@@ -4,6 +4,7 @@ from Tools.CList import CList
 from Tools.HardwareInfo import HardwareInfo
 from Components.About import about
 from Tools.Directories import fileExists
+from Components.Console import Console
 import os
 from enigma import getDesktop
 
@@ -60,7 +61,7 @@ class VideoHardware:
                 "60Hz": {60: "2160p60"},
                 "multi": {50: "2160p50", 60: "2160p60"},
                 "auto": {50: "2160p50", 60: "2160p60", 24: "2160p24"}}
-        if HardwareInfo().get_device_name() in ("dm900", "dm920", "dreamone", "dreamtwo"):
+        if HardwareInfo().get_device_name() in ("dm900", "dm920", "one", "two"):
                 rates["2160p"] = {"50Hz": {50: "2160p50"}, "60Hz": {60: "2160p60"}, "multi": {50: "2160p50", 60: "2160p60"}, "auto": {50: "2160p50", 60: "2160p60", 24: "2160p24"}}
         else:
                 rates["2160p"] = {"50Hz": {50: "2160p50"}, "60Hz": {60: "2160p"}, "multi": {50: "2160p50", 60: "2160p"}, "auto": {50: "2160p50", 60: "2160p", 24: "2160p24"}}
@@ -83,7 +84,7 @@ class VideoHardware:
 
         if SystemInfo["HasScart"]:
                 modes["Scart"] = ["PAL", "NTSC", "Multi"]
-        elif SystemInfo["HasComposite"]:
+        if SystemInfo["HasComposite"] and HardwareInfo().get_device_name() in ("dm7020hd", "dm7020hdv2", "dm8000"):
                 modes["RCA"] = ["576i", "PAL", "NTSC", "Multi"]
         if SystemInfo["HasYPbPr"]:
                 modes["YPbPr"] = ["720p", "1080i", "576p", "480p", "576i", "480i"]
@@ -91,9 +92,10 @@ class VideoHardware:
                 modes["DVI"] = ["720p", "1080p", "2160p", "1080i", "576p", "480p", "576i", "480i"]
         else:
                 modes["DVI"] = ["720p", "1080p", "2160p", "2160p30", "1080i", "576p", "480p", "576i", "480i"]
+
         modes["DVI-PC"] = ["PC"]
 
-        if HardwareInfo().get_device_name() in ("dreamone", "dreamtwo"):
+        if HardwareInfo().get_device_name() in ("one", "two"):
                 modes["HDMI"] = ["720p", "1080p", "2160p", "1080i", "576p", "576i", "480p", "480i"]
                 widescreen_modes = {"720p", "1080p", "1080i", "2160p"}
 
@@ -168,7 +170,7 @@ class VideoHardware:
 
         def readPreferredModes(self):
                 if config.av.edid_override.value == False:
-                        if HardwareInfo().get_device_name() in ("dreamone", "dreamtwo") and fileExists("/sys/class/amhdmitx/amhdmitx0/disp_cap"):
+                        if HardwareInfo().get_device_name() in ("one", "two") and fileExists("/sys/class/amhdmitx/amhdmitx0/disp_cap"):
                                 print("[Videomode] Read /sys/class/amhdmitx/amhdmitx0/disp_cap")
                                 modes = open("/sys/class/amhdmitx/amhdmitx0/disp_cap").read()[:-1]
                                 self.modes_preferred = modes.splitlines()
@@ -233,20 +235,26 @@ class VideoHardware:
                         if force == 50:
                                 mode_24 = mode_50
 
-                if HardwareInfo().get_device_name() in ("dreamone", "dreamtwo"):
+                if HardwareInfo().get_device_name() in ("one", "two"):
                         open('/sys/class/display/mode', 'w').write('576i50hz')
                         amlmode = mode + rate.lower()
-                        print("[Videomode] Write to /sys/class/display/mode")
-                        open('/sys/class/display/mode', 'w').write(amlmode)
-                        print("[Videomode] Write to /sys/class/ppmgr/ppscaler")
-                        open('/sys/class/ppmgr/ppscaler', 'w').write('1')
-                        print("[Videomode] Write to /sys/class/ppmgr/ppscaler")
-                        open('/sys/class/ppmgr/ppscaler', 'w').write('0')
+                        try:
+                                open('/sys/class/display/mode', 'w').write(amlmode)
+                        except:
+                                print("[Videomode] Write to /sys/class/display/mode failed!")
+                        try:
+                                open('/sys/class/ppmgr/ppscaler', 'w').write('1')
+                        except:
+                                print("[Videomode] Write to /sys/class/ppmgr/ppscaler failed!")
+                        try:
+                                open('/sys/class/ppmgr/ppscaler', 'w').write('0')
+                        except:
+                                print("[Videomode] Write to /sys/class/ppmgr/ppscaler failed!")
                         size_width = getDesktop(0).size().width()
                         if size_width >= 1920:
-                                Console().ePopen('fbset -fb /dev/fb0  -g 1920 1080 1920 3240  32')
+                                Console().ePopen('fbset -fb /dev/fb0 -g 1920 1080 1920 3240 32')
                         else:
-                                Console().ePopen('fbset -fb /dev/fb0  -g 1280 720 1280 2160  32')
+                                Console().ePopen('fbset -fb /dev/fb0 -g 1280 720 1280 2160 32')
                         return
 
                 try:
@@ -307,7 +315,7 @@ class VideoHardware:
         def getModeList(self, port):
                 print("[Videomode] VideoHardware getModeList for port", port)
                 res = []
-                if HardwareInfo().get_device_name() not in ("dreamone", "dreamtwo"):
+                if HardwareInfo().get_device_name() not in ("one", "two"):
                         for mode in self.modes[port]:
                                 # list all rates which are completely valid
                                 rates = [rate for rate in self.rates[mode] if self.isModeAvailable(port, mode, rate)]
@@ -349,7 +357,7 @@ class VideoHardware:
                         for (mode, rates) in modes:
                                 ratelist = []
                                 for rate in rates:
-                                        if rate == "auto":
+                                        if rate in ("auto"):
                                                 if SystemInfo["Has24hz"]:
                                                         ratelist.append((rate, mode == "2160p30" and "auto (25Hz/30Hz/24Hz)" or "auto (50Hz/60Hz/24Hz)"))
                                         else:
@@ -360,12 +368,16 @@ class VideoHardware:
         def setConfiguredMode(self):
                 port = config.av.videoport.value
                 if port not in config.av.videomode:
-                        print("[VideoHardware] current port not available, not setting videomode")
+                        print("[Videomode] VideoHardware current port not available, not setting videomode")
                         return
 
                 mode = config.av.videomode[port].value
 
-                if HardwareInfo().get_device_name() in ("dreamone", "dreamtwo") and (mode.find("0p30") != -1 or mode.find("0p24") != -1 or mode.find("0p25") != -1):
+                if mode not in config.av.videorate:
+                        print("[Videomode] VideoHardware current mode not available, not setting videomode")
+                        return
+
+                if HardwareInfo().get_device_name() in ("one", "two") and (mode.find("0p30") != -1 or mode.find("0p24") != -1 or mode.find("0p25") != -1):
                         match = re.search(r"(\d*?[ip])(\d*?)$", mode)
                         mode = match.group(1)
                         rate = match.group(2) + "Hz"
@@ -396,7 +408,7 @@ class VideoHardware:
 
                 port = config.av.videoport.value
                 if port not in config.av.videomode:
-                        print("[VideoHardware] current port not available, not setting videomode")
+                        print("[Videomode] VideoHardware current port not available, not setting videomode")
                         return
                 mode = config.av.videomode[port].value
 
@@ -430,8 +442,8 @@ class VideoHardware:
                 else:
                         wss = "auto"
 
-                print("[VideoHardware] -> setting aspect, policy, policy2, wss", aspect, policy, policy2, wss)
-                if chipsetstring.startswith("meson-6") and HardwareInfo().get_device_name() in ("dreamone", "dreamtwo"):
+                print("[Videomode] VideoHardware -> setting aspect, policy, policy2, wss", aspect, policy, policy2, wss)
+                if chipsetstring.startswith("meson-6") and HardwareInfo().get_device_name() not in ("one", "two"):
                         arw = "0"
                         if config.av.policy_43.value == "bestfit":
                                 arw = "10"
@@ -440,11 +452,10 @@ class VideoHardware:
                         if config.av.policy_43.value == "letterbox":
                                 arw = "12"
                         try:
-                                print("[Videomode] Write to /sys/class/video/screen_mode")
                                 open("/sys/class/video/screen_mode", "w").write(arw)
                         except IOError:
                                 print("[Videomode] Write to /sys/class/video/screen_mode failed.")
-                elif HardwareInfo().get_device_name() in ("dreamone", "dreamtwo"):
+                elif HardwareInfo().get_device_name() in ("one", "two"):
                         arw = "0"
                         if config.av.policy_43.value == "bestfit":
                                 arw = "10"
@@ -453,28 +464,23 @@ class VideoHardware:
                         if config.av.policy_43.value == "panscan":
                                 arw = "12"
                         try:
-                                print("[Videomode] Write to /sys/class/video/screen_mode")
                                 open("/sys/class/video/screen_mode", "w").write(arw)
                         except IOError:
                                 print("[Videomode] Write to /sys/class/video/screen_mode failed.")
 
                 try:
-                        print("[Videomode] Write to /proc/stb/video/aspect")
                         open("/proc/stb/video/aspect", "w").write(aspect)
                 except IOError:
                         print("[Videomode] Write to /proc/stb/video/aspect failed.")
                 try:
-                        print("[Videomode] Write to /proc/stb/video/policy")
                         open("/proc/stb/video/policy", "w").write(policy)
                 except IOError:
                         print("[Videomode] Write to /proc/stb/video/policy failed.")
                 try:
-                        print("[Videomode] Write to /proc/stb/denc/0/wss")
                         open("/proc/stb/denc/0/wss", "w").write(wss)
                 except IOError:
                         print("[Videomode] Write to /proc/stb/denc/0/wss failed.")
                 try:
-                        print("[Videomode] Write to /proc/stb/video/policy2")
                         open("/proc/stb/video/policy2", "w").write(policy2)
                 except IOError:
                         print("[Videomode] Write to /proc/stb/video/policy2 failed.")
