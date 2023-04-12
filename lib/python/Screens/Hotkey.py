@@ -104,6 +104,8 @@ class hotkey:
 		("Context" + " " + _("long"), "contextmenu_long", ""),
 		("Video Mode", "vmode", ""),
 		("Video Mode" + " " + _("long"), "vmode_long", ""),
+		("Mode", "mode", ""),
+		("Mode" + " " + _("long"), "mode_long", ""),
 		("Home", "home", ""),
 		("Power", "power", "Module/Screens.Standby/Standby"),
 		("Power" + " " + _("long"), "power_long", "Menu/shutdown"),
@@ -117,6 +119,8 @@ class hotkey:
 		("Favorites" + " " + _("long"), "favorites_long", ""),
 		("Mouse", "mouse", ""),
 		("Mouse" + " " + _("long"), "mouse_long", ""),
+		("MP3", "mp3", ""),
+		("MP3" + " " + _("long"), "mp3_long", ""),
 		("Sat", "sat", ""),
 		("Sat" + " " + _("long"), "sat_long", ""),
 		("Homepage", "homepage", ""),
@@ -180,6 +184,7 @@ def getHotkeyFunctions():
 	hotkey.functions.append((_("Toggle TV/RADIO mode"), "Infobar/toggleTvRadio", "InfoBar"))
 	hotkey.functions.append((_("Instant recording"), "Infobar/instantRecord", "InfoBar"))
 	hotkey.functions.append((_("Start instant recording"), "Infobar/startInstantRecording", "InfoBar"))
+	hotkey.functions.append((_("Start recording current event"), "Infobar/startRecordingCurrentEvent", "InfoBar"))
 	hotkey.functions.append((_("Activate timeshift End"), "Infobar/activateTimeshiftEnd", "InfoBar"))
 	hotkey.functions.append((_("Activate timeshift end and pause"), "Infobar/activateTimeshiftEndAndPause", "InfoBar"))
 	hotkey.functions.append((_("Start timeshift"), "Infobar/startTimeshift", "InfoBar"))

@@ -7,7 +7,7 @@ from Screens.ChoiceBox import ChoiceBox
 from Components.ServiceEventTracker import ServiceEventTracker
 from Components.ActionMap import NumberActionMap
 from Components.ConfigList import ConfigListScreen
-from Components.config import config, ConfigSubsection, getConfigListEntry, ConfigNothing, ConfigSelection, ConfigOnOff, ConfigYesNo
+from Components.config import config, ConfigSubsection, ConfigNothing, ConfigSelection, ConfigOnOff, ConfigYesNo
 from Components.Label import Label
 from Components.Sources.List import List
 from Components.Sources.Boolean import Boolean
@@ -94,14 +94,21 @@ class AudioSelection(ConfigListScreen, Screen):
 			self.audioTracks = audio = service and service.audioTracks()
 			n = audio and audio.getNumberOfTracks() or 0
 			if SystemInfo["CanDownmixAC3"]:
-				if SystemInfo["DreamBoxAudio"]:
-					choice_list = [("downmix", _("Downmix")), ("passthrough", _("Passthrough")), ("multichannel", _("convert to multi-channel PCM")), ("hdmi_best", _("use best / controlled by HDMI"))]
-					self.settings.downmix_ac3 = ConfigSelection(choices=choice_list, default=config.av.downmix_ac3.value)
-				else:
-					self.settings.downmix_ac3 = ConfigOnOff(default=config.av.downmix_ac3.value)
-				self.settings.downmix_ac3.addNotifier(self.changeAC3Downmix, initial_call=False)
-				conflist.append(getConfigListEntry(_("AC3 downmix"), self.settings.downmix_ac3, None))
-				self["key_red"].setBoolean(True)
+				downmix_ac3_value = config.av.downmix_ac3.value
+				if downmix_ac3_value in ("downmix", "passthrough"):
+					choice_list = [
+						("downmix", _("Downmix")),
+						("passthrough", _("Passthrough"))
+					]
+					self.settings.downmix = ConfigSelection(choices=choice_list, default=downmix_ac3_value)
+					self.settings.downmix.addNotifier(self.changeAC3Downmix, initial_call=False)
+					extra_text = " - AC3"
+					if SystemInfo["CanDownmixDTS"]:
+						extra_text += ",DTS"
+					if SystemInfo["CanDownmixAAC"]:
+						extra_text += ",AAC"
+					conflist.append((_("Multi channel downmix") + extra_text, self.settings.downmix))
+					self["key_red"].setBoolean(True)
 
 			if n > 0:
 				self.audioChannel = service.audioChannel()
@@ -109,7 +116,7 @@ class AudioSelection(ConfigListScreen, Screen):
 					choicelist = [("0", _("left")), ("1", _("stereo")), ("2", _("right"))]
 					self.settings.channelmode = ConfigSelection(choices=choicelist, default=str(self.audioChannel.getCurrentChannel()))
 					self.settings.channelmode.addNotifier(self.changeMode, initial_call=False)
-					conflist.append(getConfigListEntry(_("Channel"), self.settings.channelmode))
+					conflist.append((_("Channel"), self.settings.channelmode))
 					self["key_green"].setBoolean(True)
 				else:
 					conflist.append(('',))
@@ -152,7 +159,7 @@ class AudioSelection(ConfigListScreen, Screen):
 
 			if subtitlelist:
 				self["key_yellow"].setBoolean(True)
-				conflist.append(getConfigListEntry(_("To subtitle selection"), self.settings.menupage))
+				conflist.append((_("To subtitle selection"), self.settings.menupage))
 			else:
 				self["key_yellow"].setBoolean(False)
 				conflist.append(('',))
@@ -161,19 +168,19 @@ class AudioSelection(ConfigListScreen, Screen):
 				choice_list = [("none", _("off")), ("hdmi", _("HDMI")), ("spdif", _("SPDIF")), ("dac", _("DAC"))]
 				self.settings.surround_3d = ConfigSelection(choices=choice_list, default=config.av.surround_3d.value)
 				self.settings.surround_3d.addNotifier(self.change3DSurround, initial_call=False)
-				conflist.append(getConfigListEntry(_("3D Surround"), self.settings.surround_3d, None))
+				conflist.append((_("3D Surround"), self.settings.surround_3d, None))
 
 			if SystemInfo["Has3DSpeaker"] and config.av.surround_3d.value != "none":
 				choice_list = [("center", _("center")), ("wide", _("wide")), ("extrawide", _("extra wide"))]
 				self.settings.surround_3d_speaker = ConfigSelection(choices=choice_list, default=config.av.surround_3d_speaker.value)
 				self.settings.surround_3d_speaker.addNotifier(self.change3DSurroundSpeaker, initial_call=False)
-				conflist.append(getConfigListEntry(_("3D Surround Speaker Position"), self.settings.surround_3d_speaker, None))
+				conflist.append((_("3D Surround Speaker Position"), self.settings.surround_3d_speaker, None))
 
 			if SystemInfo["HasAutoVolume"]:
 				choice_list = [("none", _("off")), ("hdmi", _("HDMI")), ("spdif", _("SPDIF")), ("dac", _("DAC"))]
 				self.settings.autovolume = ConfigSelection(choices=choice_list, default=config.av.autovolume.value)
 				self.settings.autovolume.addNotifier(self.changeAutoVolume, initial_call=False)
-				conflist.append(getConfigListEntry(_("Auto Volume Level"), self.settings.autovolume, None))
+				conflist.append((_("Auto Volume Level"), self.settings.autovolume, None))
 
 			from Components.PluginComponent import plugins
 			from Plugins.Plugin import PluginDescriptor
@@ -192,10 +199,10 @@ class AudioSelection(ConfigListScreen, Screen):
 				if self.Plugins:
 					self["key_blue"].setBoolean(True)
 					if len(self.Plugins) > 1:
-						conflist.append(getConfigListEntry(_("Audio plugins"), ConfigNothing()))
+						conflist.append((_("Audio plugins"), ConfigNothing()))
 						self.plugincallfunc = [(x[0], x[1]) for x in self.Plugins]
 					else:
-						conflist.append(getConfigListEntry(self.Plugins[0][0], ConfigNothing()))
+						conflist.append((self.Plugins[0][0], ConfigNothing()))
 						self.plugincallfunc = self.Plugins[0][1]
 
 		elif self.settings.menupage.getValue() == PAGE_SUBTITLES:
@@ -247,11 +254,11 @@ class AudioSelection(ConfigListScreen, Screen):
 				streams.append((x, "", number, description, language, selected))
 				idx += 1
 
-			conflist.append(getConfigListEntry(_("To audio selection"), self.settings.menupage))
+			conflist.append((_("To audio selection"), self.settings.menupage))
 
 			if self.infobar.selected_subtitle and self.infobar.selected_subtitle != (0, 0, 0, 0) and not ".DVDPlayer'>" in repr(self.infobar):
 				self["key_blue"].setBoolean(True)
-				conflist.append(getConfigListEntry(_("Subtitle Quickmenu"), ConfigNothing()))
+				conflist.append((_("Subtitle Quickmenu"), ConfigNothing()))
 
 		self["config"].list = conflist
 
@@ -288,15 +295,9 @@ class AudioSelection(ConfigListScreen, Screen):
 		config.av.autovolume.save()
 
 	def changeAC3Downmix(self, downmix):
-		if SystemInfo["DreamBoxAudio"]:
-			config.av.downmix_ac3.setValue(downmix.value)
-		else:
-			if downmix.value:
-				config.av.downmix_ac3.setValue(True)
-				if SystemInfo["HasMultichannelPCM"]:
-					config.av.multichannel_pcm.setValue(False)
-			else:
-				config.av.downmix_ac3.setValue(False)
+		config.av.downmix_ac3.setValue(downmix.value)
+		if SystemInfo["HasMultichannelPCM"]:
+			config.av.multichannel_pcm.setValue(False)
 		config.av.downmix_ac3.save()
 		if SystemInfo["HasMultichannelPCM"]:
 			config.av.multichannel_pcm.save()
@@ -308,24 +309,15 @@ class AudioSelection(ConfigListScreen, Screen):
 		config.av.btaudio.save()
 
 	def changePCMMultichannel(self, multichan):
-		if SystemInfo["DreamBoxAudio"]:
+		if multichan.value:
 			config.av.multichannel_pcm.setValue(multichan.value)
 		else:
-			if multichan.value:
-				config.av.multichannel_pcm.setValue(True)
-			else:
-				config.av.multichannel_pcm.setValue(False)
+			config.av.multichannel_pcm.setValue(False)
 		config.av.multichannel_pcm.save()
 		self.fillList()
 
 	def changeAACDownmix(self, downmix):
-		if SystemInfo["DreamBoxAudio"]:
-			config.av.downmix_aac.setValue(downmix.value)
-		else:
-			if downmix.value:
-				config.av.downmix_aac.setValue(True)
-			else:
-				config.av.downmix_aac.setValue(False)
+		config.av.downmix_aac.setValue(downmix.value)
 		config.av.downmix_aac.save()
 
 	def changeAACDownmixPlus(self, downmix):
@@ -487,7 +479,7 @@ class AudioSelection(ConfigListScreen, Screen):
 
 	def protectResult(self, answer):
 		if answer:
-			self.session.open(Setup, "AutoLanguage")
+			self.session.open(Setup, "autolanguagesetup")
 			self.protectContextMenu = False
 		elif answer is not None:
 			self.session.openWithCallback(self.close, MessageBox, _("The PIN code you entered is wrong."), MessageBox.TYPE_ERROR)

@@ -2582,7 +2582,7 @@ class InfoBarInstantRecord:
 				self.recording = InfoBarInstance.recording
 
 	def moveToTrash(self, entry):
-		print("instantRecord stop and delete recording: ", entry.name)
+		print("[instantRecord] stop and delete recording: %s", entry.name)
 		from Tools.Trashcan import createTrashFolder
 		trash = createTrashFolder(entry.Filename)
 		from Screens.MovieSelection import moveServiceFiles
@@ -2649,24 +2649,28 @@ class InfoBarInstantRecord:
 			info["eventid"] = curEvent[4]
 			info["end"] = curEvent[1]
 
-	def startInstantRecording(self, limitEvent=False):
+	def startInstantRecording(self, limitEvent=""):
 		begin = int(time())
-		end = begin + 3600      # dummy
+		end = begin + 3600  # 1h (dummy)
 		name = _("Instant record")
 		info = {}
+		message = duration_message = ""
+		timeout = 5
+		added_timer = False
 
 		self.getProgramInfoAndEvent(info, name)
 		serviceref = info["serviceref"]
 		event = info["event"]
 
-		if event is not None:
-			if limitEvent:
+		if limitEvent in ("event", "manualendtime", "manualduration"):
+			if event: 
 				end = info["end"]
-		else:
-			message = _("No event info found, recording indefinitely.")
-			if limitEvent:
-				message = _("Recording time has been set.")
-			self.session.open(MessageBox, message, MessageBox.TYPE_INFO, timeout=5)
+			else:
+				message = _("No event info found, recording indefinitely.")
+		if limitEvent in ("", "indefinitely"):
+			message = _("Recording time has been set.")
+			if event:
+				info["name"] += " - " + name
 
 		if isinstance(serviceref, eServiceReference):
 			serviceref = ServiceReference(serviceref)
@@ -2674,33 +2678,50 @@ class InfoBarInstantRecord:
 		recording = RecordTimerEntry(serviceref, begin, end, info["name"], info["description"], info["eventid"], dirname=preferredInstantRecordPath())
 		recording.dontSave = True
 
-		if event is None or limitEvent == False:
+		if not event or limitEvent in ("", "indefinitely"):
 			recording.autoincrease = True
 			recording.setAutoincreaseEnd()
+			duration_message = "\n" + _("Default duration: %d mins") % ((recording.end - recording.begin) // 60) + "\n"
 
 		simulTimerList = self.session.nav.RecordTimer.record(recording)
 
-		if simulTimerList is None:	# no conflict
+		if simulTimerList is None:  # no conflict
 			recording.autoincrease = False
 			self.recording.append(recording)
+			added_timer = True
 		else:
-			if len(simulTimerList) > 1: # with other recording
-				name = simulTimerList[1].name
+			count = len(simulTimerList)
+			if count > 1:  # with other recording
+				timeout = 10
+				name = "'%s'" % simulTimerList[1].name
 				name_date = ' '.join((name, strftime('%F %T', localtime(simulTimerList[1].begin))))
-				print("[TIMER] conflicts with", name_date)
-				recording.autoincrease = True	# start with max available length, then increment
+				print("[InfoBarInstantRecord] conflicts with", name_date, count)
+				recording.autoincrease = True  # start with max available length, then increment
 				if recording.setAutoincreaseEnd():
 					self.session.nav.RecordTimer.record(recording)
 					self.recording.append(recording)
-					self.session.open(MessageBox, _("Record time limited due to conflicting timer %s") % name_date, MessageBox.TYPE_INFO)
+					added_timer = True
+					message += _("Record time limited due to conflicting timer %s") % name_date
+					duration_message = "\n" + _("Default duration: %d mins") % ((recording.end - recording.begin) // 60) + "\n"
 				else:
-					self.session.open(MessageBox, _("Could not record due to conflicting timer %s") % name, MessageBox.TYPE_INFO)
+					message = _("Could not record due to conflicting timer %s") % name
+					if count > 2:
+						message +=  "\n" +_("total conflict (%d)") % (count - 1)
 			else:
-				self.session.open(MessageBox, _("Could not record due to invalid service %s") % serviceref, MessageBox.TYPE_INFO)
+				ref = "\n'%s'" % serviceref
+				message = _("Could not record due to invalid service %s") % ref
 			recording.autoincrease = False
+		if message:
+			if added_timer and duration_message:
+				message += duration_message
+			self.session.open(MessageBox, text=message, type=MessageBox.TYPE_INFO, timeout=timeout)
+		return added_timer
+
+	def startRecordingCurrentEvent(self):
+		self.startInstantRecording(limitEvent="event")
 
 	def isInstantRecordRunning(self):
-		print("self.recording:", self.recording)
+		print("[InfoBarInstantRecord] self.recording:", self.recording)
 		if self.recording:
 			for x in self.recording:
 				if x.isRunning():
@@ -2708,7 +2729,7 @@ class InfoBarInstantRecord:
 		return False
 
 	def recordQuestionCallback(self, answer):
-		print("pre:\n", self.recording)
+		print("[InfoBarInstantRecord] pre:\n", self.recording)
 
 		if answer is None or answer[1] == "no":
 			return
@@ -2756,11 +2777,11 @@ class InfoBarInstantRecord:
 			self.deleteRecording = True
 			self.stopAllCurrentRecordings(list)
 		elif answer[1] in ("indefinitely", "manualduration", "manualendtime", "event"):
-			self.startInstantRecording(limitEvent=answer[1] in ("event", "manualendtime", "manualduration") or False)
-			if answer[1] == "manualduration":
-				self.changeDuration(len(self.recording) - 1)
-			elif answer[1] == "manualendtime":
-				self.setEndtime(len(self.recording) - 1)
+			if self.startInstantRecording(limitEvent=answer[1]):
+				if answer[1] == "manualduration":
+					self.changeDuration(len(self.recording) - 1)
+				elif answer[1] == "manualendtime":
+					self.setEndtime(len(self.recording) - 1)
 		elif "timeshift" in answer[1]:
 			ts = self.getTimeshift()
 			if ts:
@@ -2772,7 +2793,7 @@ class InfoBarInstantRecord:
 					remaining = self.currentEventTime()
 					if remaining > 0:
 						self.setCurrentEventTimer(remaining - 15)
-		print("after:\n", self.recording)
+		print("[InfoBarInstantRecord] after:\n", self.recording)
 
 	def setEndtime(self, entry):
 		if entry is not None and entry >= 0:
@@ -2782,13 +2803,13 @@ class InfoBarInstantRecord:
 			dlg.setTitle(_("Please change recording endtime"))
 
 	def TimeDateInputClosed(self, ret):
-		if len(ret) > 1:
-			if ret[0]:
-				print("stopping recording at", strftime("%F %T", localtime(ret[1])))
-				if self.recording[self.selectedEntry].end != ret[1]:
-					self.recording[self.selectedEntry].autoincrease = False
-				self.recording[self.selectedEntry].end = ret[1]
-				self.session.nav.RecordTimer.timeChanged(self.recording[self.selectedEntry])
+		if len(ret) > 1 and ret[0]:
+			print("[InfoBarInstantRecord] stop recording at %s " % strftime("%F %T", localtime(ret[1])))
+			entry = self.recording[self.selectedEntry]
+			if entry.end != ret[1]:
+				entry.autoincrease = False
+			entry.end = ret[1]
+			self.session.nav.RecordTimer.timeChanged(entry)
 
 	def changeDuration(self, entry):
 		if entry is not None and entry >= 0:
@@ -2801,8 +2822,8 @@ class InfoBarInstantRecord:
 			self.session.openWithCallback(self.inputAddRecordingTime, InputBox, title=_("How many minutes do you want add to the recording?"), text="5  ", maxSize=True, type=Input.NUMBER)
 
 	def inputAddRecordingTime(self, value):
-		if value:
-			print("added", int(value), "minutes for recording.")
+		if value and value.isdigit():
+			print("[InfoBarInstantRecord] added %d minutes for recording." % int(value))
 			entry = self.recording[self.selectedEntry]
 			if int(value) != 0:
 				entry.autoincrease = False
@@ -2810,8 +2831,8 @@ class InfoBarInstantRecord:
 			self.session.nav.RecordTimer.timeChanged(entry)
 
 	def inputCallback(self, value):
-		if value:
-			print("stopping recording after", int(value), "minutes.")
+		if value and value.isdigit():
+			print("[InfoBarInstantRecord] stopping recording after %d minutes." % int(value))
 			entry = self.recording[self.selectedEntry]
 			if int(value) != 0:
 				entry.autoincrease = False
@@ -2835,8 +2856,7 @@ class InfoBarInstantRecord:
 		if not findSafeRecordPath(pirr) and not findSafeRecordPath(defaultMoviePath()):
 			if not pirr:
 				pirr = ""
-			self.session.open(MessageBox, _("Missing ") + "\n" + pirr +
-						"\n" + _("No HDD found or HDD not initialized!"), MessageBox.TYPE_ERROR)
+			self.session.open(MessageBox, _("Missing ") + "\n" + pirr + "\n" + _("No HDD found or HDD not initialized!"), MessageBox.TYPE_ERROR)
 			return
 
 		if isStandardInfoBar(self):
@@ -2886,17 +2906,43 @@ class InfoBarInstantRecord:
 
 class InfoBarAudioSelection:
 	def __init__(self):
-		self["AudioSelectionAction"] = HelpableActionMap(self, ["InfobarAudioSelectionActions"],
-			{
-				"audioSelection": (self.audioSelection, _("Audio options...")),
-			})
+		self["AudioSelectionAction"] = HelpableActionMap(self, "InfobarAudioSelectionActions", {
+			"audioSelection": (self.audioSelection, _("Audio options...")),
+			"yellow_key": (self.yellow_key, _("Audio options...")),
+			"audioSelectionLong": (self.audioDownmixToggle, _("Toggle Digital downmix...")),
+		}, prio=0, description=_("Audio Actions"))
+
+	def yellow_key(self):
+		from Screens.AudioSelection import AudioSelection
+		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
 
 	def audioSelection(self):
 		from Screens.AudioSelection import AudioSelection
 		self.session.openWithCallback(self.audioSelected, AudioSelection, infobar=self)
 
 	def audioSelected(self, ret=None):
-		print("[infobar::audioSelected]", ret)
+		print("[InfoBarGenerics] [infobar::audioSelected]", ret)
+
+	def audioDownmixToggle(self, popup=True):
+		if SystemInfo["CanDownmixAC3"]:
+			if config.av.downmix_ac3.value:
+				message = _("Dolby Digital downmix is now") + " " + _("disabled")
+				print('[InfoBarGenerics] [Audio] Dolby Digital downmix is now disabled')
+				config.av.downmix_ac3.setValue(False)
+			else:
+				config.av.downmix_ac3.setValue(True)
+				message = _("Dolby Digital downmix is now") + " " + _("enabled")
+				print('[InfoBarGenerics] [Audio] Dolby Digital downmix is now enabled')
+			if popup:
+				Notifications.AddPopup(text=message, type=MessageBox.TYPE_INFO, timeout=5, id="DDdownmixToggle")
+
+	def audioDownmixOn(self):
+		if not config.av.downmix_ac3.value:
+			self.audioDownmixToggle(False)
+
+	def audioDownmixOff(self):
+		if config.av.downmix_ac3.value:
+			self.audioDownmixToggle(False)
 
 
 class InfoBarSubserviceSelection:
@@ -4058,20 +4104,20 @@ class InfoBarHandleBsod:
 			txt += _("(Attention: There will be a restart after %d crashes.)") % maxbs
 			if writelog:
 				txt += "\n" + "-" * 80 + "\n"
-				txt += _("A crashlog was %s created in '%s'") % ((_('not'), '')[int(writelog)], config.crash.debugPath.value)
+				txt += _("A crash log was %s created in '%s'") % ((_("not"), '')[int(writelog)], config.crash.debugPath.value)
 			#if not writelog:
 			#	txt += "\n" + "-"*80 + "\n"
-			#	txt += _("(It is set that '%s' crash logs are displayed and written.\nInfo: It will always write the first, last but one and lastest crash log.)") % str(int(config.crash.bsodhide.value) or _('never'))
+			#	txt += _("(It is set that '%s' crash logs are displayed and written.\nInfo: It will always write the first, last but one and lastest crash log.)") % str(int(config.crash.bsodhide.value) or _("Never"))
 			if bsodcnt >= maxbs:
 				txt += "\n" + "-" * 80 + "\n"
 				txt += _("Warning: This is the last crash before an automatic restart is performed.\n")
 				txt += _("Should the crash counter be reset to prevent a restart?")
 				self.lastestBsodWarning = True
 			try:
-				self.session.openWithCallback(self.infoBsodCallback, MessageBox, txt, type=MessageBox.TYPE_ERROR, default=False, close_on_any_key=not self.lastestBsodWarning, showYESNO=self.lastestBsodWarning)
+				self.session.openWithCallback(self.infoBsodCallback, MessageBox, txt, type=MessageBox.TYPE_YESNO if self.lastestBsodWarning else MessageBox.TYPE_ERROR, default=False, close_on_any_key=not self.lastestBsodWarning, showYESNO=self.lastestBsodWarning)
 				self.infoBsodIsShown = True
-			except Exception as ex:
-				#print("[InfoBarHandleBsod] Exception:", ex)
+			except Exception as e:
+				#print "[InfoBarHandleBsod] Exception:", e
 				self.checkBsodTimer.stop()
 				self.checkBsodTimer.start(5000, True)
 				self.infoBsodCallback(False)
@@ -4083,4 +4129,5 @@ class InfoBarHandleBsod:
 			resetBsodCounter()
 		self.infoBsodIsShown = False
 		self.lastestBsodWarning = False
+
 #########################################################################################

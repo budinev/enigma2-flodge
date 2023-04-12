@@ -8,7 +8,7 @@ from Components.NimManager import nimmanager
 from Components.Renderer.FrontpanelLed import ledPatterns, PATTERN_ON, PATTERN_OFF, PATTERN_BLINK
 from Components.ServiceList import refreshServiceList
 from Components.SystemInfo import SystemInfo
-from os.path import exists, islink, join as pathjoin, normpath
+from os.path import exists, isfile, join as pathjoin, normpath
 import os, time, locale, skin
 from boxbranding import getDisplayType
 
@@ -21,30 +21,23 @@ visuallyImpairedCommentary = "NAR qad"
 
 def InitUsageConfig():
 	config.usage = ConfigSubsection()
-	if os.path.isfile("/etc/crontab") and not fileContains("/etc/crontab", "registry.arm.bin"):
-		if os.path.isfile("/home/root/.cache/gstreamer-1.0/registry.arm.bin"):
+	if isfile("/etc/crontab") and not fileContains("/etc/crontab", "registry.arm.bin"):
+		if isfile("/home/root/.cache/gstreamer-1.0/registry.arm.bin"):
 			Console().ePopen("sed -i '$a@reboot root rm -f /home/root/.cache/gstreamer-1.0/registry.arm.bin' /etc/crontab")
-		elif os.path.isfile("/home/root/.cache/gstreamer-0.10/registry.arm.bin"):
+		elif isfile("/home/root/.cache/gstreamer-0.10/registry.arm.bin"):
 			Console().ePopen("sed -i '$a@reboot root rm -f /home/root/.cache/gstreamer-0.10/registry.arm.bin' /etc/crontab")
 		else:
 			print("[UsageConfig] No registry.arm.bin?")
-	if fileContains("/etc/network/interfaces", "iface eth0 inet static") and not fileContains("/etc/network/interfaces", "iface wlan0 inet dhcp") or fileContains("/etc/network/interfaces", "iface wlan0 inet static") and fileContains("/run/ifstate", "wlan0=wlan0"):
-		config.usage.dns = ConfigSelection(default="custom", choices=[
-			("custom", _("Static IP or Custom")),
-			("google", _("Google DNS")),
-			("cloudflare", _("Cloudflare")),
-			("opendns-familyshield", _("OpenDNS FamilyShield")),
-			("opendns-home", _("OpenDNS Home"))
-		])
-	else:
-		config.usage.dns = ConfigSelection(default="dhcp-router", choices=[
-			("dhcp-router", _("DHCP Router")),
-			("custom", _("Static IP or Custom")),
-			("google", _("Google DNS")),
-			("cloudflare", _("Cloudflare")),
-			("opendns-familyshield", _("OpenDNS FamilyShield")),
-			("opendns-home", _("OpenDNS Home"))
-		])
+	config.usage.dns = ConfigSelection(default="dhcp-router", choices=[
+		("dhcp-router", _("DHCP Router")),
+		("staticip", _("Static IP Router")),
+		("google", _("Google DNS")),
+		("quad9security", _("Quad9 Security")),
+		("quad9nosecurity", _("Quad9 No Security")),
+		("cloudflare", _("Cloudflare")),
+		("opendns", _("OpenDNS")),
+		("opendns-2", _("OpenDNS-2"))
+	])
 	config.usage.subnetwork = ConfigYesNo(default=True)
 	config.usage.subnetwork_cable = ConfigYesNo(default=True)
 	config.usage.subnetwork_terrestrial = ConfigYesNo(default=True)
@@ -825,8 +818,11 @@ def InitUsageConfig():
 		config.usage.lcd_show_symbols.addNotifier(lcdShowSymbols)
 
 	if SystemInfo["WakeOnLAN"]:
+		f = open(SystemInfo["WakeOnLAN"], "r")
+		status = f.read().strip()
+		f.close()
 		def wakeOnLANChanged(configElement):
-			if "fp" in SystemInfo["WakeOnLAN"]:
+			if status in ("enable", "disable"):
 				open(SystemInfo["WakeOnLAN"], "w").write(configElement.value and "enable" or "disable")
 			else:
 				open(SystemInfo["WakeOnLAN"], "w").write(configElement.value and "on" or "off")
@@ -853,6 +849,8 @@ def InitUsageConfig():
 
 	config.usage.boolean_graphic = ConfigSelection(default="true", choices={"false": _("no"), "true": _("yes"), "only_bool": _("yes, but not in multi selections")})
 
+	config.usage.multiboot_order = ConfigYesNo(default=True)
+
 	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
 
 	config.epg = ConfigSubsection()
@@ -866,6 +864,9 @@ def InitUsageConfig():
 	config.epg.saveepg = ConfigYesNo(default=True)
 
 	config.epg.maxdays = ConfigSelectionNumber(min=1, max=365, stepwidth=1, default=7, wraparound=True)
+	config.epg.joinAbbreviatedEventNames = ConfigYesNo(default=True)
+	config.epg.eventNamePrefixes = ConfigText(default="")
+	config.epg.eventNamePrefixMode = ConfigSelection(choices=[(0, _("Off")), (1, _("Remove")), (2, _("Move to description"))])
 
 	def EpgmaxdaysChanged(configElement):
 		eEPGCache.getInstance().setEpgmaxdays(config.epg.maxdays.getValue())
@@ -1049,7 +1050,7 @@ def InitUsageConfig():
 	def updateStackTracePrinter(configElement):
 		from Components.StackTrace import StackTracePrinter
 		if configElement.value:
-			if (os.path.isfile("/tmp/doPythonStackTrace")):
+			if (isfile("/tmp/doPythonStackTrace")):
 				os.remove("/tmp/doPythonStackTrace")
 			from threading import current_thread
 			StackTracePrinter.getInstance().activate(current_thread().ident)
@@ -1446,20 +1447,17 @@ def InitUsageConfig():
 		if configElement.value == "dvb" or not GetIPsFromNetworkInterfaces():
 			eDVBLocalTimeHandler.getInstance().setUseDVBTime(True)
 			eEPGCache.getInstance().timeUpdated()
-			if configElement.value == "dvb" and islink("/etc/network/if-up.d/ntpdate-sync"):
-				Console().ePopen("sed -i '/ntpdate-sync/d' /etc/cron/crontabs/root;unlink /etc/network/if-up.d/ntpdate-sync")
 		else:
 			eDVBLocalTimeHandler.getInstance().setUseDVBTime(False)
 			eEPGCache.getInstance().timeUpdated()
-			if not islink("/etc/network/if-up.d/ntpdate-sync"):
-				Console().ePopen("echo '30 * * * * /usr/bin/ntpdate-sync silent' >>/etc/cron/crontabs/root;ln -s /usr/bin/ntpdate-sync /etc/network/if-up.d/ntpdate-sync")
 	config.ntp.timesync = ConfigSelection(default="ntp", choices=[
 		("auto", _("Auto")),
 		("dvb", _("Transponder time")),
-		("ntp", _("Internet time (NTP)"))
+		("ntp", _("Internet time"))
 	])
 	config.ntp.timesync.addNotifier(timesyncChanged)
-	config.ntp.server = ConfigText("pool.ntp.org", fixed_size=False)
+	config.ntp.sntpserver = ConfigText("pool.ntp.org", fixed_size=False)
+	config.ntp.rdateserver = ConfigText("time.nist.gov", fixed_size=False)
 
 def updateChoices(sel, choices):
 	if choices:
