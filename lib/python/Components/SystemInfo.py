@@ -290,13 +290,12 @@ SystemInfo["HasComposite"] = model not in ("i55", "gbquad4k", "gbue4k", "hd1500"
 SystemInfo["hasXcoreVFD"] = model in ("osmega", "spycat4k", "spycat4kmini", "spycat4kcombo") and fileCheck("/sys/module/brcmstb_%s/parameters/pt6302_cgram" % model)
 SystemInfo["HasOfflineDecoding"] = model not in ("osmini", "osminiplus", "et7000mini", "et11000", "mbmicro", "mbtwinplus", "mbmicrov2", "et7000", "et8500")
 SystemInfo["hasKexec"] = fileHas("/proc/cmdline", "kexec=1")
-SystemInfo["canKexec"] = model in ("vusolo4k", "vuduo4k", "vuduo4kse", "vuultimo4k", "vuuno4k", "vuuno4kse", "vuzero4k") and not SystemInfo["hasKexec"] and fileExists("/usr/bin/kernel_auto.bin") and fileExists("/usr/bin/STARTUP.cpio.gz")
+SystemInfo["canKexec"] = not SystemInfo["hasKexec"] and fileExists("/usr/bin/kernel_auto.bin") and fileExists("/usr/bin/STARTUP.cpio.gz") and (model in ("vuduo4k", "vuduo4kse") and ["mmcblk0p9", "mmcblk0p6"] or model in ("vusolo4k", "vuultimo4k", "vuuno4k", "vuuno4kse") and ["mmcblk0p4", "mmcblk0p1"] or model == "vuzero4k" and ["mmcblk0p7", "mmcblk0p4"])
 SystemInfo["MultibootStartupDevice"] = getMultibootStartupDevice()
 SystemInfo["canMode12"] = "%s_4.boxmode" % model in cmdline and cmdline["%s_4.boxmode" % model] in ("1", "12") and "192M"
 SystemInfo["canMultiBoot"] = getMultibootslots()
 SystemInfo["canDualBoot"] = fileExists("/dev/block/by-name/flag")
 SystemInfo["canFlashWithOfgwrite"] = not(model.startswith("dm"))
-SystemInfo["HDRSupport"] = fileExists("/proc/stb/hdmi/hlg_support_choices") and fileCheck("/proc/stb/hdmi/hlg_support")
 SystemInfo["CanProc"] = SystemInfo["HasMMC"] and not SystemInfo["Blindscan_t2_available"]
 SystemInfo["HasMultichannelPCM"] = fileCheck("/proc/stb/audio/multichannel_pcm")
 SystemInfo["HasAutoVolume"] = fileExists("/proc/stb/audio/avl_choices") and fileCheck("/proc/stb/audio/avl")
@@ -320,6 +319,8 @@ SystemInfo["CanSyncMode"] = fileExists("/proc/stb/video/sync_mode_choices")
 SystemInfo["CanBTAudio"] = fileHas("/proc/stb/audio/btaudio_choices", "off")
 SystemInfo["CanBTAudioDelay"] = fileCheck("/proc/stb/audio/btaudio_delay") or fileCheck("/proc/stb/audio/btaudio_delay_pcm")
 SystemInfo["CanChangeOsdAlpha"] = access("/proc/stb/video/alpha", R_OK) and True or False
+SystemInfo["CanChangeOsdPlaneAlpha"] = access("/sys/class/graphics/fb0/osd_plane_alpha", R_OK) and True or False
+SystemInfo["CanChangeOsdPositionAML"] = access('/sys/class/graphics/fb0/free_scale', R_OK) and True or False
 SystemInfo["ScalerSharpness"] = fileCheck("/proc/stb/vmpeg/0/pep_scaler_sharpness")
 SystemInfo["BootDevice"] = getBootdevice()
 SystemInfo["NimExceptionVuSolo2"] = model == "vusolo2"
@@ -344,3 +345,5 @@ SystemInfo["FrontpanelLEDColorControl"] = fileExists("/proc/stb/fp/led_color")
 SystemInfo["FrontpanelLEDFadeControl"] = fileExists("/proc/stb/fp/led_fade")
 SystemInfo["FCCactive"] = False
 SystemInfo["Autoresolution_proc_videomode"] = model in ("gbue4k", "gbquad4k") and "/proc/stb/video/videomode_50hz" or "/proc/stb/video/videomode"
+SystemInfo["HDRSupport"] = fileExists("/proc/stb/hdmi/hlg_support_choices") and fileCheck("/proc/stb/hdmi/hlg_support")
+SystemInfo["AmlHDRSupport"] = isfile("/sys/class/amhdmitx/amhdmitx0/config")
