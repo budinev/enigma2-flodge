@@ -8,7 +8,6 @@ dist_pkgdata_DATA = \
 	freesat.t2 \
 	groupedservices \
 	iso-639-3.pck \
-	imagefeeds.xml \
 	keymap.xml \
 	menu.xml \
 	otv_00820000_fbff_16a8.dict \
@@ -21,7 +20,8 @@ dist_pkgdata_DATA = \
 	startwizard.xml \
 	unicable.xml \
 	hd-testcard.mvi \
-	userinterfacepositionerwizard.xml
+	userinterfacepositionerwizard.xml \
+	lcd_picon_default.png
 
 iso-639-3.pck: $(srcdir)/iso-639-3.tab
 	python3 $(srcdir)/convert-iso-639-3.py $< $@

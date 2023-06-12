@@ -3,6 +3,7 @@
 #include <csignal>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #ifdef __GLIBC__
 #include <execinfo.h>
 #endif
@@ -91,8 +92,25 @@ static void stringFromFile(FILE* f, const char* context, const char* filename)
 		std::string line;
 		std::getline(in, line);
 		fprintf(f, "%s=%s\n", context, line.c_str());
+		in.close();
 	}
 }
+
+static void dumpFile(FILE* f, const char* filename)
+{
+	std::ifstream in(filename);
+	if (in.good()) {
+		do
+		{
+			std::string line;
+			std::getline(in, line);
+			fprintf(f, "%s\n", line.c_str());
+		}
+		while (in.good());
+		in.close();
+	}
+}
+
 
 static bool bsodhandled = false;
 static bool bsodrestart =  true;
@@ -158,10 +176,16 @@ void bsodFatal(const char *component)
 	std::string crashlog_name;
 	std::ostringstream os;
 	std::ostringstream os_text;
+
+	char dated[22];
+	time_t now_time = time(0);
+	struct tm loctime;
+	localtime_r(&now_time, &loctime);
+	strftime (dated, 21, "%Y%m%d-%H%M%S", &loctime);
+
 	os << getConfigString("config.crash.debugPath", "/home/root/logs/");
-	os << "enigma2_crash_";
-	os << time(0);
-	os << ".log";
+	os << dated;
+	os << "-enigma2-crash.log";
 	crashlog_name = os.str();
 	f = fopen(crashlog_name.c_str(), "wb");
 
@@ -209,13 +233,37 @@ void bsodFatal(const char *component)
 			enigma2_rev,
 			component);
 
-		stringFromFile(f, "stbmodel", "/proc/stb/info/boxtype");
-		stringFromFile(f, "stbmodel", "/proc/stb/info/vumodel");
-		stringFromFile(f, "stbmodel", "/proc/stb/info/model");
+		std::ifstream in(eEnv::resolve("${libdir}/enigma.info").c_str());
+		const std::list<std::string> enigmainfovalues {
+			"model=",
+			"machinebuild=",
+			"imageversion=",
+			"imagebuild="
+		};
+
+		if (in.good()) {
+			do
+			{
+				std::string line;
+				std::getline(in, line);
+				for(std::list<std::string>::const_iterator i = enigmainfovalues.begin(); i != enigmainfovalues.end(); ++i)
+				{
+					if (line.find(i->c_str()) != std::string::npos) {
+						line.erase(std::remove( line.begin(), line.end(), '\"' ),line.end());
+						line.erase(std::remove( line.begin(), line.end(), '\'' ),line.end());
+						fprintf(f, "%s\n", line.c_str());
+						break;
+					}
+				}
+			}
+			while (in.good());
+			in.close();
+		}
+
+		fprintf(f, "\n");
 		stringFromFile(f, "kernelcmdline", "/proc/cmdline");
-		stringFromFile(f, "nimsockets", "/proc/bus/nim_sockets");
-		stringFromFile(f, "imageversion", "/etc/image-version");
-		stringFromFile(f, "imageissue", "/etc/issue.net");
+		fprintf(f, "\nnimsockets:\n");
+		dumpFile(f, "/proc/bus/nim_sockets");
 
 		/* dump the log ringbuffer */
 		fprintf(f, "\n\n");
@@ -358,7 +406,13 @@ void bsodFatal(const char *component)
 		p.clear();
 		return;
 	}
-	if (component) raise(SIGKILL);
+	if (component) {
+		/*
+		 *  We need to use a signal that generate core dump.
+		 */
+		if (eConfigManager::getConfigBoolValue("config.crash.coredump", false)) raise(SIGTRAP);
+		raise(SIGKILL);
+	}
 }
 
 void oops(const mcontext_t &context)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Screens.ChannelSelection import ChannelSelection, BouquetSelector, SilentBouquetSelector
 
 from Components.ActionMap import ActionMap, HelpableActionMap
@@ -38,9 +39,12 @@ from Screens.UnhandledKey import UnhandledKey
 from ServiceReference import ServiceReference, isPlayableForCur
 
 from Tools.ASCIItranslit import legacyEncode
-from Tools.Directories import fileExists, getRecordingFilename, moveFiles, fileWriteLine
+from Tools.Directories import fileExists, fileReadLine, fileWriteLine, getRecordingFilename, moveFiles
+from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 from Tools.Notifications import AddPopup, AddNotificationWithCallback, current_notifications, lock, notificationAdded, notifications, RemovePopup
 from Tools.HardwareInfo import HardwareInfo
+
+from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 
 from enigma import eTimer, eServiceCenter, eDVBServicePMTHandler, iServiceInformation, iPlayableService, eServiceReference, eEPGCache, eActionMap, getDesktop, eDVBDB
 
@@ -56,6 +60,8 @@ from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
 
 # hack alert!
 from Screens.Menu import MainMenu, mdom
+
+MODULE_NAME = __name__.split(".")[-1]
 
 
 def isStandardInfoBar(self):
@@ -219,17 +225,32 @@ class InfoBarUnhandledKey:
 		eActionMap.getInstance().bindAction('', maxsize, self.actionB) #lowest prio
 		self.flags = (1 << 1)
 		self.uflags = 0
+		self.sibIgnoreKeys = (
+			KEYIDS["KEY_VOLUMEDOWN"], KEYIDS["KEY_VOLUMEUP"],
+			KEYIDS["KEY_EXIT"], KEYIDS["KEY_OK"],
+			KEYIDS["KEY_UP"], KEYIDS["KEY_DOWN"],
+			KEYIDS["KEY_CHANNELUP"], KEYIDS["KEY_CHANNELDOWN"],
+			KEYIDS["KEY_NEXT"], KEYIDS["KEY_PREVIOUS"]
+		)
 
-	#this function is called on every keypress!
+	# This function is called on every keypress!
 	def actionA(self, key, flag):
-		self.unhandledKeyDialog.hide()
+		print("[InfoBarGenerics] Key: %s (%s) KeyID='%s'." % (key, KEYFLAGS.get(flag, _("Unknown")), KEYIDNAMES.get(key, _("Unknown"))))
+		if flag != 2: # Don't hide on repeat.
+			self.unhandledKeyDialog.hide()
+			if self.closeSIB(key) and self.secondInfoBarScreen and self.secondInfoBarScreen.shown:
+				self.secondInfoBarScreen.hide()
+				self.secondInfoBarWasShown = False
 		if flag != 4:
-			if self.flags & (1 << 1):
+			if flag == 0:
 				self.flags = self.uflags = 0
 			self.flags |= (1 << flag)
-			if flag == 1: # break
+			if flag == 1 or flag == 3:  # Break and Long.
 				self.checkUnusedTimer.start(0, True)
 		return 0
+
+	def closeSIB(self, key):
+		return True if key >= 12 and key not in self.sibIgnoreKeys else False  # (114, 115, 174, 352, 103, 108, 402, 403, 407, 412)
 
 	#this function is only called when no other action has handled this key
 	def actionB(self, key, flag):
@@ -462,7 +483,7 @@ class InfoBarShowHide(InfoBarScreenSaver):
 
 	def showSecondInfoBar(self):
 		if isStandardInfoBar(self) and config.usage.show_second_infobar.value == "EPG":
-			if not(hasattr(self, "hotkeyGlobal") and self.hotkeyGlobal("info") != 0):
+			if not (hasattr(self, "hotkeyGlobal") and self.hotkeyGlobal("info") != 0):
 				self.showDefaultEPG()
 		elif self.actualSecondInfoBarScreen and config.usage.show_second_infobar.value and not self.actualSecondInfoBarScreen.shown:
 			self.show()
@@ -2664,7 +2685,7 @@ class InfoBarInstantRecord:
 		event = info["event"]
 
 		if limitEvent in ("event", "manualendtime", "manualduration"):
-			if event: 
+			if event:
 				end = info["end"]
 			else:
 				message = _("No event info found, recording indefinitely.")
@@ -2707,7 +2728,7 @@ class InfoBarInstantRecord:
 				else:
 					message = _("Could not record due to conflicting timer %s") % name
 					if count > 2:
-						message +=  "\n" +_("total conflict (%d)") % (count - 1)
+						message += "\n" + _("total conflict (%d)") % (count - 1)
 			else:
 				ref = "\n'%s'" % serviceref
 				message = _("Could not record due to invalid service %s") % ref
@@ -3156,83 +3177,58 @@ class InfoBarAspectSelection:
 
 class InfoBarResolutionSelection:
 	def __init__(self):
-		return
+		pass
 
 	def resolutionSelection(self):
-		if isfile("/proc/stb/vmpeg/0/xres"):
-			xRes = int(fileReadLine("/proc/stb/vmpeg/0/xres", 0, source=MODULE_NAME), 16)
-		elif isfile("/sys/class/video/frame_width"):
-			xRes = int(fileReadLine("/sys/class/video/frame_width", 0, source=MODULE_NAME))
-		if isfile("/proc/stb/vmpeg/0/yres"):
-			yRes = int(fileReadLine("/proc/stb/vmpeg/0/yres", 0, source=MODULE_NAME), 16)
-		elif isfile("/sys/class/video/frame_height"):
-			yRes = int(fileReadLine("/sys/class/video/frame_height", 0, source=MODULE_NAME))
-		if brand == "azbox":
-			print("[InfoBarGenerics] Set fpsString to 50000 for azbox to avoid further problems!")
-			fpsString = '50000'
-		else:
-			if isfile("/proc/stb/vmpeg/0/framerate"):
-				fps = float(fileReadLine("/proc/stb/vmpeg/0/framerate", 50000, source=MODULE_NAME)) / 1000.0
-			elif isfile("/proc/stb/vmpeg/0/frame_rate"):
-				fps = float(fileReadLine("/proc/stb/vmpeg/0/frame_rate", 50000, source=MODULE_NAME)) / 1000.0
-		xres = int(xresString, 16)
-		yres = int(yresString, 16)
-		fps = int(fpsString)
-		fpsFloat = float(fps)
-		fpsFloat = fpsFloat / 1000
-
-		# do we need a new sorting with this way here or should we disable some choices?
-		choices = []
-		if os.path.exists("/proc/stb/video/videomode_choices"):
-			print("[InfoBarGenerics] Read /proc/stb/video/videomode_choices")
-			f = open("/proc/stb/video/videomode_choices")
-			values = f.readline().replace("\n", "").replace("pal ", "").replace("ntsc ", "").split(" ", -1)
-			for x in values:
-				entry = x.replace('i50', 'i@50hz').replace('i60', 'i@60hz').replace('p23', 'p@23.976hz').replace('p24', 'p@24hz').replace('p25', 'p@25hz').replace('p29', 'p@29hz').replace('p30', 'p@30hz').replace('p50', 'p@50hz'), x
-				choices.append(entry)
-			f.close()
-
-		selection = 0
-		tlist = []
-		tlist.append((_("Exit"), "exit"))
-		tlist.append((_("Auto (not available)"), "auto"))
-		tlist.append((_("Video: ") + str(xres) + "x" + str(yres) + "@" + str(fpsFloat) + "hz", ""))
-		tlist.append(("--", ""))
-		if choices != []:
-			for x in choices:
-				tlist.append(x)
-
+		amlogic = HardwareInfo().get_device_model() in ("one", "two")
+		base = 10 if amlogic else 16
+		file = "/sys/class/video/frame_width" if amlogic else "/proc/stb/vmpeg/0/xres"
+		xRes = int(fileReadLine(file, 0, source=MODULE_NAME), base)
+		file = "/sys/class/video/frame_height" if amlogic else "/proc/stb/vmpeg/0/yres"
+		yRes = int(fileReadLine(file, 0, source=MODULE_NAME), base)
+		file = "/proc/stb/vmpeg/0/frame_rate" if amlogic else "/proc/stb/vmpeg/0/framerate"
+		fps = float(fileReadLine(file, default=50000, source=MODULE_NAME)) / 1000.0
+		resList = []
+		resList.append((_("Exit"), "exit"))
+		resList.append((_("Auto(not available)"), "auto"))
+		resList.append((_("Video: ") + "%dx%d@%gHz" % (xRes, yRes, fps), ""))
+		resList.append(("--", ""))
+		# Do we need a new sorting with this way here or should we disable some choices?
+		if exists("/proc/stb/video/videomode_choices"):
+			videoModes = fileReadLine("/proc/stb/video/videomode_choices", "", source=MODULE_NAME)
+			videoModes = videoModes.replace("pal ", "").replace("ntsc ", "").split(" ")
+			for videoMode in videoModes:
+				video = videoMode
+				if videoMode.endswith("23"):
+					video = "%s.976" % videoMode
+				if videoMode[-1].isdigit():
+					video = "%sHz" % videoMode
+				resList.append((video, videoMode))
+		file = "/sys/class/display/mode" if amlogic else "/proc/stb/video/videomode"
+		videoMode = fileReadLine(file, default="Unknown", source=MODULE_NAME)
 		keys = ["green", "yellow", "blue", "", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+		selection = 0
+		for item in range(len(resList)):
+			if resList[item][1] == videoMode:
+				selection = item
+				break
+		print("[InfoBarGenerics] Current video mode is %s." % videoMode)
+		self.session.openWithCallback(self.resolutionSelected, ChoiceBox, title=_("Please select a resolution..."), list=resList, keys=keys, selection=selection)
 
-		if isfile("/proc/stb/video/videomode"):
-			mode = fileReadLine("/proc/stb/video/videomode", "Unknown", source=MODULE_NAME)
-		elif isfile("/sys/class/display/mode"):
-			mode = fileReadLine("/sys/class/display/mode", "Unknown", source=MODULE_NAME)
-		print(mode)
-		for x in range(len(tlist)):
-			if tlist[x][1] == mode:
-				selection = x
-
-		self.session.openWithCallback(self.ResolutionSelected, ChoiceBox, title=_("Please select a resolution..."), list=tlist, selection=selection, keys=keys)
-
-	def ResolutionSelected(self, Resolution):
-		if not Resolution is None:
-			if isinstance(Resolution[1], str):
-				if Resolution[1] == "exit" or Resolution[1] == "" or Resolution[1] == "auto":
+	def resolutionSelected(self, videoMode):
+		amlogic = HardwareInfo().get_device_model() in ("one", "two")
+		if videoMode is not None:
+			if isinstance(videoMode[1], str):
+				if videoMode[1] == "exit" or videoMode[1] == "" or videoMode[1] == "auto":
 					self.ExGreen_toggleGreen()
-				if Resolution[1] != "auto":
-					if isfile("/proc/stb/video/videomode"):
-						if fileWriteLine("/proc/stb/video/videomode", Resolution[1], source=MODULE_NAME):
-							print("[InfoBarGenerics] New video mode is %s." % Resolution[1])
-						else:
-							print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % videoMode[1])
-					elif isfile("/sys/class/display/mode"):
-						if fileWriteLine("/sys/class/display/mode", Resolution[1], source=MODULE_NAME):
-							print("[InfoBarGenerics] New video mode is %s." % Resolution[1])
-						else:
-							print("[InfoBarGenerics] Error: Unable to set new video mode of %s!" % Resolution[1])
-					#from enigma import gMainDC
-					#gMainDC.getInstance().setResolution(-1, -1)
+				if videoMode[1] != "auto":
+					file = "/sys/class/display/mode" if amlogic else "/proc/stb/video/videomode"
+					if fileWriteLine(file, videoMode[1], source=MODULE_NAME):
+						print("[InfoBarGenerics] New video mode is '%s'." % videoMode[1])
+					else:
+						print("[InfoBarGenerics] Error: Unable to set new video mode of '%s'!" % videoMode[1])
+					# from enigma import gMainDC
+					# gMainDC.getInstance().setResolution(-1, -1)
 					self.ExGreen_doHide()
 		else:
 			self.ExGreen_doHide()
@@ -3332,7 +3328,7 @@ class InfoBarNotifications:
 					reload_whitelist_vbi()
 				if "epg" in config.usage.remote_fallback_import.value:
 					eEPGCache.getInstance().load()
-				if config.misc.initialchannelselection.value or not(config.usage.remote_fallback_import.value and (n[4].endswith("NOK") and config.usage.remote_fallback_nok.value or config.usage.remote_fallback_ok.value)):
+				if config.misc.initialchannelselection.value or not (config.usage.remote_fallback_import.value and (n[4].endswith("NOK") and config.usage.remote_fallback_nok.value or config.usage.remote_fallback_ok.value)):
 					return
 			if cb:
 				dlg = self.session.openWithCallback(cb, n[1], *n[2], **n[3])
@@ -3627,7 +3623,7 @@ class InfoBarSummarySupport:
 class InfoBarMoviePlayerSummary(Screen):
 	skin = """
 	<screen position="0,0" size="132,64">
-		<widget source="global.CurrentTime" render="Label" position="62,46" size="64,18" font="Regular;16" halign="right" >
+		<widget source="global.CurrentTime" render="Label" position="62,46" size="64,18" font="Regular;16" horizontalAlignment="right" >
 			<convert type="ClockToText">WithSeconds</convert>
 		</widget>
 		<widget source="session.RecordState" render="FixedLabel" text=" " position="62,46" size="64,18" zPosition="1" >

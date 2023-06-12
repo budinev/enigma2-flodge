@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Screens.Screen import Screen
 from Components.Button import Button
 from Components.ActionMap import HelpableActionMap, ActionMap, NumberActionMap
@@ -410,7 +411,7 @@ class MovieContextMenu(Screen, ProtectedScreen):
 					if not parentalControl.sessionPinCached:
 						append_to_menu(menu, (_("Unhide parental control services"), csel.unhideParentalServices), key="1")
 				# Plugins expect a valid selection, so only include them if we selected a non-dir
-				if not(service.flags & eServiceReference.mustDescent):
+				if not (service.flags & eServiceReference.mustDescent):
 					for p in plugins.getPlugins(PluginDescriptor.WHERE_MOVIELIST):
 						append_to_menu(menu, (p.description, boundFunction(p, session, service)), key="bullet")
 		if csel.exist_bookmark():
@@ -430,7 +431,7 @@ class MovieContextMenu(Screen, ProtectedScreen):
 
 	def isResetable(self):
 		item = self.csel.getCurrentSelection()
-		return not(item[1] and moviePlayState(item[0].getPath() + ".cuts", item[0], item[1].getLength(item[0])) is None)
+		return not (item[1] and moviePlayState(item[0].getPath() + ".cuts", item[0], item[1].getLength(item[0])) is None)
 
 	def pinEntered(self, answer):
 		if answer:
@@ -1358,7 +1359,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 	def setCurrentRef(self, path):
 		self.current_ref = eServiceReference("2:0:1:0:0:0:0:0:0:0:" + path)
 		# Magic: this sets extra things to show
-		self.current_ref.setName('16384:jpg 16384:png 16384:gif 16384:bmp')
+		self.current_ref.setName('16384:jpg 16384:jpeg 16384:png 16384:gif 16384:bmp 16384:svg')
 
 	def reloadList(self, sel=None, home=False):
 		self.reload_sel = sel
@@ -1752,7 +1753,7 @@ class MovieSelection(Screen, HelpableScreen, SelectionEventInfo, InfoBarBase, Pr
 			resetMoviePlayState(current.getPath() + ".cuts", current)
 			self["list"].invalidateCurrentItem()
 			idx = self["list"].getCurrentIndex()
-			self["list"].moveToIndex(idx-1)
+			self["list"].moveToIndex(idx - 1)
 			self["list"].moveToIndex(idx)
 
 	def do_move(self):

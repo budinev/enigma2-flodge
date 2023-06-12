@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from Components.SystemInfo import SystemInfo
@@ -575,7 +576,7 @@ class NIM:
 				types.remove("DVB-S")
 			if len(types) > 1:
 				self.multi_type = {}
-				self.combined = not(os.path.exists("/proc/stb/frontend/%d/mode" % self.frontend_id) or self.isFBCTuner())
+				self.combined = not (os.path.exists("/proc/stb/frontend/%d/mode" % self.frontend_id) or self.isFBCTuner())
 				for type in types:
 					self.multi_type[str(types.index(type))] = type
 

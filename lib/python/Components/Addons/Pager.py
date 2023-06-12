@@ -1,8 +1,7 @@
+# -*- coding: utf-8 -*-
 from Components.Addons.GUIAddon import GUIAddon
 
 from enigma import eListbox, eListboxPythonMultiContent, BT_ALIGN_CENTER, eSize
-
-from skin import parseScale
 
 from Components.MultiContent import MultiContentEntryPixmapAlphaBlend
 
@@ -40,9 +39,9 @@ class Pager(GUIAddon):
 			pixd_size = self.picDotPage.size()
 			pixd_width = pixd_size.width()
 			pixd_height = pixd_size.height()
-			width_dots = pixd_width + (pixd_width + self.spacing)*pageCount
-			xPos = (width - width_dots)/2 - pixd_width/2 if self.showIcons == "showAll" else 0
-		res = [ None ]
+			width_dots = pixd_width + (pixd_width + self.spacing) * pageCount
+			xPos = (width - width_dots) / 2 - pixd_width / 2 if self.showIcons == "showAll" else 0
+		res = [None]
 		if pageCount > (0 if self.showIcons == "showAll" else -1):
 			pages = list(range(pageCount + 1))
 			# add option to show just first or last icon
@@ -105,14 +104,14 @@ class Pager(GUIAddon):
 			return orig_source.content.getItemSize()
 
 		return orig_source.l.getItemSize()
-	
+
 	def initPager(self):
 		if self.source.__class__.__name__ == "ScrollLabel":
-			currentPageIndex = self.source.curPos//self.source.pageHeight
+			currentPageIndex = self.source.curPos // self.source.pageHeight
 			if not ((self.source.TotalTextHeight - self.source.curPos) % self.source.pageHeight):
 				currentPageIndex += 1
-			pagesCount = -(-self.source.TotalTextHeight//self.source.pageHeight) - 1
-			self.selChange(currentPageIndex,pagesCount)
+			pagesCount = -(-self.source.TotalTextHeight // self.source.pageHeight) - 1
+			self.selChange(currentPageIndex, pagesCount)
 		else:
 			l_orientation = self.getSourceOrientation()
 			if l_orientation == eListbox.orVertical:
@@ -127,14 +126,14 @@ class Pager(GUIAddon):
 					itemControlledSizeParam = self.getListItemSize().height()
 				else:
 					itemControlledSizeParam = self.getListItemSize().width()
-				items_per_page = listControledlSize//itemControlledSizeParam
+				items_per_page = listControledlSize // itemControlledSizeParam
 				if items_per_page > 0:
-					currentPageIndex = current_index//items_per_page
-					pagesCount = -(listCount//-items_per_page) - 1
-					self.selChange(currentPageIndex,pagesCount)
+					currentPageIndex = current_index // items_per_page
+					pagesCount = -(listCount // -items_per_page) - 1
+					self.selChange(currentPageIndex, pagesCount)
 
 	def applySkin(self, desktop, parent):
-		attribs = [ ]
+		attribs = []
 		for (attrib, value) in self.skinAttributes[:]:
 			if attrib == "picPage":
 				pic = LoadPixmap(resolveFilename(SCOPE_GUISKIN, value))
@@ -145,9 +144,9 @@ class Pager(GUIAddon):
 				if pic:
 					self.picDotCurPage = pic
 			elif attrib == "itemHeight":
-				self.l.setItemHeight(parseScale(value))
+				self.l.setItemHeight(int(value))
 			elif attrib == "spacing":
-				self.spacing = parseScale(value)
+				self.spacing = int(value)
 			elif attrib == "showIcons":
 				self.showIcons = value
 			else:

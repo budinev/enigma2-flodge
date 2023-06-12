@@ -335,7 +335,7 @@ void eListboxServiceContent::sort()
 DEFINE_REF(eListboxServiceContent);
 
 eListboxServiceContent::eListboxServiceContent()
-	:m_visual_mode(visModeSimple), m_size(0), m_current_marked(false), m_itemheight(25), m_hide_number_marker(false), m_show_two_lines(0), m_servicetype_icon_mode(0), m_crypto_icon_mode(0), m_record_indicator_mode(0), m_column_width(0), m_progressbar_height(6), m_progressbar_border_width(2), m_nonplayable_margins(10), m_items_distances(8)
+	:m_visual_mode(visModeSimple), m_saved_cursor_line(0), m_size(0), m_current_marked(false), m_itemheight(25), m_hide_number_marker(false), m_show_two_lines(0), m_servicetype_icon_mode(0), m_crypto_icon_mode(0), m_record_indicator_mode(0), m_column_width(0), m_progressbar_height(6), m_progressbar_border_width(2), m_nonplayable_margins(10), m_items_distances(8)
 {
 	memset(m_color_set, 0, sizeof(m_color_set));
 	cursorHome();
@@ -559,6 +559,16 @@ void eListboxServiceContent::cursorRestore()
 	m_saved_cursor = m_list.end();
 }
 
+void eListboxServiceContent::cursorSaveLine(int line)
+{
+	m_saved_cursor_line = line;
+}
+
+int eListboxServiceContent::cursorRestoreLine()
+{
+	return m_saved_cursor_line;
+}
+
 int eListboxServiceContent::size()
 {
 	int size = 0;
@@ -701,7 +711,7 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 	} else
 	{
 		if (local_style->m_background)
-			painter.blit(local_style->m_background, offset, eRect(), gPainter::BT_ALPHATEST);
+			painter.blit(local_style->m_background, offset, eRect(), gPainter::BT_ALPHABLEND);
 		else if (selected && !local_style->m_selection)
 			painter.clear();
 	}
@@ -752,7 +762,7 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 		}
 
 		if (selected && local_style && local_style->m_selection)
-			painter.blit(local_style->m_selection, offset, eRect(), gPainter::BT_ALPHATEST);
+			painter.blit(local_style->m_selection, offset, eRect(), gPainter::BT_ALPHABLEND);
 
 		int xoffset=0;  // used as offset when painting the folder/marker symbol or the serviceevent progress
 		int nameLeft=0, nameWidth=0, nameYoffs=0, nextYoffs=0; // used as temporary values for 'show two lines' option
@@ -801,6 +811,9 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 				{
 					if (service_info)
 						service_info->getName(*m_cursor, text);
+#ifdef USE_LIBVUGLES2
+					painter.setFlush(text == "<n/a>");
+#endif
 					if (!isPlayable)
 					{
 						area.setWidth(area.width() + m_element_position[celServiceEventProgressbar].width() +  m_nonplayable_margins);
@@ -1091,7 +1104,6 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 					else
 						yoffs = (area.height() - bbox.height())/2 - bbox.top();
 				}
-
 				painter.renderPara(para, offset+ePoint(xoffs, yoffs));
 			}
 			else if ((e == celFolderPixmap && m_cursor->flags & eServiceReference::isDirectory) ||
@@ -1138,7 +1150,7 @@ void eListboxServiceContent::paint(gPainter &painter, eWindowStyle &style, const
 			ePtr<gPixmap> &pixmap = m_pixmaps[picServiceEventProgressbar];
 			if (pixmap) {
 				painter.clip(tmp);
-				painter.blit(pixmap, ePoint(pb_xpos + m_progressbar_border_width, pb_ypos + m_progressbar_border_width), tmp, gPainter::BT_ALPHATEST);
+				painter.blit(pixmap, ePoint(pb_xpos + m_progressbar_border_width, pb_ypos + m_progressbar_border_width), tmp, gPainter::BT_ALPHABLEND);
 				painter.clippop();
 			}
 			else {

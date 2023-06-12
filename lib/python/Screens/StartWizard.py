@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Screens.Wizard import wizardManager
 from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
@@ -181,6 +182,7 @@ class AutoInstallWizard(Screen):
 		self.logfile.close()
 		os.unlink("/etc/.doAutoinstall")
 		self.close(44)
+
 
 if not os.path.isfile("/etc/installed"):
 	from Components.Console import Console

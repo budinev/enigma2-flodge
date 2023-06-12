@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from Components.GUIComponent import GUIComponent
-from skin import parseFont, parseScale
+from skin import parseFont
 
 from Tools.FuzzyDate import FuzzyTime
 
@@ -29,7 +30,7 @@ class TimerList(GUIComponent):
 			res.append((eListboxPythonMultiContent.TYPE_TEXT, width - serviceNameWidth - self.iconMargin, 0, serviceNameWidth, self.rowSplit, 0, RT_HALIGN_RIGHT | RT_VALIGN_BOTTOM, serviceName, self.backupColor, self.backupColorSel, None, None, None, None))
 		else:
 			res.append((eListboxPythonMultiContent.TYPE_TEXT, width - serviceNameWidth - self.iconMargin, 0, serviceNameWidth, self.rowSplit, 0, RT_HALIGN_RIGHT | RT_VALIGN_BOTTOM, serviceName))
-		res.append((eListboxPythonMultiContent.TYPE_TEXT, self.iconWidth + self.iconMargin, 0, width - serviceNameWidth - self.iconWidth - self.iconMargin*2, self.rowSplit, 2, RT_HALIGN_LEFT | RT_VALIGN_BOTTOM, timer.name))
+		res.append((eListboxPythonMultiContent.TYPE_TEXT, self.iconWidth + self.iconMargin, 0, width - serviceNameWidth - self.iconWidth - self.iconMargin * 2, self.rowSplit, 2, RT_HALIGN_LEFT | RT_VALIGN_BOTTOM, timer.name))
 
 		begin = FuzzyTime(timer.begin)
 		if timer.repeated:
@@ -118,7 +119,7 @@ class TimerList(GUIComponent):
 
 	def applySkin(self, desktop, parent):
 		def itemHeight(value):
-			self.itemHeight = parseScale(value)
+			self.itemHeight = int(value)
 
 		def setServiceNameFont(value):
 			self.serviceNameFont = parseFont(value, ((1, 1), (1, 1)))
@@ -130,13 +131,13 @@ class TimerList(GUIComponent):
 			self.font = parseFont(value, ((1, 1), (1, 1)))
 
 		def rowSplit(value):
-			self.rowSplit = parseScale(value)
+			self.rowSplit = int(value)
 
 		def iconMargin(value):
-			self.iconMargin = parseScale(value)
+			self.iconMargin = int(value)
 
 		def satPosLeft(value):
-			self.satPosLeft = parseScale(value)
+			self.satPosLeft = int(value)
 
 		def backupColor(value):
 			self.backupColor = int(value)

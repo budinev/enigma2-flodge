@@ -2,12 +2,16 @@
 	<setup key="avsetup">
 		<!-- this is just a placeholder, the Videomode plugin implements this submenu -->
 	</setup>
+	<setup key="checkupdate" title="Check update Settings">
+		<item level="1" text="check for firmware updates every" description="Choose the time to check for update avilable every...">config.updatecheck.check_update_notifier</item>
+		<item level="1" text="check for firmware updates on start" description="Enable/Disable check for update after reboot or restart box.">config.updatecheck.check_update_on_boot</item>
+	</setup>
 	<setup key="usage" title="Customize">
 		<item level="0" text="Show Main Menu as" description="Choose style of main menus" >config.usage.menutype</item>
 		<item level="1" text="Sort order for menu entries" description="This option allows you to hide and sort menu entries. When selecting user you can change order and hide menu items via the blue button. With the user defined hidden the blue button is not shown in the menus">config.usage.menu_sort_mode</item>
 		<item level="1" text="Sort order for setup entries" description="This option allows you to alphabetically sort setup menu entries.">config.usage.sort_settings</item>
 		<item level="1" text="Show screen path" description="This option allows you to show the full screen path leading to the current screen.">config.usage.showScreenPath</item>
-		<item level="1" text="Virtual keyboard skin" description="You can select the skin of virtual keyboard.">config.usage.virtualkeyBoard_style</item>
+		<item level="1" text="Virtual keyboard skin" description="You can select the skin of virtual keyboard.">config.misc.virtualkeyBoardstyle</item>
 		<item level="0" text="Plugin Browser Style (Need Restart GUI)" description="This option allows you to select the plugin browser style (Need Restart GUI).">config.misc.plugin_style</item>
 		<item level="0" text="Show menu or plugin numbers" description="This option allows you to show menu and/or plugin number quick links.">config.usage.menu_show_numbers</item>
 		<item level="2" text="Show softcam setup in extensions menu" description="This option allows you to add the softcam setup in the extensions menu." requires="HasSoftcamInstalled">config.misc.softcam_setup.extension_menu</item>
@@ -129,9 +133,7 @@
 		<item level="2" text="Full description separator" description="Configure separator type used in full description for separate short and extended descriptions.">config.epg.fulldescription_separator</item>
 		<item level="2" text="Replace newlines in EPG" description="Select char for replacing newlines in EPG.">config.epg.replace_newlines</item>
 		<item level="2" text="Enable EPG event name abbreviation removal" description="Broadcasters sometimes split long event names into the event description using ... Choose whether to prevent this behaviour.">config.epg.joinAbbreviatedEventNames</item>
-		<if conditional="config.epg.eventNamePrefixMode.value > 0">
-			<item level="2" text="EPG event name prefixes to remove" description="| separated list of prefixes you'd like to be removed from event names, separated with |, e.g. New:|Live:">config.epg.eventNamePrefixes</item>
-		</if>
+		<item level="2" text="EPG event name prefixes to remove" conditional="config.epg.eventNamePrefixMode.value > 0" description="| separated list of prefixes you'd like to be removed from event names, separated with |, e.g. New:|Live:">config.epg.eventNamePrefixes</item>
 	</setup>
 	<setup key="subtitlesetup" title="Subtitle settings">
 		<item level="0" text="Teletext subtitle color" description="Configure the color of the teletext subtitles.">config.subtitles.ttx_subtitle_colors</item>
@@ -205,12 +207,12 @@
 	</setup>
 	<setup key="Time" title="Time Setup">
 		<item level="0" text="Time zone area" description="Select your time zone area or region.">config.timezone.area</item>
-		<item level="0" text="Time zone" description="Select the time zone within the area or region.">config.timezone.val</item>
+		<item level="0" text="Time zone" description="Select the time zone within the area or region.">config.timezone.val</item>		
+		<item level="0" text="Sync time using" description="Synchronize system time using transponder or Internet.">config.misc.SyncTimeUsing</item>
+		<item level="0" text="NTP server" conditional="config.misc.SyncTimeUsing.value == '1'" description="Configure your NTP server.">config.misc.NTPserver</item>
+		<item level="0" text="Sync NTP every (minutes)" conditional="config.misc.SyncTimeUsing.value == '1'" description="Setup network time synchronization interval.">config.misc.useNTPminutes</item>
 		<item level="0" text="Date style" description="Choose the display formatting style for dates. 'D' / 'DD' is the date and 'M' / 'MM' is the month in digits.  ('DD' and 'MM' have leading zeros for single digit values.) The screen display will be based on your choice but can be influenced by the skin." requires="config.usage.date.enabled">config.usage.date.dayfull</item>
-		<item level="0" text="Time style" description="Choose the display formatting style for times. 'H' / 'HH' is the hour for a 24 hour clock, 'h' / 'hh' is the hour for a 12 hour clock, 'mm' is the minutes and 'ss' is the seconds.  ('HH' and 'hh' have leading zeros for single digit values.) The screen display will be based on your choice but can be influenced by the skin." requires="config.usage.time.enabled">config.usage.time.long</item>		
-		<item level="1" text="Time synchronization method" description="Select how you want your receiver to keep the correct time, either from the DVB transponder, or from the internet. Or use Auto, which will favour using internet, but will fall back to transponder time when no internet connection is available.">config.ntp.timesync</item>
-		<item level="1" text="RFC 5905 hostname (SNTP - Simple Network Time Protocol)" conditional="config.ntp.timesync.value != 'dvb'" description="The hostname or the IP address of the RFC 5905 server to synchronise the time with.">config.ntp.sntpserver</item>
-		<item level="1" text="RFC 868 hostname (rdate - Remote Date)" conditional="config.ntp.timesync.value != 'dvb'" description="The hostname or the IP address of the RFC 868 server to synchronise the time with.">config.ntp.rdateserver</item>
+		<item level="0" text="Time style" description="Choose the display formatting style for times. 'H' / 'HH' is the hour for a 24 hour clock, 'h' / 'hh' is the hour for a 12 hour clock, 'mm' is the minutes and 'ss' is the seconds.  ('HH' and 'hh' have leading zeros for single digit values.) The screen display will be based on your choice but can be influenced by the skin." requires="config.usage.time.enabled">config.usage.time.long</item>
 	</setup>
 	<setup key="DNS" title="DNS Settings">
 		<item level="0" text="DNS data source" description="Select the source of the default DNS settings.">config.usage.dns</item>
@@ -272,16 +274,28 @@
 		<item level="2" text="Show crash info on screen and write crash log for x times" description="If 'never', will write crash log despite that for the first crash." requires="config.crash.bsodpython">config.crash.bsodhide</item>
 		<item level="2" text="Restart GUI after x crashes" description="If 'never', will force restart despite that after 100 crashes." requires="config.crash.bsodpython">config.crash.bsodmax</item>
 		<item level="2" text="Enable debug log *" description="Allows you to enable the debug log. They contain very detailed information of everything the system does.">config.crash.enabledebug</item>
-		<item level="2" text="Enable twisted log *" description="Allows you to enable the twisted log. They contain very detailed information of everything the twisted does. ('/tmp/twisted.log')">config.misc.enabletwistedlog</item>
+		<item level="2" text="Include keyboard data" description="Enable this option to add keyboard key map data to the debug log file.">config.crash.debugKeyboards</item>
+		<item level="2" text="Include remote control data" description="Enable this option to add remote control data to the debug log file.">config.crash.debugRemoteControls</item>
+		<item level="2" text="Include screen load data" description="Enable this option to add screen names and resolution data to the debug log file.">config.crash.debugScreens</item>
+		<item level="2" text="Include DVB scan data" description="Enable this option to add extra DVB scan data to the debug log file.">config.crash.debugDVBScan</item>
 		<item level="2" text="Limit debug log size (MB)" description="Allows you to set the maximum size of the Debug log size (MB). When that size is reached, a new file will be created.">config.crash.debugloglimit</item>
-		<item level="2" text="Show Log Manager in extensions list ?" description="Allows you to show/hide Log Manager in extensions (blue button).">config.logmanager.showinextensions</item>
+		<item level="2" text="Show Log Manager in extensions list" description="Allows you to show/hide Log Manager in extensions (BLUE button).">config.logmanager.showinextensions</item>
+		<item level="2" text="Maximum no of days" description="Logs older then the set no of days will be deleted.">config.crash.daysloglimit</item>
+		<item level="2" text="Maximum space used (MB)" description="If logs are using the set maximum space used the eldest will be deleted.">config.crash.sizeloglimit</item>
+		<item level="2" text="Crash at skin error for debug reasons" description="Select 'No' to only write a log message to the debug log file.">config.crash.skin_error_crash</item>
+		<item level="2" text="Log python stack trace on spinner" description="Set to yes for debugging the root cause of a spinner.">config.crash.pystackonspinner</item>
+		<item level="2" text="Debug log time format *" description="This sets the prefix for each line in the debug log. The 'Boot time' is the number of seconds since your device was last booted.">config.crash.debugTimeFormat</item>
+		<item level="2" text="Enable GStreamer debug log *" description="Allows you to enable the GStreamer debug log. They contain very detailed information of everything the GStreamer system does.">config.crash.gstdebug</item>
+		<if conditional="config.crash.gstdebug.value">
+			<item level="2" text="GStreamer debug log category *" description="Only log debug information of GStreamer category. * means all categories.">config.crash.gstdebugcategory</item>
+			<item level="2" text="GStreamer debug log level *" description="Detail of GStreamer log">config.crash.gstdebuglevel</item>
+		</if>
+		<item level="2" text="Enable GStreamer pipeline graphs *" description="Allows you to enable the GStreamer pipeline graphs. These are .dot files that describe the topology of your pipeline, along with the caps negotiated in each link.">config.crash.gstdot</item>
+		<item level="2" text="Enable core dumps *" description="Core dumps are helpful for developers in case of a FATAL SIGNAL crash in the C++ code. Typical core dump size is 110 MB so adjust maximum space used and choose proper location.">config.crash.coredump</item>
+		<item level="2" text="Enable twisted log *" description="Allows you to enable the twisted log. They contain very detailed information of everything the twisted does. ('/tmp/twisted.log')">config.misc.enabletwistedlog</item>
 		<!--<item level="2" text="User name" description="Enter your forum user name, to make it easier trace logs.">config.logmanager.user</item>
 		<item level="2" text="e-Mail address" description="Enter your email address to send a copy of the log to.">config.logmanager.useremail</item>
 		<item level="2" text="Send yourself a copy ?" description="Allows you to send a copy of the log to yourself.">config.logmanager.usersendcopy</item>-->
-		<item level="2" text="Maximum no of days:" description="Logs older then the set no of days will be deleted.">config.crash.daysloglimit</item>
-		<item level="2" text="Maximum space used (MB):" description="If logs are using the set maximum space used the eldest will be deleted.">config.crash.sizeloglimit</item>
-		<item level="2" text="Crash at skin error for debug reasons ?" description="if set to 'no', only an debug message is written to the Debug log ">config.crash.skin_error_crash</item>
-		<item level="2" text="Log python stack trace on spinner ?" description="Set to yes for debugging the root cause of a spinner.">config.crash.pystackonspinner</item>
 	</setup>
 	<setup key="network" title="Network setup">
 		<item text="Use DHCP" description="When enabled, use DHCP for the IP configuration.">config.network.dhcp</item>

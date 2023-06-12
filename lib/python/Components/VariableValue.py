@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 class VariableValue:
 	"""VariableValue can be used for components which have a variable value (like eSlider), based on any widget with setValue call"""
 
@@ -8,7 +9,6 @@ class VariableValue:
 		self.__value = int(value)
 		if self.instance:
 			self.instance.setValue(self.__value)
-
 
 	def getValue(self):
 		return self.__value

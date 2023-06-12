@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Components.ActionMap import ActionMap
 from Components.Sources.StaticText import StaticText
 from Components.Label import Label
@@ -21,6 +22,7 @@ from timer import TimerEntry as RealTimerEntry
 from ServiceReference import ServiceReference
 from enigma import eServiceReference, eEPGCache
 import functools
+
 
 class TimerEditList(Screen):
 	EMPTY = 0

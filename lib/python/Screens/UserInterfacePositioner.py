@@ -1,7 +1,7 @@
+# -*- coding: utf-8 -*-
 from Screens.Screen import Screen
 from Components.ActionMap import ActionMap
-from Components.AVSwitch import iAVSwitch
-from Components.config import config, configfile
+from Components.config import config, configfile, ConfigSelectionNumber
 from Components.ConfigList import ConfigListScreen
 from Components.SystemInfo import SystemInfo
 from Components.Sources.StaticText import StaticText
@@ -11,7 +11,7 @@ from Tools.Directories import fileExists
 from enigma import getDesktop
 from os import access, R_OK
 from Tools.HardwareInfo import HardwareInfo
-
+from Plugins.SystemPlugins.Videomode.VideoHardware import VideoHardware # storm - needed
 
 def getFilePath(setting):
 	if HardwareInfo().get_device_model() not in ('dreamone', 'dreamtwo'):
@@ -96,7 +96,7 @@ def InitOsd():
 			print('[UserInterfacePositioner] Setting OSD plane alpha:%s' % str(configElement.value))
 			config.av.osd_alpha.setValue(configElement.value)
 			with open("/sys/class/graphics/fb0/osd_plane_alpha", "w") as fd:
-				fd.write(hex(configElement.value))
+				fd.write(hex(int(configElement.value))) # @storm -here int() is required, because of the integer
 	config.osd.alpha.addNotifier(setOSDPlaneAlpha)
 
 	def set3DMode(configElement):
@@ -139,9 +139,9 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 		skin = """
 			<screen position="center,center" size="1920,1080" backgroundColor="#000000" title="OSD Adjustment" >
 
-				<widget name="text" position="300,165" zPosition="1" size="1320,180" font="Regular;32" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget name="text" position="300,165" zPosition="1" size="1320,180" font="Regular;32" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 				<widget name="config" position="225,375" zPosition="1" size="1470,315" itemHeight="45" font="Regular;30" transparent="1" />
-				<widget source="status" render="Label" position="300,713" zPosition="1" size="1320,120" font="Regular;32" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget source="status" render="Label" position="300,713" zPosition="1" size="1320,120" font="Regular;32" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 
 				<eLabel backgroundColor="red" position="0,0" size="1920,1" zPosition="0" />
 				<eLabel backgroundColor="red" position="0,1079" size="1920,1" zPosition="0" />
@@ -164,19 +164,19 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 				<eLabel backgroundColor="green" position="665,941" size="210,5" zPosition="0" />
 				<eLabel backgroundColor="yellow" position="1046,941" size="210,5" zPosition="0" />
 				<eLabel backgroundColor="blue" position="1427,941" size="210,5" zPosition="0" />
-				<widget source="key_red" render="Label" position="284,908" zPosition="1" size="210,33" font="Regular;27" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_green" render="Label" position="665,908" zPosition="1" size="210,33" font="Regular;27" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_yellow" render="Label" position="1046,908" zPosition="1" size="210,33" font="Regular;27" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_blue" render="Label" position="1427,908" zPosition="1" size="210,33" font="Regular;27" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_red" render="Label" position="284,908" zPosition="1" size="210,33" font="Regular;27" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_green" render="Label" position="665,908" zPosition="1" size="210,33" font="Regular;27" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_yellow" render="Label" position="1046,908" zPosition="1" size="210,33" font="Regular;27" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_blue" render="Label" position="1427,908" zPosition="1" size="210,33" font="Regular;27" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 
 			</screen>"""
 	elif (getDesktop(0).size().width() == 1280):
 		skin = """
 			<screen position="center,center" size="1280,720" backgroundColor="#000000" title="OSD Adjustment" >
 
-				<widget name="text" position="200,110" zPosition="1" size="880,120" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget name="text" position="200,110" zPosition="1" size="880,120" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 				<widget name="config" position="150,250" zPosition="1" size="980,210" itemHeight="30" font="Regular;20" transparent="1" />
-				<widget source="status" render="Label" position="200,475" zPosition="1" size="880,80" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget source="status" render="Label" position="200,475" zPosition="1" size="880,80" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 
 				<eLabel backgroundColor="red" position="0,0" size="1280,1" zPosition="0" />
 				<eLabel backgroundColor="red" position="0,719" size="1280,1" zPosition="0" />
@@ -199,10 +199,10 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 				<eLabel backgroundColor="green" position="443,627" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="yellow" position="697,627" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="blue" position="951,627" size="140,3" zPosition="0" />
-				<widget source="key_red" render="Label" position="189,605" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_green" render="Label" position="443,605" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_yellow" render="Label" position="697,605" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_blue" render="Label" position="951,605" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_red" render="Label" position="189,605" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_green" render="Label" position="443,605" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_yellow" render="Label" position="697,605" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_blue" render="Label" position="951,605" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 
 			</screen>"""
 
@@ -210,9 +210,9 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 		skin = """
 			<screen position="center,center" size="1024,576" backgroundColor="#000000" title="OSD Adjustment" >
 
-				<widget name="text"  position="200,180" zPosition="1" size="624,100" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
-				<widget name="config" position="100,180" zPosition="1" size="824,50" font="Regular;24" halign="center" valign="center" transparent="1" />
-				<widget source="status" render="Label" position="200,450" zPosition="1" size="624,80" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget name="text"  position="200,180" zPosition="1" size="624,100" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget name="config" position="100,180" zPosition="1" size="824,50" font="Regular;24" horizontalAlignment="center" verticalAlignment="center" transparent="1" />
+				<widget source="status" render="Label" position="200,450" zPosition="1" size="624,80" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 
 				<eLabel backgroundColor="red" position="0,0" size="1024,1" zPosition="0" />
 				<eLabel backgroundColor="red" position="0,575" size="1024,1" zPosition="0" />
@@ -235,19 +235,19 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 				<eLabel backgroundColor="green" position="341,477" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="yellow" position="544,477" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="blue" position="747,477" size="140,3" zPosition="0" />
-				<widget source="key_red" render="Label" position="138,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_green" render="Label" position="341,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_yellow" render="Label" position="544,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_blue" render="Label" position="747,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_red" render="Label" position="138,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_green" render="Label" position="341,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_yellow" render="Label" position="544,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_blue" render="Label" position="747,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 			</screen>"""
 
 	else:
 		skin = """
 			<screen position="center,center" size="720,576" backgroundColor="#000000" title="OSD Adjustment" >
 
-				<widget source="text" render="Label" position="75,80" zPosition="1" size="570,100" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
-				<widget source="config" render="Label" position="75,180" zPosition="1" size="570,50" font="Regular;21" halign="center" valign="center" transparent="1" />
-				<widget source="status" render="Label" position="75,450" zPosition="1" size="570,80" font="Regular;21" halign="center" valign="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget source="text" render="Label" position="75,80" zPosition="1" size="570,100" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
+				<widget source="config" render="Label" position="75,180" zPosition="1" size="570,50" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" transparent="1" />
+				<widget source="status" render="Label" position="75,450" zPosition="1" size="570,80" font="Regular;21" horizontalAlignment="center" verticalAlignment="center" foregroundColor="yellow" backgroundColor="#1f771f" transparent="1" />
 
 				<eLabel backgroundColor="red" position="0,0" size="720,1" zPosition="0" />
 				<eLabel backgroundColor="red" position="0,575" size="720,1" zPosition="0" />
@@ -270,10 +270,10 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 				<eLabel backgroundColor="green" position="220,477" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="yellow" position="360,477" size="140,3" zPosition="0" />
 				<eLabel backgroundColor="blue" position="500,477" size="140,3" zPosition="0" />
-				<widget source="key_red" render="Label" position="80,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_green" render="Label" position="220,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_yellow" render="Label" position="360,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
-				<widget source="key_blue" render="Label" position="500,455" zPosition="1" size="140,22" font="Regular;18" halign="center" valign="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_red" render="Label" position="80,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_green" render="Label" position="220,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_yellow" render="Label" position="360,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
+				<widget source="key_blue" render="Label" position="500,455" zPosition="1" size="140,22" font="Regular;18" horizontalAlignment="center" verticalAlignment="center" backgroundColor="#1f771f" transparent="1" />
 
 			</screen>"""
 
@@ -312,10 +312,10 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 			self.list.append((_("Move Up/Down"), config.osd.dst_top, _("Use the Left/Right buttons on your remote to move the user interface up/down")))
 			self.list.append((_("Height"), config.osd.dst_height, _("Use the Left/Right buttons on your remote to adjust the size of the user interface. Left button decreases the size, Right increases the size.")))
 		if SystemInfo["CanChangeOsdPositionAML"]:
-			self.list.append(getConfigListEntry(_("Left"), config.osd.dst_left, _("Use the Left/Right buttons on your remote to move the user interface left")))
-			self.list.append(getConfigListEntry(_("Right"), config.osd.dst_width, _("Use the Left/Right buttons on your remote to move the user interface right")))
-			self.list.append(getConfigListEntry(_("Top"), config.osd.dst_top, _("Use the Left/Right buttons on your remote to move the user interface top")))
-			self.list.append(getConfigListEntry(_("Bottom"), config.osd.dst_height, _("Use the Left/Right buttons on your remote to move the user interface bottom")))
+			self.list.append((_("Left"), config.osd.dst_left, _("Use the Left/Right buttons on your remote to move the user interface left")))
+			self.list.append((_("Right"), config.osd.dst_width, _("Use the Left/Right buttons on your remote to move the user interface right")))
+			self.list.append((_("Top"), config.osd.dst_top, _("Use the Left/Right buttons on your remote to move the user interface top")))
+			self.list.append((_("Bottom"), config.osd.dst_height, _("Use the Left/Right buttons on your remote to move the user interface bottom")))
 		self["config"].list = self.list
 		self["config"].l.setList(self.list)
 
@@ -367,11 +367,48 @@ class UserInterfacePositioner2(Screen, ConfigListScreen):
 			config.osd.dst_left.setValue(0)
 			config.osd.dst_top.setValue(0)
 		elif SystemInfo["CanChangeOsdPositionAML"]:
-			limits = [int(x) for x in iAVSwitch.getWindowsAxis().split()]
-			config.osd.dst_left.setValue(limits[0])
-			config.osd.dst_top.setValue(limits[1])
-			config.osd.dst_width.setValue(limits[2])
-			config.osd.dst_height.setValue(limits[3])
+			amlmode = list(modes.values())[0]
+			oldamlmode = self.getAMLMode()
+			f = open("/sys/class/display/mode", "w")
+			f.write(amlmode)
+			f.close()
+			print("[AVSwitch] Amlogic setting videomode to mode: %s" % amlmode)
+			f = open("/etc/u-boot.scr.d/000_hdmimode.scr", "w")
+			f.write("setenv hdmimode %s" % amlmode)
+			f.close()
+			f = open("/etc/u-boot.scr.d/000_outputmode.scr", "w")
+			f.write("setenv outputmode %s" % amlmode)
+			f.close()
+			os.system("update-autoexec")
+			f = open("/sys/class/ppmgr/ppscaler", "w")
+			f.write("1")
+			f.close()
+			f = open("/sys/class/ppmgr/ppscaler", "w")
+			f.write("0")
+			f.close()
+			f = open("/sys/class/video/axis", "w")
+			f.write(axis[mode])
+			f.close()
+			f = open("/sys/class/graphics/fb0/stride", "r")
+			stride = f.read().strip()
+			f.close()
+			limits = [int(x) for x in axis[mode].split()]
+			config.osd.dst_left = ConfigSelectionNumber(default=limits[0], stepwidth=1, min=limits[0] - 255, max=limits[0] + 255, wraparound=False)
+			config.osd.dst_top = ConfigSelectionNumber(default=limits[1], stepwidth=1, min=limits[1] - 255, max=limits[1] + 255, wraparound=False)
+			config.osd.dst_width = ConfigSelectionNumber(default=limits[2], stepwidth=1, min=limits[2] - 255, max=limits[2] + 255, wraparound=False)
+			config.osd.dst_height = ConfigSelectionNumber(default=limits[3], stepwidth=1, min=limits[3] - 255, max=limits[3] + 255, wraparound=False)
+
+			if oldamlmode != amlmode:
+			        config.osd.dst_width.setValue(limits[0])
+			        config.osd.dst_height.setValue(limits[1])
+			        config.osd.dst_left.setValue(limits[2])
+			        config.osd.dst_top.setValue(limits[3])
+			        config.osd.dst_left.save()
+			        config.osd.dst_width.save()
+			        config.osd.dst_top.save()
+			        config.osd.dst_height.save()
+			print("[AVSwitch] Framebuffer mode:%s  stride:%s axis:%s" % (getDesktop(0).size().width(), stride, axis[mode]))
+			return
 		self["config"].l.setList(self.list)
 
 	def setPreviewPosition(self):
@@ -512,11 +549,48 @@ class UserInterfacePositioner(Screen, ConfigListScreen):
 			config.osd.dst_left.setValue(0)
 			config.osd.dst_top.setValue(0)
 		elif SystemInfo["CanChangeOsdPositionAML"]:
-			limits = iAVSwitch.getWindowsAxis().split()
-			config.osd.dst_left.setValue(limits[0])
-			config.osd.dst_top.setValue(limits[1])
-			config.osd.dst_width.setValue(limits[2])
-			config.osd.dst_height.setValue(limits[3])
+			amlmode = list(modes.values())[0]
+			oldamlmode = self.getAMLMode()
+			f = open("/sys/class/display/mode", "w")
+			f.write(amlmode)
+			f.close()
+			print("[AVSwitch] Amlogic setting videomode to mode: %s" % amlmode)
+			f = open("/etc/u-boot.scr.d/000_hdmimode.scr", "w")
+			f.write("setenv hdmimode %s" % amlmode)
+			f.close()
+			f = open("/etc/u-boot.scr.d/000_outputmode.scr", "w")
+			f.write("setenv outputmode %s" % amlmode)
+			f.close()
+			os.system("update-autoexec")
+			f = open("/sys/class/ppmgr/ppscaler", "w")
+			f.write("1")
+			f.close()
+			f = open("/sys/class/ppmgr/ppscaler", "w")
+			f.write("0")
+			f.close()
+			f = open("/sys/class/video/axis", "w")
+			f.write(axis[mode])
+			f.close()
+			f = open("/sys/class/graphics/fb0/stride", "r")
+			stride = f.read().strip()
+			f.close()
+			limits = [int(x) for x in axis[mode].split()]
+			config.osd.dst_left = ConfigSelectionNumber(default=limits[0], stepwidth=1, min=limits[0] - 255, max=limits[0] + 255, wraparound=False)
+			config.osd.dst_top = ConfigSelectionNumber(default=limits[1], stepwidth=1, min=limits[1] - 255, max=limits[1] + 255, wraparound=False)
+			config.osd.dst_width = ConfigSelectionNumber(default=limits[2], stepwidth=1, min=limits[2] - 255, max=limits[2] + 255, wraparound=False)
+			config.osd.dst_height = ConfigSelectionNumber(default=limits[3], stepwidth=1, min=limits[3] - 255, max=limits[3] + 255, wraparound=False)
+
+			if oldamlmode != amlmode:
+			        config.osd.dst_width.setValue(limits[0])
+			        config.osd.dst_height.setValue(limits[1])
+			        config.osd.dst_left.setValue(limits[2])
+			        config.osd.dst_top.setValue(limits[3])
+			        config.osd.dst_left.save()
+			        config.osd.dst_width.save()
+			        config.osd.dst_top.save()
+			        config.osd.dst_height.save()
+			print("[AVSwitch] Framebuffer mode:%s  stride:%s axis:%s" % (getDesktop(0).size().width(), stride, axis[mode]))
+			return
 		self["config"].l.setList(self.list)
 
 	def setPreviewPosition(self):

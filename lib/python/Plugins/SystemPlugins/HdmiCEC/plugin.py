@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Screens.Screen import Screen
 from Components.ConfigList import ConfigListScreen
 from Components.config import config
@@ -79,7 +80,6 @@ class HdmiCECSetupScreen(ConfigListScreen, Screen):
 		for x in self["config"].list:
 			x[1].save()
 		self.close()
-
 
 	def keyOk(self):
 		currentry = self["config"].getCurrent()

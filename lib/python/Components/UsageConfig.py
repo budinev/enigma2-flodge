@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Components.Harddisk import harddiskmanager
 from Components.Console import Console
 from Components.config import ConfigSubsection, ConfigYesNo, config, ConfigSelection, ConfigText, ConfigNumber, ConfigSet, ConfigLocations, ConfigSelectionNumber, ConfigClock, ConfigSlider, ConfigEnableDisable, ConfigSubDict, ConfigDictionarySet, ConfigInteger, ConfigIP, ConfigPassword, NoSave, ConfigBoolean
@@ -9,7 +10,7 @@ from Components.NimManager import nimmanager
 from Components.Renderer.FrontpanelLed import ledPatterns, PATTERN_ON, PATTERN_OFF, PATTERN_BLINK
 from Components.ServiceList import refreshServiceList
 from Components.SystemInfo import SystemInfo
-from Components.AVSwitch import iAVSwitch
+from os import makedirs
 from os.path import exists, isfile, join as pathjoin, normpath
 import os, time, locale, skin
 from boxbranding import getDisplayType
@@ -74,11 +75,6 @@ def InitUsageConfig():
 	config.usage.crypto_icon_mode.addNotifier(refreshServiceList)
 	config.usage.record_indicator_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename")), ("3", _("Red colored"))])
 	config.usage.record_indicator_mode.addNotifier(refreshServiceList)
-
-	config.usage.virtualkeyBoard_style = ConfigSelection(default="new", choices=[
-		("new", _("New style")),
-		("e2", _("Enigma2 default"))
-	])
 
 	choicelist = [("-1", _("Disable"))]
 	for i in range(0, 1300, 100):
@@ -259,12 +255,12 @@ def InitUsageConfig():
 
 	config.usage.poweroff_enabled = ConfigYesNo(default=False)
 	config.usage.poweroff_force = ConfigYesNo(default=False)
-	config.usage.poweroff_nextday = ConfigClock(default = ((6 * 60 + 0) * 60))
+	config.usage.poweroff_nextday = ConfigClock(default=((6 * 60 + 0) * 60))
 	config.usage.poweroff_day = ConfigSubDict()
 	config.usage.poweroff_time = ConfigSubDict()
 	for i in range(7):
 		config.usage.poweroff_day[i] = ConfigEnableDisable(default=False)
-		config.usage.poweroff_time[i] = ConfigClock(default = ((1 * 60 + 0) * 60))
+		config.usage.poweroff_time[i] = ConfigClock(default=((1 * 60 + 0) * 60))
 
 	choicelist = [("0", _("Do nothing"))]
 	for i in range(3600, 21601, 3600):
@@ -823,6 +819,7 @@ def InitUsageConfig():
 		f = open(SystemInfo["WakeOnLAN"], "r")
 		status = f.read().strip()
 		f.close()
+
 		def wakeOnLANChanged(configElement):
 			if status in ("enable", "disable"):
 				open(SystemInfo["WakeOnLAN"], "w").write(configElement.value and "enable" or "disable")
@@ -932,17 +929,12 @@ def InitUsageConfig():
 	config.epg.cacheloadtimer = ConfigSelectionNumber(default = 24, stepwidth = 1, min = 1, max = 24, wraparound = True)
 	config.epg.cachesavetimer = ConfigSelectionNumber(default = 24, stepwidth = 1, min = 1, max = 24, wraparound = True)
 
-	if HardwareInfo().get_device_name() in ("one", "two"):
-		limits = [int(x) for x in iAVSwitch.getWindowsAxis().split()]
-		config.osd.dst_left = ConfigSelectionNumber(default=limits[0], stepwidth=1, min=limits[0] - 255, max=limits[0] + 255, wraparound=False)
-		config.osd.dst_top = ConfigSelectionNumber(default=limits[1], stepwidth=1, min=limits[1] - 255, max=limits[1] + 255, wraparound=False)
-		config.osd.dst_width = ConfigSelectionNumber(default=limits[2], stepwidth=1, min=limits[2] - 255, max=limits[2] + 255, wraparound=False)
-		config.osd.dst_height = ConfigSelectionNumber(default=limits[3], stepwidth=1, min=limits[3] - 255, max=limits[3] + 255, wraparound=False)
-	else:
-		config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
-		config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
-		config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
-		config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
+# storm - previous code were placed in VideoHardware to where its belong
+
+	config.osd.dst_left = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=720, wraparound=False)
+	config.osd.dst_width = ConfigSelectionNumber(default=720, stepwidth=1, min=0, max=720, wraparound=False)
+	config.osd.dst_top = ConfigSelectionNumber(default=0, stepwidth=1, min=0, max=576, wraparound=False)
+	config.osd.dst_height = ConfigSelectionNumber(default=576, stepwidth=1, min=0, max=576, wraparound=False)
 
 	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
 	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
@@ -1014,46 +1006,73 @@ def InitUsageConfig():
 	config.usage.keytrans = ConfigText(default=keytranslation)
 	config.usage.alternative_imagefeed = ConfigText(default="", fixed_size=False)
 
-	config.crash = ConfigSubsection()
-	#// handle python crashes
+	# This is already in StartEniga.py.
+	# config.crash = ConfigSubsection()
+
+	# Handle python crashes.
 	config.crash.bsodpython = ConfigYesNo(default=True)
 	config.crash.bsodpython_ready = NoSave(ConfigYesNo(default=False))
-	choicelist = [("0", _("never")), ("1", "1"), ("2", "2"), ("3", "3"), ("4", "4"), ("5", "5"), ("6", "6"), ("7", "7"), ("8", "8"), ("9", "9"), ("10", "10")]
-	config.crash.bsodhide = ConfigSelection(default="0", choices=choicelist)
-	config.crash.bsodmax = ConfigSelection(default="3", choices=choicelist)
-	#//
+	choiceList = [("0", _("Never"))] + [(str(x), str(x)) for x in range(1, 11)]
+	config.crash.bsodhide = ConfigSelection(default="0", choices=choiceList)
+	config.crash.bsodmax = ConfigSelection(default="3", choices=choiceList)
 
 	config.crash.enabledebug = ConfigYesNo(default=False)
 	config.crash.debugloglimit = ConfigSelectionNumber(min=1, max=10, stepwidth=1, default=4, wraparound=True)
 	config.crash.daysloglimit = ConfigSelectionNumber(min=1, max=30, stepwidth=1, default=8, wraparound=True)
-	config.crash.sizeloglimit = ConfigSelectionNumber(min=1, max=20, stepwidth=1, default=10, wraparound=True)
+	config.crash.sizeloglimit = ConfigSelectionNumber(min=1, max=250, stepwidth=1, default=10, wraparound=True)
 	config.crash.lastfulljobtrashtime = ConfigInteger(default=-1)
 
-	debugPath = [('/home/root/logs/', '/home/root/')]
-	for p in harddiskmanager.getMountedPartitions():
-		if exists(p.mountpoint):
-			d = normpath(p.mountpoint)
-			if p.mountpoint != '/':
-				debugPath.append((p.mountpoint + '/logs/', d))
-	config.crash.debugPath = ConfigSelection(default="/home/root/logs/", choices=debugPath)
-	if not exists("/home"):
-		os.mkdir("/home", 0o755)
-	if not exists("/home/root"):
-		os.mkdir("/home/root", 0o755)
+	# The config.crash.debugTimeFormat item is used to set ENIGMA_DEBUG_TIME environmental variable on enigma2 start from enigma2.sh.
+	config.crash.debugTimeFormat = ConfigSelection(default="2", choices=[
+		("0", _("None")),
+		("1", _("Boot time")),
+		("2", _("Local time")),
+		("3", _("Boot time and local time")),
+		("6", _("Local date/time")),
+		("7", _("Boot time and local date/time"))
+	])
+	config.crash.debugTimeFormat.save_forced = True
 
-	def updatedebugPath(configElement):
-		if not exists(config.crash.debugPath.value):
-			try:
-				os.mkdir(config.crash.debugPath.value, 0o755)
-			except:
-				print("Failed to create log path: %s" % config.crash.debugPath.value)
-	config.crash.debugPath.addNotifier(updatedebugPath, immediate_feedback=False)
+	config.crash.gstdebug = ConfigYesNo(default=False)
+	config.crash.gstdebugcategory = ConfigSelection(default="*", choices=[
+		("*", _("All")),
+		("*audio*", _("Audio")),
+		("*video*", _("Video"))
+	])
+	config.crash.gstdebuglevel = ConfigSelection(default="INFO", choices=[
+		"none",
+		"ERROR",
+		"WARNING",
+		"FIXME",
+		"INFO",
+		"DEBUG",
+		"LOG",
+		"TRACE",
+		"MEMDUMP"
+	])
+	config.crash.gstdot = ConfigYesNo(default=False)
+
+	config.crash.coredump = ConfigYesNo(default=False)
+
+	def updateDebugPath(configElement):
+		debugPath = config.crash.debugPath.value
+		try:
+			makedirs(debugPath, 0o755, exist_ok=True)
+		except OSError as err:
+			print("[UsageConfig] Error %d: Unable to create log directory '%s'!  (%s)" % (err.errno, debugPath, err.strerror))
+
+	choiceList = [("/home/root/logs/", "/home/root/")]
+	for partition in harddiskmanager.getMountedPartitions():
+		if exists(partition.mountpoint) and partition.mountpoint != "/":
+			choiceList.append((pathjoin(partition.mountpoint, "logs", ""), normpath(partition.mountpoint)))
+	config.crash.debugPath = ConfigSelection(default="/home/root/logs/", choices=choiceList)
+	config.crash.debugPath.addNotifier(updateDebugPath, immediate_feedback=False)
 
 	crashlogheader = _("We are really sorry. Your receiver encountered "
-					 "a software problem, and needs to be restarted.\n"
-					 "Please send the logfile %senigma2_crash_xxxxxx.log to https://github.com/fairbird/enigma2.\n"
-					 "Your receiver restarts in 10 seconds!\n"
-					 "Component: enigma2") % config.crash.debugPath.value
+		"a software problem, and needs to be restarted.\n"
+		"Please send the logfile %senigma2_crash_xxxxxx.log to www.opena.tv.\n"
+		"Your receiver restarts in 10 seconds!\n"
+		"Component: enigma2") % config.crash.debugPath.value
 	config.crash.debug_text = ConfigText(default=crashlogheader, fixed_size=False)
 	config.crash.skin_error_crash = ConfigYesNo(default=True)
 
@@ -1393,7 +1412,7 @@ def InitUsageConfig():
 		config.autolanguage.subtitle_autoselect3.setChoices([x for x in subtitle_language_choices if x[0] and x[0] not in getselectedsublanguages((1, 2, 4)) or not x[0] and not config.autolanguage.subtitle_autoselect4.value])
 		config.autolanguage.subtitle_autoselect4.setChoices([x for x in subtitle_language_choices if x[0] and x[0] not in getselectedsublanguages((1, 2, 3)) or not x[0]])
 		choicelist = [('0', _("None"))]
-		for y in range(1, 15 if config.autolanguage.subtitle_autoselect4.value else (7 if config.autolanguage.subtitle_autoselect3.value else(4 if config.autolanguage.subtitle_autoselect2.value else (2 if config.autolanguage.subtitle_autoselect1.value else 0)))):
+		for y in range(1, 15 if config.autolanguage.subtitle_autoselect4.value else (7 if config.autolanguage.subtitle_autoselect3.value else (4 if config.autolanguage.subtitle_autoselect2.value else (2 if config.autolanguage.subtitle_autoselect1.value else 0)))):
 			choicelist.append((str(y), ", ".join([eval("config.autolanguage.subtitle_autoselect%x.getText()" % x) for x in (y & 1, y & 2, y & 4 and 3, y & 8 and 4) if x])))
 		if config.autolanguage.subtitle_autoselect3.value:
 			choicelist.append((str(y + 1), "All"))
@@ -1449,23 +1468,7 @@ def InitUsageConfig():
 	config.logmanager.additionalinfo = NoSave(ConfigText(default=""))
 	config.logmanager.sentfiles = ConfigLocations(default='')
 
-	config.ntp = ConfigSubsection()
-
-	def timesyncChanged(configElement):
-		if configElement.value == "dvb" or not GetIPsFromNetworkInterfaces():
-			eDVBLocalTimeHandler.getInstance().setUseDVBTime(True)
-			eEPGCache.getInstance().timeUpdated()
-		else:
-			eDVBLocalTimeHandler.getInstance().setUseDVBTime(False)
-			eEPGCache.getInstance().timeUpdated()
-	config.ntp.timesync = ConfigSelection(default="ntp", choices=[
-		("auto", _("Auto")),
-		("dvb", _("Transponder time")),
-		("ntp", _("Internet time"))
-	])
-	config.ntp.timesync.addNotifier(timesyncChanged)
-	config.ntp.sntpserver = ConfigText("pool.ntp.org", fixed_size=False)
-	config.ntp.rdateserver = ConfigText("time.nist.gov", fixed_size=False)
+	config.misc.useNTPminutes = ConfigSelection(default="30", choices=[("30", _("%d Minutes") % 30), ("60", _("%d Hour") % 1), ("1440", _("%d Hours") % 24)])
 
 def updateChoices(sel, choices):
 	if choices:
@@ -1519,6 +1522,7 @@ def showrotorpositionChoicesUpdate(update=False):
 	else:
 		config.misc.showrotorposition.setChoices(choiceslist, "no")
 	SystemInfo["isRotorTuner"] = count > 0
+
 
 def preferredTunerChoicesUpdate(update=False):
 	dvbs_nims = [("-2", _("disabled"))]
@@ -1597,10 +1601,12 @@ def preferredTunerChoicesUpdate(update=False):
 	SystemInfo["DVB-C_priority_tuner_available"] = len(dvbc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbt_nims, atsc_nims))
 	SystemInfo["ATSC_priority_tuner_available"] = len(atsc_nims) > 3 and any(len(i) > 2 for i in (dvbs_nims, dvbc_nims, dvbt_nims))
 
+
 def dropEPGNewLines(text):
 	if config.epg.replace_newlines.value != "no":
 		text = text.replace('\x0a', replaceEPGSeparator(config.epg.replace_newlines.value))
 	return text
+
 
 def replaceEPGSeparator(code):
 	return {"newline": "\n", "2newlines": "\n\n", "space": " ", "dash": " - ", "dot": " . ", "asterisk": " * ", "hashtag": " # ", "nothing": ""}.get(code)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from enigma import eDVBResourceManager, eDVBFrontendParametersSatellite, eDVBFrontendParametersTerrestrial, eTimer
 
 from Screens.ScanSetup import ScanSetup, buildTerTransponder
@@ -493,7 +494,7 @@ class Satfinder(ScanSetup):
 	def keyGoScan(self):
 		self.frontend = None
 		if self.raw_channel:
-			del(self.raw_channel)
+			del (self.raw_channel)
 		tlist = []
 		if self.DVB_type.value == "DVB-S":
 			self.addSatTransponder(tlist,

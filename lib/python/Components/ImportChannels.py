@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 import shutil
@@ -47,7 +48,7 @@ class ImportChannels:
 				sleep(5)
 				return self.getUrl(url, timeout)
 			print("[Import Channels] URLError ", e)
-			raise(e)
+			raise (e)
 		return result
 
 	def getTerrestrialUrl(self):
@@ -84,6 +85,7 @@ class ImportChannels:
 	"""
 	Enumerate all the files that make up the bouquet system, either local or on a remote machine
 	"""
+
 	def ImportGetFilelist(self, remote=False, radio=False, *files):
 		result = []
 		for file in files:
@@ -105,7 +107,7 @@ class ImportChannels:
 			except Exception as e:
 				# for the moment just log and ignore
 				print("[Import Channels] %s" % str(e))
-				continue;
+				continue
 
 			# check the contents for more bouquet files
 			for line in content:
@@ -172,7 +174,7 @@ class ImportChannels:
 
 		if "channels" in self.remote_fallback_import:
 			print("[Import Channels] enumerate remote files")
-			files = self.ImportGetFilelist(True, 'bouquets.tv', 'bouquets.radio');
+			files = self.ImportGetFilelist(True, 'bouquets.tv', 'bouquets.radio')
 
 			print("[Import Channels] fetch remote files")
 			for file in files:
@@ -183,7 +185,7 @@ class ImportChannels:
 					print("[Import Channels] Exception: %s" % str(e))
 
 			print("[Import Channels] enumerate local files")
-			files = self.ImportGetFilelist(False, 'bouquets.tv', 'bouquets.radio');
+			files = self.ImportGetFilelist(False, 'bouquets.tv', 'bouquets.radio')
 
 			print("[Import Channels] Removing old local files...")
 			for file in files:

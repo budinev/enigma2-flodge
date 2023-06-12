@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # fake-enigma
 
 
@@ -275,6 +276,9 @@ class eDBoxLCD:
 
 	def setLCDContrast(self, value):
 		print("[enigma] eDBoxLCD set contrast to %d" % value)
+
+	def setLED(self, value):
+		print("[enigma] eDBoxLCD set led button to %d" % value)
 
 	def setInverted(self, value):
 		print("[enigma] eDBoxLCD set inverted to %d" % value)

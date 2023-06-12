@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from Components.GUIComponent import GUIComponent
+
 
 class GUIAddon(GUIComponent):
 	def __init__(self):

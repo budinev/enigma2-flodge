@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import struct
 import RecordTimer
@@ -12,7 +13,7 @@ from Components.ImportChannels import ImportChannels
 from Components.SystemInfo import SystemInfo
 from Components.Sources.StreamService import StreamServiceList
 from Components.Task import job_manager
-from Tools.Directories import mediafilesInUse
+from Tools.Directories import mediaFilesInUse
 from Tools.Notifications import AddNotification
 from time import time, localtime
 from GlobalActions import globalActionMap
@@ -197,7 +198,7 @@ class StandbyScreen(Screen):
 							duration += 24 * 3600
 						self.standbyTimeoutTimer.startLongTimer(duration)
 						return
-		if self.session.screen["TunerInfo"].tuner_use_mask or mediafilesInUse(self.session):
+		if self.session.screen["TunerInfo"].tuner_use_mask or mediaFilesInUse(self.session):
 			self.standbyTimeoutTimer.startLongTimer(600)
 		else:
 			RecordTimer.RecordTimerEntry.TryQuitMainloop()
@@ -235,7 +236,7 @@ class Standby(StandbyScreen):
 class StandbySummary(Screen):
 	skin = """
 	<screen position="0,0" size="132,64">
-		<widget source="global.CurrentTime" render="Label" position="0,0" size="132,64" font="Regular;40" halign="center">
+		<widget source="global.CurrentTime" render="Label" position="0,0" size="132,64" font="Regular;40" horizontalAlignment="center">
 			<convert type="ClockToText" />
 		</widget>
 		<widget source="session.RecordState" render="FixedLabel" text=" " position="0,0" size="132,64" zPosition="1" >
@@ -248,8 +249,8 @@ class StandbySummary(Screen):
 class QuitMainloopScreen(Screen):
 	def __init__(self, session, retvalue=QUIT_SHUTDOWN):
 		self.skin = """<screen name="QuitMainloopScreen" position="fill" flags="wfNoBorder">
-				<ePixmap pixmap="icons/input_info.png" position="c-27,c-60" size="53,53" alphatest="on" />
-				<widget name="text" position="center,c+5" size="720,100" font="Regular;22" halign="center" />
+				<ePixmap pixmap="icons/input_info.png" position="c-27,c-60" size="53,53" alphaTest="on" />
+				<widget name="text" position="center,c+5" size="720,100" font="Regular;22" horizontalAlignment="center" />
 			</screen>"""
 		Screen.__init__(self, session)
 		from Components.Label import Label
@@ -286,9 +287,9 @@ def getReasons(session, retvalue=QUIT_SHUTDOWN):
 			reasons.append((ngettext("%d job is running in the background!", "%d jobs are running in the background!", jobs) % jobs))
 	if checkTimeshiftRunning():
 		reasons.append(_("You seem to be in timeshift!"))
-	if eStreamServer.getInstance().getConnectedClients() or StreamServiceList:
+	if [stream for stream in eStreamServer.getInstance().getConnectedClients() if stream[0] != '127.0.0.1'] or StreamServiceList:
 		reasons.append(_("Client is streaming from this box!"))
-	if not reasons and mediafilesInUse(session) and retvalue in (QUIT_SHUTDOWN, QUIT_REBOOT, QUIT_UPGRADE_FP, QUIT_UPGRADE_PROGRAM):
+	if not reasons and mediaFilesInUse(session) and retvalue in (QUIT_SHUTDOWN, QUIT_REBOOT, QUIT_UPGRADE_FP, QUIT_UPGRADE_PROGRAM):
 		reasons.append(_("A file from media is in use!"))
 	return "\n".join(reasons)
 
@@ -379,6 +380,7 @@ class TryQuitMainloop(MessageBox):
 	def __onHide(self):
 		global inTryQuitMainloop
 		inTryQuitMainloop = False
+
 
 class SwitchToAndroid(Screen):
 	def __init__(self, session):

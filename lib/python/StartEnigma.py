@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import os
 from time import time
@@ -17,6 +18,14 @@ from Components.config import config, configfile, ConfigText, ConfigYesNo, Confi
 
 from traceback import print_exc
 
+# These entries should be moved back to UsageConfig.py when it is safe to bring UsageConfig init to this location in StartEnigma.py.
+#
+config.crash = ConfigSubsection()
+config.crash.debugScreens = ConfigYesNo(default=False)
+config.crash.debugKeyboards = ConfigYesNo(default=False)
+config.crash.debugRemoteControls = ConfigYesNo(default=False)
+config.crash.debugDVBScan = ConfigYesNo(default=False)
+
 # config.plugins needs to be defined before InputDevice < HelpMenu < MessageBox < InfoBar.
 config.plugins = ConfigSubsection()
 config.plugins.remotecontroltype = ConfigSubsection()
@@ -31,6 +40,11 @@ config.misc.plugin_style = ConfigSelection(default="normallstyle", choices=[
 	("newstyle4", _("New Style 4")),
 	("newstyle5", _("New Style 5")),
 	("newstyle6", _("New Style 6"))])
+
+# New VirtualkeyBoard Style
+config.misc.virtualkeyBoardstyle = ConfigSelection(default="new", choices=[
+	("new", _("New style")),
+	("e2", _("Enigma2 default"))])
 
 profile("SimpleSummary")
 from Screens import InfoBar
@@ -75,7 +89,11 @@ config.misc.prev_wakeup_time = ConfigInteger(default=0)
 config.misc.prev_wakeup_time_type = ConfigInteger(default=0)
 # 0 = RecordTimer, 1 = ZapTimer, 2 = Plugins, 3 = WakeupTimer
 config.misc.epgcache_filename = ConfigText(default="/media/hdd/epg.dat", fixed_size=False)
-
+config.misc.SyncTimeUsing = ConfigSelection(default="0", choices=[
+	("0", _("Transponder Time")),
+	("1", _("NTP"))
+])
+config.misc.NTPserver = ConfigText(default="pool.ntp.org", fixed_size=False)
 
 def setEPGCachePath(configElement):
 	if os.path.isdir(configElement.value) or os.path.islink(configElement.value):
@@ -488,7 +506,7 @@ def runScreenTest():
 
 	screensToRun.append((100, InfoBar.InfoBar))
 
-#	screensToRun.sort(key=lambda x: x[0])
+	screensToRun.sort(key=lambda x: x[0])
 
 	enigma.ePythonConfigQuery.setQueryFunc(configfile.getResolvedKey)
 
@@ -531,14 +549,13 @@ def runScreenTest():
 	from Screens.SleepTimerEdit import isNextWakeupTime
 	#get currentTime
 	nowTime = time()
-	wakeupList = [
+	wakeupList = sorted([
 		x for x in ((session.nav.RecordTimer.getNextRecordingTime(), 0),
 					(session.nav.RecordTimer.getNextZapTime(isWakeup=True), 1),
 					(plugins.getNextWakeupTime(), 2),
 					(isNextWakeupTime(), 3))
 		if x[0] != -1
-	]
-	wakeupList.sort()
+	])
 	if wakeupList:
 		from time import strftime
 		startTime = wakeupList[0]
@@ -546,8 +563,8 @@ def runScreenTest():
 			wptime = nowTime + 30  # so switch back on in 30 seconds
 		else:
 			wptime = startTime[0] - 240
-		print("[StartEnigma] Set wakeup time to", strftime("%Y/%m/%d %H:%M", localtime(wptime)))
-		if not config.ntp.timesync.value == "dvb":
+		if config.misc.SyncTimeUsing.value != "0":
+			print("[StartEnigma] DVB time sync disabled, so set RTC now to current Linux time!  (%s)" % strftime("%Y/%m/%d %H:%M", localtime(nowTime)))
 			setRTCtime(nowTime)
 		setFPWakeuptime(wptime)
 		config.misc.prev_wakeup_time.value = int(startTime[0])
@@ -570,9 +587,9 @@ def runScreenTest():
 	return 0
 
 
-profile("Init:skin")
-import skin
-skin.loadSkinData(enigma.getDesktop(0))
+profile("Skin")
+from skin import InitSkins
+InitSkins()
 
 profile("InputDevice")
 import Components.InputDevice
@@ -611,6 +628,10 @@ profile("keymapparser")
 import keymapparser
 keymapparser.readKeymap(config.usage.keymap.value)
 keymapparser.readKeymap(config.usage.keytrans.value)
+
+profile("Init:NTPSync")
+from Components.NetworkTime import ntpSyncPoller
+ntpSyncPoller.startTimer()
 
 profile("Network")
 import Components.Network
