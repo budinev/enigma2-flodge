@@ -4,7 +4,7 @@
 #include <lib/gui/ewidgetdesktop.h>
 
 ePixmap::ePixmap(eWidget *parent)
-	:eWidget(parent), m_alphatest(0), m_scale(0), m_have_border_color(false), m_border_width(0)
+	: eWidget(parent), m_alphatest(0), m_scale(0), m_have_border_color(false), m_border_width(0)
 {
 }
 
@@ -103,6 +103,7 @@ int ePixmap::event(int event, void *data, void *data2)
 		//		eWidget::event(event, data, data2);
 
 		gPainter &painter = *(gPainter *)data2;
+		int cornerRadius = getCornerRadius();
 		if (m_pixmap)
 		{
 			int flags = 0;
@@ -112,8 +113,12 @@ int ePixmap::event(int event, void *data, void *data2)
 				flags = gPainter::BT_ALPHABLEND;
 
 			flags |= m_scale;
+			painter.setRadius(cornerRadius, getCornerRadiusEdges());
 			painter.blit(m_pixmap, eRect(ePoint(0, 0), s), eRect(), flags);
 		}
+
+		if(cornerRadius)
+			return 0; // border not suppored for rounded edges
 
 		if (m_have_border_color)
 			painter.setForegroundColor(m_border_color);
@@ -125,7 +130,6 @@ int ePixmap::event(int event, void *data, void *data2)
 			painter.fill(eRect(m_border_width, s.height() - m_border_width, s.width() - m_border_width, m_border_width));
 			painter.fill(eRect(s.width() - m_border_width, m_border_width, m_border_width, s.height() - m_border_width));
 		}
-
 		return 0;
 	}
 	case evtChangedPixmap:

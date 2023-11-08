@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-10-16 21:21+0200\n"
 "Last-Translator: Luis A. Martínez <luis.a.martinez@gmail.com>\n"
 "Language-Team: LAMS\n"
@@ -1638,6 +1638,10 @@ msgstr "CANLE %s"
 msgid "CI (Common Interface) Setup"
 msgstr "Axustes da CI (Interface Común)"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "Retardo DVB CI"
+
 #
 msgid "CI assignment"
 msgstr "Asignación de CI"
@@ -2510,12 +2514,11 @@ msgstr "Conectar"
 msgid "Connect to a wireless network"
 msgstr "Conectar a unha rede sen fíos"
 
-#
-msgid "Connected"
-msgstr "Conectado"
-
 msgid "Connected satellites"
 msgstr "Satélites conectados"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 #
 msgid "Connected to"
@@ -3376,7 +3379,7 @@ msgstr[1] "Feito - %d Paquetes (%s) instalados, actualizados ou eliminados"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -12712,6 +12715,10 @@ msgstr "saír do menú de configuración do adaptador de rede"
 msgid "experimental film/video"
 msgstr "película/vídeo experimental"
 
+#, fuzzy
+msgid "extra high"
+msgstr "extra ancho"
+
 msgid "extra wide"
 msgstr "extra ancho"
 
@@ -12809,6 +12816,9 @@ msgstr "altura"
 #
 msgid "help..."
 msgstr "axuda…"
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

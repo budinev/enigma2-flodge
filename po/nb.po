@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2023-01-01 16:49+0100\n"
 "Last-Translator: GeirJ <dummy@dummy.com>\n"
 "Language-Team: GeirJ\n"
@@ -1614,6 +1614,10 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI (Common Interface) oppsett"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "DVB CI forsinkelse"
+
 #
 msgid "CI assignment"
 msgstr "CI tildeling"
@@ -2475,12 +2479,11 @@ msgstr "Koble til"
 msgid "Connect to a wireless network"
 msgstr "Koble til et trådløst nettverk"
 
-#
-msgid "Connected"
-msgstr "Koblet til"
-
 msgid "Connected satellites"
 msgstr "Tilkoblede satellitter"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 #
 msgid "Connected to"
@@ -3330,7 +3333,7 @@ msgstr[1] "Ferdig - Installert, oppdatert eller slettet %d pakker (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -12589,6 +12592,10 @@ msgstr "avslutt nettverksmeny"
 msgid "experimental film/video"
 msgstr "eksperimentell film/video"
 
+#, fuzzy
+msgid "extra high"
+msgstr "ekstra wide"
+
 msgid "extra wide"
 msgstr "ekstra wide"
 
@@ -12685,6 +12692,9 @@ msgstr "høyde"
 #
 msgid "help..."
 msgstr "hjelp..."
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

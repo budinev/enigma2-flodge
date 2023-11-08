@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-05-24 17:48+0300\n"
 "Last-Translator: Dimitrij <Dima-73@inbox.lv>\n"
 "Language-Team: openPLi Dimitrij\n"
@@ -345,6 +345,7 @@ msgstr "%s KSymb/s"
 msgid "%s MHz"
 msgstr "%s MHz"
 
+#, python-format
 msgid "%s connected successfully."
 msgstr "%s успешно подключено."
 
@@ -1474,6 +1475,9 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "Настройка CI (Common Interface) модулей"
 
+msgid "CI Boot Delay"
+msgstr "Задержка запуска CI"
+
 msgid "CI assignment"
 msgstr "Присвоение CI"
 
@@ -2265,11 +2269,11 @@ msgstr "Подключить"
 msgid "Connect to a wireless network"
 msgstr "Подключение к беспроводной сети"
 
-msgid "Connected"
-msgstr "Подключено"
-
 msgid "Connected satellites"
 msgstr "Подключенные спутники"
+
+msgid "Connected through another tuner"
+msgstr "Подключение через другой тюнер"
 
 msgid "Connected to"
 msgstr "Подключено к"
@@ -2493,7 +2497,7 @@ msgid "DVB Subtitles PID & lang"
 msgstr "DVB субтитры PID & язык"
 
 msgid "DVB driver version: "
-msgstr "Версия DVB драйверов: "
+msgstr "Дата DVB драйверов: "
 
 msgid "DVB subtitle black transparency"
 msgstr "Прозрачность черных DVB субтитров"
@@ -3025,9 +3029,10 @@ msgstr[2] "Выполнено - Установлено, обновлено ил�
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
-msgstr "Успешно загружено\n"
+msgstr ""
+"Успешно загружено\n"
 "%s"
 
 msgid "Download plugins"
@@ -8768,7 +8773,7 @@ msgid "Stopped"
 msgstr "Остановлено"
 
 msgid "Storage device not available or not initialized."
-msgstr ""
+msgstr "Устройство хранения недоступно или не инициализировано."
 
 msgid "Store at index"
 msgstr "Сохранить номер"
@@ -11381,6 +11386,9 @@ msgstr "выход из меню настроек сетевого адапте�
 msgid "experimental film/video"
 msgstr "экспериментальный фильм/видео"
 
+msgid "extra high"
+msgstr "экстра широкий"
+
 msgid "extra wide"
 msgstr "экстра широкий"
 
@@ -11464,6 +11472,9 @@ msgstr "высота"
 
 msgid "help..."
 msgstr "помощь..."
+
+msgid "high"
+msgstr "широкий"
 
 msgid "horizontal"
 msgstr "горизонтальная"

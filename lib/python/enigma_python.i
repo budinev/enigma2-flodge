@@ -42,6 +42,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/base/eerror.h>
 #include <lib/base/message.h>
 #include <lib/base/e2avahi.h>
+#include <lib/base/internetcheck.h>
 #include <lib/driver/rc.h>
 #include <lib/driver/rcinput_swig.h>
 #include <lib/service/event.h>
@@ -61,6 +62,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/gui/einputstring.h>
 #include <lib/gui/einputnumber.h>
 #include <lib/gui/epixmap.h>
+#include <lib/gui/erectangle.h>
 #include <lib/gui/ebutton.h>
 #include <lib/gui/ewindow.h>
 #include <lib/gui/ewidgetdesktop.h>
@@ -78,7 +80,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/gui/elistboxcontent.h>
 #include <lib/gui/esubtitle.h>
 #include <lib/service/listboxservice.h>
-#include <lib/nav/pcore.h>
+#include <lib/nav/core.h>
 #include <lib/actions/action.h>
 #include <lib/gdi/gfont.h>
 #include <lib/gdi/epng.h>
@@ -101,6 +103,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/components/file_eraser.h>
 #include <lib/components/tuxtxtapp.h>
 #include <lib/driver/avswitch.h>
+#include <lib/driver/avcontrol.h>
 #include <lib/driver/hdmi_cec.h>
 #include <lib/driver/rfmod.h>
 #include <lib/driver/misc_options.h>
@@ -113,6 +116,7 @@ is usually caused by not marking PSignals as immutable.
 #include <lib/python/python_helpers.h>
 #include <lib/gdi/picload.h>
 #include <lib/dvb/fcc.h>
+#include <lib/gdi/accel.h>
 %}
 
 %feature("ref")   iObject "$this->AddRef(); /* eDebug(\"AddRef (%s:%d)!\", __FILE__, __LINE__); */ "
@@ -167,6 +171,7 @@ typedef long time_t;
 %include <lib/service/servicepeer.h>
 
 // TODO: embed these...
+%immutable eInternetCheck::callback;
 %immutable ePicLoad::PictureData;
 %immutable eButton::selected;
 %immutable eInput::changed;
@@ -182,7 +187,7 @@ typedef long time_t;
 %immutable eDVBCI_UI::ciStateChanged;
 %immutable eSocket_UI::socketStateChanged;
 %immutable eDVBResourceManager::frontendUseMaskChanged;
-%immutable eAVSwitch::vcr_sb_notifier;
+%immutable eAVControl::vcr_sb_notifier;
 %immutable eHdmiCEC::messageReceived;
 %immutable eHdmiCEC::addressChanged;
 %immutable ePythonMessagePump::recv_msg;
@@ -198,6 +203,7 @@ typedef long time_t;
 %immutable iDVBChannel::receivedTsidOnid;
 %immutable eDVBSatelliteEquipmentControl::slotRotorSatPosChanged;
 %include <lib/base/message.h>
+%include <lib/base/internetcheck.h>
 %include <lib/driver/rc.h>
 %include <lib/driver/rcinput_swig.h>
 %include <lib/gdi/fb.h>
@@ -213,6 +219,7 @@ typedef long time_t;
 %include <lib/gui/einputstring.h>
 %include <lib/gui/einputnumber.h>
 %include <lib/gui/epixmap.h>
+%include <lib/gui/erectangle.h>
 %include <lib/gui/ecanvas.h>
 %include <lib/gui/ebutton.h>
 %include <lib/gui/ewindow.h>
@@ -228,7 +235,7 @@ typedef long time_t;
 %include <lib/gui/evideo.h>
 %include <lib/gui/esubtitle.h>
 %include <lib/service/listboxservice.h>
-%include <lib/nav/pcore.h>
+%include <lib/nav/core.h>
 %include <lib/actions/action.h>
 %include <lib/gdi/gfont.h>
 %include <lib/gdi/epng.h>
@@ -248,6 +255,7 @@ typedef long time_t;
 %include <lib/components/file_eraser.h>
 %include <lib/components/tuxtxtapp.h>
 %include <lib/driver/avswitch.h>
+%include <lib/driver/avcontrol.h>
 %include <lib/driver/hdmi_cec.h>
 %include <lib/driver/rfmod.h>
 %include <lib/driver/misc_options.h>
@@ -262,6 +270,8 @@ typedef long time_t;
 %include <lib/gdi/picload.h>
 %include <lib/dvb/fcc.h>
 %include <lib/dvb/streamserver.h>
+%include <lib/gdi/accel.h>
+
 /**************  eptr  **************/
 
 /**************  signals  **************/
@@ -448,6 +458,14 @@ PyObject *getFontFaces()
 }
 %}
 
+void setACCELDebug(int);
+%{
+void setACCELDebug(int enable)
+{
+	gAccel::getInstance()->setAccelDebug(enable);
+}
+%}
+
 /************** temp *****************/
 
 	/* need a better place for this, i agree. */
@@ -464,6 +482,7 @@ extern const char *getBoxType();
 extern void dump_malloc_stats(void);
 extern void pauseInit(void);
 extern void resumeInit(void);
+extern int checkInternetAccess(const char* host, int timeout = 3);
 %}
 
 extern void addFont(const char *filename, const char *alias, int scale_factor, int is_replacement, int renderflags = 0);
@@ -478,6 +497,7 @@ extern const char *getBoxType();
 extern void dump_malloc_stats(void);
 extern void pauseInit(void);
 extern void resumeInit(void);
+extern int checkInternetAccess(const char* host, int timeout = 3);
 
 %include <lib/python/python_console.i>
 %include <lib/python/python_base.i>

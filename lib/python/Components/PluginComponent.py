@@ -17,7 +17,7 @@ class PluginComponent:
 		self.pluginList = []
 		self.installedPluginList = []
 		self.setPluginPrefix("Plugins.")
-		self.resetWarnings()
+		self.pluginWarnings = []
 
 	def setPluginPrefix(self, prefix):
 		self.prefix = prefix
@@ -36,7 +36,8 @@ class PluginComponent:
 		if plugin in self.pluginList:
 			self.pluginList.remove(plugin)
 		for x in plugin.where:
-			self.plugins[x].remove(plugin)
+			if x in self.plugins:
+				self.plugins[x].remove(plugin)
 			if x == PluginDescriptor.WHERE_AUTOSTART:
 				plugin(reason=1)
 
@@ -61,7 +62,7 @@ class PluginComponent:
 							# supress errors due to missing plugin.py* files (badly removed plugin)
 							for fn in ('plugin.py', 'plugin.pyc'):
 								if os.path.exists(os.path.join(path, fn)):
-									self.warnings.append((c + "/" + pluginname, str(exc)))
+									self.pluginWarnings.append((c + "/" + pluginname, str(exc)))
 									from traceback import print_exc
 									print_exc()
 									break
@@ -89,7 +90,7 @@ class PluginComponent:
 								keymapparser.readKeymap(keymap)
 							except Exception as exc:
 								print("keymap for plugin %s/%s failed to load: " % (c, pluginname), exc)
-								self.warnings.append((c + "/" + pluginname, str(exc)))
+								self.pluginWarnings.append((c + "/" + pluginname, str(exc)))
 
 		# build a diff between the old list of plugins and the new one
 		# internally, the "fnc" argument will be compared with __eq__
@@ -139,6 +140,16 @@ class PluginComponent:
 			res += p(menuid)
 		return res
 
+	def getDescriptionForMenuEntryID(self, menuid, entryid ):
+		for p in self.getPlugins(PluginDescriptor.WHERE_MENU):
+			if p(menuid) and isinstance(p(menuid), (list,tuple)):
+				if p(menuid)[0][2] == entryid:
+					return p.description
+		return None
+
+	def getPluginsForMenuWithDescription(self, menuid):
+		return [(x[0], p.description) for p in self.getPlugins(PluginDescriptor.WHERE_MENU) if (x := p(menuid))]
+
 	def clearPluginList(self):
 		self.pluginList = []
 		self.plugins = {}
@@ -151,8 +162,13 @@ class PluginComponent:
 		for p in self.pluginList[:]:
 			self.removePlugin(p)
 
+	def getWarnings(self):
+		return self.pluginWarnings
+
+	warnings = property(getWarnings)
+	
 	def resetWarnings(self):
-		self.warnings = []
+		self.pluginWarnings = []
 
 	def getNextWakeupTime(self):
 		wakeup = -1
@@ -163,4 +179,5 @@ class PluginComponent:
 		return int(wakeup)
 
 
-plugins = PluginComponent()
+pluginComponent = PluginComponent()
+plugins = pluginComponent  # Retain the legacy name until all code is updated.

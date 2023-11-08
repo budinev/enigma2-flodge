@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-07-31 17:00+0800\n"
 "Last-Translator: 孤独之剑 <haotzyy1970@yahoo.com>\n"
 "Language-Team: 孤独之剑 <haotzyy1970@yahoo.com>\n"
@@ -1468,6 +1468,10 @@ msgstr "频道%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI 通用接口选择"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "DVB CI延迟"
+
 msgid "CI assignment"
 msgstr "CI选择"
 
@@ -2267,11 +2271,11 @@ msgstr "连接"
 msgid "Connect to a wireless network"
 msgstr "连接无线网络"
 
-msgid "Connected"
-msgstr "已连接"
-
 msgid "Connected satellites"
 msgstr "已锁定卫星"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "连接到"
@@ -3028,7 +3032,7 @@ msgstr[1] "完成-已安装,更新或删除 %d 个程序包 (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11426,6 +11430,10 @@ msgstr "退出网卡设置菜单"
 msgid "experimental film/video"
 msgstr "实验电影/视频"
 
+#, fuzzy
+msgid "extra high"
+msgstr "超宽"
+
 msgid "extra wide"
 msgstr "超宽"
 
@@ -11510,6 +11518,9 @@ msgstr "高"
 
 msgid "help..."
 msgstr "帮助..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "水平"

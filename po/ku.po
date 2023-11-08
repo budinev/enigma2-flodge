@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2 Kurdish translation\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2013-04-22 04:29+0330\n"
 "Last-Translator: dimili21\n"
 "Language-Team: \n"
@@ -1489,6 +1489,9 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr ""
 
+msgid "CI Boot Delay"
+msgstr ""
+
 msgid "CI assignment"
 msgstr "CI assignment"
 
@@ -2289,11 +2292,10 @@ msgstr "Giréda"
 msgid "Connect to a wireless network"
 msgstr "Girédibi wireless network"
 
-#, fuzzy
-msgid "Connected"
-msgstr "connected"
-
 msgid "Connected satellites"
+msgstr ""
+
+msgid "Connected through another tuner"
 msgstr ""
 
 msgid "Connected to"
@@ -3070,7 +3072,7 @@ msgstr[1] "Done - Installed, updated or removed %d packages with %d errors"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11584,6 +11586,9 @@ msgstr "exit networkadapter setup menu"
 msgid "experimental film/video"
 msgstr "experimental film/video"
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -11670,6 +11675,9 @@ msgstr "height"
 
 msgid "help..."
 msgstr "help..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "horizontal"

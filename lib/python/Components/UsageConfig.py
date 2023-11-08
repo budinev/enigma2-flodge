@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Components.Harddisk import harddiskmanager
 from Components.Console import Console
-from Components.config import ConfigSubsection, ConfigYesNo, config, ConfigSelection, ConfigText, ConfigNumber, ConfigSet, ConfigLocations, ConfigSelectionNumber, ConfigClock, ConfigSlider, ConfigEnableDisable, ConfigSubDict, ConfigDictionarySet, ConfigInteger, ConfigIP, ConfigPassword, NoSave, ConfigBoolean
+from Components.config import ConfigSubsection, ConfigDirectory, ConfigYesNo, config, ConfigSelection, ConfigText, ConfigNumber, ConfigSet, ConfigLocations, ConfigSelectionNumber, ConfigClock, ConfigSlider, ConfigEnableDisable, ConfigSubDict, ConfigDictionarySet, ConfigInteger, ConfigIP, ConfigPassword, NoSave, ConfigBoolean
 from Tools.Directories import SCOPE_HDD, SCOPE_TIMESHIFT, defaultRecordingLocation, fileContains, resolveFilename, fileHas
 from enigma import setTunerTypePriorityOrder, setPreferredTuner, setSpinnerOnOff, setEnableTtCachingOnOff, eEnv, eDVBDB, Misc_Options, eBackgroundFileEraser, eServiceEvent, eDVBLocalTimeHandler, eEPGCache
 from Tools.HardwareInfo import HardwareInfo
@@ -18,7 +18,7 @@ from boxbranding import getDisplayType
 displaytype = getDisplayType()
 
 
-originalAudioTracks = "orj dos ory org esl qaa und mis mul ORY ORJ Audio_ORJ oth"
+originalAudioTracks = "orj dos ory org esl qaa qaf und mis mul ORY ORJ Audio_ORJ oth"
 visuallyImpairedCommentary = "NAR qad"
 
 
@@ -63,27 +63,78 @@ def InitUsageConfig():
 		refreshServiceList()
 	config.usage.alternative_number_mode.addNotifier(alternativeNumberModeChange)
 
-	config.usage.servicelist_twolines = ConfigSelection(default="0", choices=[("0", _("Single line mode")), ("1", _("Two lines")), ("2", _("Two lines and next event"))])
-	config.usage.servicelist_twolines.addNotifier(refreshServiceList)
-
 	config.usage.hide_number_markers = ConfigYesNo(default=True)
 	config.usage.hide_number_markers.addNotifier(refreshServiceList)
 
-	config.usage.servicetype_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
+	config.usage.servicetype_icon_mode = ConfigSelection(default="0", choices=[
+		("0", _("None")),
+		("1", _("Left from service name")),
+		("2", _("Right from service name"))
+	])
 	config.usage.servicetype_icon_mode.addNotifier(refreshServiceList)
-	config.usage.crypto_icon_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename"))])
+	config.usage.crypto_icon_mode = ConfigSelection(default="0", choices=[
+		("0", _("None")),
+		("1", _("Left from service name")),
+		("2", _("Right from service name"))
+	])
 	config.usage.crypto_icon_mode.addNotifier(refreshServiceList)
-	config.usage.record_indicator_mode = ConfigSelection(default="0", choices=[("0", _("None")), ("1", _("Left from servicename")), ("2", _("Right from servicename")), ("3", _("Red colored"))])
+	config.usage.record_indicator_mode = ConfigSelection(default="3", choices=[
+		("0", _("None")),
+		("1", _("Left from service name")),
+		("2", _("Right from service name")),
+		("3", _("Red colored"))
+	])
 	config.usage.record_indicator_mode.addNotifier(refreshServiceList)
 
-	choicelist = [("-1", _("Disable"))]
-	for i in range(0, 1300, 100):
-		choicelist.append((str(i), ngettext("%d pixel wide", "%d pixels wide", i) % i))
-	config.usage.servicelist_column = ConfigSelection(default="-1", choices=choicelist)
+	# Just merge note, config.usage.servicelist_column was already there.
+	config.usage.servicelist_column = ConfigSelection(default="-1", choices=[("-1", _("Disable"))
+	] + [(str(x), ngettext("%d Pixel wide", "%d Pixels wide", x) % x) for x in range(100, 1325, 25)])
 	config.usage.servicelist_column.addNotifier(refreshServiceList)
+	# Two lines options.
+	config.usage.servicelist_twolines = ConfigYesNo(default=False)
+	config.usage.servicelist_twolines.addNotifier(refreshServiceList)
+	config.usage.serviceitems_per_page_twolines = ConfigSelectionNumber(default=12, stepwidth=1, min=4, max=20, wraparound=True)
+	config.usage.servicelist_servicenumber_valign = ConfigSelection(default="0", choices=[
+		("0", _("Centered")),
+		("1", _("Upper line"))
+	])
+	config.usage.servicelist_servicenumber_valign.addNotifier(refreshServiceList)
+	config.usage.servicelist_eventprogress_valign = ConfigSelection(default="0", choices=[
+		("0", _("Centered")),
+		("1", _("Upper line"))
+	])
+	config.usage.servicelist_eventprogress_valign.addNotifier(refreshServiceList)
+	config.usage.servicelist_eventprogress_view_mode = ConfigSelection(default="0_barright", choices=[
+		# Single.
+		("0_no", _("No")),
+		("0_barleft", _("Progress bar left")),
+		("0_barright", _("Progress bar right")),
+		("0_percleft", _("Percentage left")),
+		("0_percright", _("Percentage right")),
+		("0_minsleft", _("Remaining minutes left")),
+		("0_minsright", _("Remaining minutes right")),
+		# Bar value.
+		("1_barpercleft", _("Progress bar/Percentage left")),
+		("1_barpercright", _("Progress bar/Percentage right")),
+		("1_barminsleft", _("Progress bar/Remaining minutes left")),
+		("1_barminsright", _("Progress bar/Remaining minutes right")),
+		# Value bar.
+		("2_percbarleft", _("Percentage/Progress bar left")),
+		("2_percbarright", _("Percentage/Progress bar right")),
+		("2_minsbarleft", _("Remaining minutes/Progress bar left")),
+		("2_minsbarright", _("Remaining minutes/Progress bar right"))
+	])
+	config.usage.servicelist_eventprogress_view_mode.addNotifier(refreshServiceList)
+	#
 
 	config.usage.service_icon_enable = ConfigYesNo(default=False)
 	config.usage.service_icon_enable.addNotifier(refreshServiceList)
+	config.usage.servicelist_picon_downsize = ConfigSelectionNumber(default=-2, stepwidth=1, min=-10, max=0, wraparound=True)
+	config.usage.servicelist_picon_ratio = ConfigSelection(default="167", choices=[
+		("167", _("XPicon, ZZZPicon")),
+		("235", _("ZZPicon")),
+		("250", _("ZPicon"))
+	])
 	config.usage.servicelist_cursor_behavior = ConfigSelection(default="keep", choices=[
 		("standard", _("Standard")),
 		("keep", _("Keep service")),
@@ -97,6 +148,16 @@ def InitUsageConfig():
 	config.usage.servicelist_number_of_services.addNotifier(refreshServiceList)
 
 	config.usage.multiepg_ask_bouquet = ConfigYesNo(default=False)
+
+	# ########  Workaround for VTI Skins   ##############
+	config.usage.picon_dir = ConfigDirectory(default="/usr/share/enigma2/picon")
+	config.usage.movielist_show_picon = ConfigYesNo(default=False)
+	config.usage.use_extended_pig = ConfigYesNo(default=False)
+	config.usage.use_extended_pig_channelselection = ConfigYesNo(default=False)
+	config.usage.servicelist_preview_mode = ConfigYesNo(default=False)
+	config.usage.numberzap_show_picon = ConfigYesNo(default=False)
+	config.usage.numberzap_show_servicename = ConfigYesNo(default=False)
+	# ####################################################
 
 	config.usage.quickzap_bouquet_change = ConfigYesNo(default=False)
 	config.usage.e1like_radio_mode = ConfigYesNo(default=True)
@@ -394,12 +455,22 @@ def InitUsageConfig():
 
 	config.misc.disable_background_scan = ConfigYesNo(default=False)
 	config.misc.use_ci_assignment = ConfigYesNo(default=False)
-	config.usage.show_event_progress_in_servicelist = ConfigSelection(default='barright', choices=[
-		('barleft', _("Progress bar left")),
-		('barright', _("Progress bar right")),
-		('percleft', _("Percentage left")),
-		('percright', _("Percentage right")),
-		('no', _("no"))])
+
+	config.usage.servicenum_fontsize = ConfigSelectionNumber(default=0, stepwidth=1, min=-10, max=10, wraparound=True)
+	config.usage.servicename_fontsize = ConfigSelectionNumber(default=0, stepwidth=1, min=-10, max=10, wraparound=True)
+	config.usage.serviceinfo_fontsize = ConfigSelectionNumber(default=0, stepwidth=1, min=-10, max=10, wraparound=True)
+	config.usage.progressinfo_fontsize = ConfigSelectionNumber(default=0, stepwidth=1, min=-10, max=10, wraparound=True)
+	config.usage.serviceitems_per_page = ConfigSelectionNumber(default=18, stepwidth=1, min=8, max=40, wraparound=True)
+
+	config.usage.show_event_progress_in_servicelist = ConfigSelection(default="barright", choices=[
+		("barleft", _("Progress bar left")),
+		("barright", _("Progress bar right")),
+		("percleft", _("Percentage left")),
+		("percright", _("Percentage right")),
+		("minsleft", _("Remaining minutes left")),
+		("minsright", _("Remaining minutes right")),
+		("no", _("No"))
+	])
 	config.usage.show_channel_numbers_in_servicelist = ConfigYesNo(default=True)
 	config.usage.show_event_progress_in_servicelist.addNotifier(refreshServiceList)
 	config.usage.show_channel_numbers_in_servicelist.addNotifier(refreshServiceList)
@@ -939,7 +1010,7 @@ def InitUsageConfig():
 	config.osd.alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
 	config.osd.alpha_teletext = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
 	config.osd.alpha_webbrowser = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
-	config.av.osd_alpha = NoSave(ConfigNumber(default=255))
+	config.av.osd_alpha = ConfigSelectionNumber(default=255, stepwidth=1, min=0, max=255, wraparound=False)
 	config.osd.threeDmode = ConfigSelection(default="auto", choices=[
 		("off", _("Off")),
 		("auto", _("Auto")),
@@ -983,6 +1054,8 @@ def InitUsageConfig():
 	config.epg.fulldescription_separator = ConfigSelection(default="2newlines", choices=choicelist)
 	choicelist = [("no", _("no")), ("nothing", _("omit")), ("space", _("space")), ("dot", ". "), ("dash", " - "), ("asterisk", " * "), ("hashtag", " # ")]
 	config.epg.replace_newlines = ConfigSelection(default="no", choices=choicelist)
+
+	config.misc.usegstplaybin3 = ConfigYesNo(default=False)
 
 	def correctInvalidEPGDataChange(configElement):
 		eServiceEvent.setUTF8CorrectMode(int(configElement.value))
@@ -1070,7 +1143,7 @@ def InitUsageConfig():
 
 	crashlogheader = _("We are really sorry. Your receiver encountered "
 		"a software problem, and needs to be restarted.\n"
-		"Please send the logfile %senigma2_crash_xxxxxx.log to www.opena.tv.\n"
+		"Please send the logfile %senigma2_crash_xxxxxx.log to https://github.com/fairbird/enigma2-dreambox.\n"
 		"Your receiver restarts in 10 seconds!\n"
 		"Component: enigma2") % config.crash.debugPath.value
 	config.crash.debug_text = ConfigText(default=crashlogheader, fixed_size=False)
@@ -1458,6 +1531,8 @@ def InitUsageConfig():
 
 	config.misc.softcam_setup = ConfigSubsection()
 	config.misc.softcam_setup.extension_menu = ConfigYesNo(default=True)
+	config.misc.softcam_streamrelay_url = ConfigIP(default=[127, 0, 0, 1], auto_jump=True)
+	config.misc.softcam_streamrelay_port = ConfigInteger(default=17999, limits=(0, 65535))
 
 	config.logmanager = ConfigSubsection()
 	config.logmanager.showinextensions = ConfigYesNo(default=False)

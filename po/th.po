@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.0.1-En-Th\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2010-04-08 18:13+0700\n"
 "Last-Translator: Tony - Thaidreambox\n"
 "Language-Team: Tony @ Thai Dreambox <tonyboyth@gmail.com>\n"
@@ -1505,6 +1505,9 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr ""
 
+msgid "CI Boot Delay"
+msgstr ""
+
 msgid "CI assignment"
 msgstr "CI assignment"
 
@@ -2322,11 +2325,10 @@ msgstr "เชื่อมต่อ"
 msgid "Connect to a wireless network"
 msgstr "เชื่อมต่อกับเครือข่ายไร้สาย"
 
-#, fuzzy
-msgid "Connected"
-msgstr "เชื่อมต่อแล้ว"
-
 msgid "Connected satellites"
+msgstr ""
+
+msgid "Connected through another tuner"
 msgstr ""
 
 msgid "Connected to"
@@ -3122,7 +3124,7 @@ msgstr[1] "เสร็จแล้ว - ติดตั้งปรับปร
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11788,6 +11790,9 @@ msgstr "ออกจากเมนูตั้งค่าระบบเคร
 msgid "experimental film/video"
 msgstr ""
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -11875,6 +11880,9 @@ msgstr ""
 
 msgid "help..."
 msgstr "ช่วยเหลือ..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "แนวนอน (H)"

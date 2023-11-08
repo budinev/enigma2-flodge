@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Openpli\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2019-04-03 06:49+0300\n"
 "Last-Translator: \n"
 "Language-Team: Raivo, Henkka, eesatfan, rimas, zeros\\n faas, sateks, valgekotkas, tigekala, rootsikunn\\n kain, i70, mustkass, pelmeen, Scott\\n <digi-tv.ee>\n"
@@ -1479,6 +1479,10 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI (Common Interface) määrangud"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "DVB CI viide"
+
 msgid "CI assignment"
 msgstr "CI määrangud"
 
@@ -2271,11 +2275,11 @@ msgstr "Ühenda"
 msgid "Connect to a wireless network"
 msgstr "Ühenda WiFi võrguga"
 
-msgid "Connected"
-msgstr "Ühendatud"
-
 msgid "Connected satellites"
 msgstr "Ühendatud satelliidid"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "Ühendatud"
@@ -3052,7 +3056,7 @@ msgstr[1] "Valmis - paigaldatud, täiendatud või eemaldatud %d paketti (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11584,6 +11588,10 @@ msgstr "välju võrgukaardi seadistusmenüüst"
 msgid "experimental film/video"
 msgstr "eksperimentaalne film/video"
 
+#, fuzzy
+msgid "extra high"
+msgstr "eriti lai"
+
 msgid "extra wide"
 msgstr "eriti lai"
 
@@ -11668,6 +11676,9 @@ msgstr "kõrgus"
 
 msgid "help..."
 msgstr "abi"
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "horisontaal"

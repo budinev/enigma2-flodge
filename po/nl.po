@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Frenske <voorzitter@openpli.org>\n"
 "Language-Team: PLiteam <translators@openpli.org>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.0.1\n"
+"X-Generator: Poedit 3.4\n"
 
 msgid ""
 "\n"
@@ -97,9 +97,8 @@ msgstr " (lager dan elke auto)"
 msgid " - Unicable/JESS LNBs not found"
 msgstr " - Unicable / Jess LNB niet gevonden"
 
-#, fuzzy
 msgid " - information"
-msgstr "Informatie"
+msgstr " - Zie het infoscherm"
 
 msgid " Warning: the selected tuner should not use SCR Unicable type for LNBs because each tuner need a own SCR number."
 msgstr "Waarschuwing: de geselecteerde tuner mag geen SCR Unicable type voor LNB's gebruiken, omdat elke tuner een eigen SCR-nummer nodig heeft."
@@ -322,9 +321,9 @@ msgstr ""
 msgid "%s %d.%d"
 msgstr "%s %d.%d"
 
-#, fuzzy, python-format
+#, python-format
 msgid "%s (files)"
-msgstr "%d bestand"
+msgstr "%s (bestanden)"
 
 #, python-format
 msgid "%s KSymb/s"
@@ -334,9 +333,9 @@ msgstr "%s KSymb/s"
 msgid "%s MHz"
 msgstr "%s MHz"
 
-#, fuzzy, python-format
+#, python-format
 msgid "%s connected successfully."
-msgstr "De pincode is gewijzigd."
+msgstr "%s met succes verbonden."
 
 #, python-format
 msgid "%s imported from fallback tuner"
@@ -354,7 +353,7 @@ msgstr[0] "%s nieuw pakket beschikbaar"
 msgstr[1] "%s nieuwe pakketten beschikbaar"
 
 msgid "'Minimum send interval' needs to be enabled to use this option."
-msgstr ""
+msgstr "De 'Minimum verzendinterval' moet ingeschakeld zijn om deze optie te gebruiken."
 
 msgid "(VU+ type)"
 msgstr "(VU+ type)"
@@ -369,9 +368,8 @@ msgstr "(ZAP)"
 msgid "(activated +%d min)"
 msgstr "(geactiveerd +%d min)"
 
-#, fuzzy
 msgid "(current)"
-msgstr "Huidige"
+msgstr "(huidige)"
 
 msgid "(empty)"
 msgstr "(leeg)"
@@ -699,7 +697,7 @@ msgid "Add bouquet to parental protection"
 msgstr "Voeg dit bouquet toe aan het kinderslot"
 
 msgid "Add directory to playlist"
-msgstr "Voeg de map aan de afspeellijst toe"
+msgstr "Voeg de map toe aan de afspeellijst"
 
 msgid "Add file to playlist"
 msgstr "Voeg het bestand toe aan de afspeellijst"
@@ -1064,6 +1062,9 @@ msgid ""
 "Attention - forced loading recovery image!\n"
 "Create an empty STARTUP_RECOVERY file at the root of your HDD/USB drive and hold the Power button for more than 12 seconds for reboot receiver!"
 msgstr ""
+"Let op!! Geforceerd laden van een herstel-image!\n"
+"\n"
+"Maak een leeg STARTUP_RECOVERY bestand aan in de root van je HDD of USB medium en houd de 'aan / uit knop' langer dan 12 seconden ingedrukt om de ontvanger te herstarten!"
 
 msgid "Attention, this is repeated timer!\n"
 msgstr "Let op, dit is een herhalende timer!\n"
@@ -1192,7 +1193,7 @@ msgid "Automatic scan"
 msgstr "Automatisch zoeken"
 
 msgid "Automatically power off box to deep standby mode."
-msgstr ""
+msgstr "Schakel de box automatisch uit naar diepe stand-by modus."
 
 msgid "Automatically put the TV in standby whenever the receiver goes into standby or deep standby."
 msgstr "Indien geactiveerd, dan wordt ook de TV in stand-by gezet zodra de ontvanger naar stand-by gaat."
@@ -1282,9 +1283,8 @@ msgstr "Barbados"
 msgid "Basic PID info"
 msgstr "Basis PID informatie"
 
-#, fuzzy
 msgid "Basic info"
-msgstr "Basis PID informatie"
+msgstr "Basis-informatie"
 
 msgid "Basque"
 msgstr "Baskisch"
@@ -1373,9 +1373,9 @@ msgstr "Groen"
 msgid "Boot to Android image"
 msgstr "Start op met Android"
 
-#, fuzzy, python-format
+#, python-format
 msgid "Boot to Recovery image - slot0 %s"
-msgstr "Start op met het recovery menu"
+msgstr "Herstart naar de Recovery-image - slot0 %s"
 
 msgid "Boot to Recovery menu"
 msgstr "Start op met het recovery menu"
@@ -1463,6 +1463,9 @@ msgstr "CH%s"
 
 msgid "CI (Common Interface) Setup"
 msgstr "Instellen CI (Common Interface)"
+
+msgid "CI Boot Delay"
+msgstr "CI opstart-vertraging"
 
 msgid "CI assignment"
 msgstr "CI toewijzing"
@@ -1582,9 +1585,8 @@ msgstr "Kan niet vaststellen"
 msgid "Cannot find any signal ..., aborting !"
 msgstr "Kan geen signaal vinden..., gestopt!"
 
-#, fuzzy
 msgid "Cannot find images - please try later or select an alternate image"
-msgstr "Kan geen images vinden - probeer het later nogmaals"
+msgstr "Geen images gevonden - probeer het later opnieuw of kies een alternatieve image"
 
 msgid "Cannot move files on a different disk or system to the trash can"
 msgstr "Kan geen bestanden van een andere schijf of systeem naar de prullenbak verplaatsen"
@@ -1750,7 +1752,7 @@ msgid "Choose bouquet"
 msgstr "Kies bouquet"
 
 msgid "Choose the option to correct invalid EPG data."
-msgstr ""
+msgstr "Selecteer de optie om de onjuiste EPG info te wijzigen."
 
 msgid "Choose whether AAC sound tracks should be transcoded."
 msgstr "Bepaal of geluid in AAC opmaak getranscodeerd moeten worden."
@@ -1838,7 +1840,7 @@ msgstr "Code rate LP"
 
 #, python-format
 msgid "Codec & lang%s"
-msgstr ""
+msgstr "Codec & Taal%s"
 
 msgid "Collection name"
 msgstr "DVD naam"
@@ -2430,11 +2432,11 @@ msgstr "Verbinden"
 msgid "Connect to a wireless network"
 msgstr "Verbind met een draadloos netwerk"
 
-msgid "Connected"
-msgstr "Verbonden"
-
 msgid "Connected satellites"
 msgstr "Verbonden satellieten"
+
+msgid "Connected through another tuner"
+msgstr "Verbonden via een andere tuner"
 
 msgid "Connected to"
 msgstr "Verbonden met"
@@ -2481,9 +2483,8 @@ msgstr "Kopieër"
 msgid "Copy to bouquets"
 msgstr "Kopieer naar bouquetten"
 
-#, fuzzy
 msgid "Correct invalid EPG data"
-msgstr "Sla de instellingen plus EPG data op"
+msgstr "Corrigeer de onjuiste EPG data"
 
 msgid "Costa Rica"
 msgstr "Costa Rica"
@@ -2586,9 +2587,8 @@ msgstr "Huidige transponder"
 msgid "Current value: "
 msgstr "Huidige waarde:"
 
-#, fuzzy
 msgid "Currently the commit log cannot be retrieved - please try later again."
-msgstr "Op dit moment kan het commitlog niet bereikt worden - probeer het later opnieuw"
+msgstr "Op dit moment kan het commit-log niet bereikt worden - probeer het later opnieuw."
 
 msgid "Custom skip time for '1'/'3' buttons"
 msgstr "Aangepaste skiptijd voor de '1'/'3'-toetsen"
@@ -2702,7 +2702,7 @@ msgid "Date/time input"
 msgstr "Tijd/Datum invoer"
 
 msgid "Debug"
-msgstr ""
+msgstr "Debug"
 
 msgid "Debug to file"
 msgstr "Debug naar bestand"
@@ -2721,7 +2721,7 @@ msgstr "Standaard kanalen scanner"
 
 #, python-format
 msgid "Default duration: %d mins"
-msgstr ""
+msgstr "Standaard tijdsduur: %d min."
 
 msgid "Default movie location"
 msgstr "Standaard opnamelocatie."
@@ -2811,7 +2811,7 @@ msgid "Delete"
 msgstr "Verwijderen"
 
 msgid "Delete Image"
-msgstr "Verwijderen de image"
+msgstr "Verwijder dit image"
 
 msgid "Delete all the text"
 msgstr "Verwijder alle tekst"
@@ -2823,7 +2823,7 @@ msgid "Delete failed!"
 msgstr "Verwijderen mislukt!"
 
 msgid "Delete file"
-msgstr "Verwijder bestand"
+msgstr "Verwijder het bestand"
 
 msgid "Delete image"
 msgstr "Image verwijderen"
@@ -3110,7 +3110,7 @@ msgid ""
 "Do you want to flash image\n"
 "%s"
 msgstr ""
-"Wilt u een image flashen?\n"
+"Wilt u deze image flashen?\n"
 "%s"
 
 msgid "Do you want to install Plugins?"
@@ -3201,9 +3201,11 @@ msgstr[1] "Gereed - %d pakketten geïnstalleerd, vervangen of verwijderd (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
+"De download is geslaagd\n"
+"%s"
 
 msgid "Download plugins"
 msgstr "Downloaden plugins"
@@ -3304,7 +3306,7 @@ msgid "Edit selection"
 msgstr "Wijzig de selectie"
 
 msgid "Edit settings"
-msgstr "Instellingen wijzigen"
+msgstr "Wijzig de instellingen"
 
 msgid "Edit the nameserver configuration of your receiver.\n"
 msgstr ""
@@ -3523,9 +3525,8 @@ msgstr "Voer pincode in"
 msgid "Enter URL"
 msgstr "Voer een URL in"
 
-#, fuzzy
 msgid "Enter an URL where alternative images could be listed for FlashImage. Enter text 'all' for automatic access of many images."
-msgstr "Hier kunt u een URL opgeven waar alternatieve images t.b.v. Flashimage te vinden zijn. "
+msgstr "Voer een URL in waar alternatieve afbeeldingen kunnen worden gevonden t.b.v. FlashImage. Voer de tekst 'all' in voor automatische toegang tot een aantal alternatieve images."
 
 msgid "Enter if you are in the east or west hemisphere."
 msgstr "Geef aan of je je in het oostelijk of westelijk halfrond bevindt."
@@ -3610,19 +3611,16 @@ msgstr ""
 msgid "Error stop stream!"
 msgstr "Fout stop de stream!"
 
-#, fuzzy
 msgid "Error when writing epg.dat on the fallback receiver"
-msgstr "Fout tijdens het wegschrijven van de epg.dat op de server"
+msgstr "Fout tijdens het wegschrijven van de epg.dat op de FallBack-server"
 
-#, fuzzy
 msgid "Error while moving epg.dat to its destination"
-msgstr "Fout tijdens het ophalen van de epg.dat van de server"
+msgstr "Fout tijdens het verplaatsen van de epg.dat naar zijn bestemming"
 
-#, fuzzy
 msgid "Error while retrieving epg.dat from the fallback receiver"
-msgstr "Fout tijdens het ophalen van de epg.dat van de server"
+msgstr "Fout tijdens het ophalen van de epg.dat vanaf de FallBack-server"
 
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "Error while retrieving fallback timer information\n"
 "%s"
@@ -3630,9 +3628,8 @@ msgstr ""
 "Fout tijdens het ophalen van de Fallback timer informatie\n"
 "%s"
 
-#, fuzzy
 msgid "Error while retrieving location of epg.dat on the fallback receiver"
-msgstr "Fout tijdens het ophalen van de locatie van de epg.dat op de server"
+msgstr "Fout tijdens het ophalen van de locatie van de epg.dat op de FallBack-server"
 
 #, python-format
 msgid ""
@@ -3750,9 +3747,8 @@ msgstr "Uitgebreide software"
 msgid "Extended Software Plugin"
 msgstr "Uitgebreide software plugin"
 
-#, fuzzy
 msgid "Extended info"
-msgstr "Uitgebreide PID informatie"
+msgstr "Uitgebreide informatie"
 
 msgid "Extended network setup plugin..."
 msgstr "Uitgebreide netwerkinstellingen plugin..."
@@ -3820,7 +3816,7 @@ msgid ""
 "connected to"
 msgstr ""
 "FBC automatisch doorlussen\n"
-"verbonden met"
+"Verbonden met"
 
 #, python-format
 msgid ""
@@ -3835,7 +3831,7 @@ msgid ""
 "inactive"
 msgstr ""
 "FBC automatisch doorlussen\n"
-"aktief"
+"Inactief"
 
 msgid "FCC enabled"
 msgstr "FCC geactiveerd"
@@ -3880,7 +3876,7 @@ msgid "Falkland Islands (Malvinas)"
 msgstr "Falkland eilanden (Malnivas)"
 
 msgid "Fallback API did not return a valid result."
-msgstr ""
+msgstr "De Fallback API gaf geen geldig resultaat."
 
 msgid "Fallback Timer"
 msgstr "Fallback timer"
@@ -4055,9 +4051,8 @@ msgstr "Formaat"
 msgid "Forward volume keys"
 msgstr "Indien geactiveerd, dan worden de volumetoetsen doorgestuurd."
 
-#, fuzzy
 msgid "Forwarded volume step size"
-msgstr "Indien geactiveerd, dan worden de volumetoetsen doorgestuurd."
+msgstr "De stappen waarmee het volume wordt verhoogd"
 
 msgid "Frame size in full view"
 msgstr "Framegrootte in vol beeld"
@@ -4395,9 +4390,8 @@ msgstr "Harde schijf"
 msgid "Harddisk Setup"
 msgstr "Instellen harde schijf"
 
-#, fuzzy
 msgid "Hardware Accelerated"
-msgstr "Hardware: "
+msgstr "Door hardware versneld"
 
 msgid "Hardware: "
 msgstr "Hardware: "
@@ -4430,7 +4424,7 @@ msgid "Hide parentel locked services"
 msgstr "Verberg de kanalen die achter het kinderslot zitten"
 
 msgid "Hide player"
-msgstr "Afspelen op de achtergrond"
+msgstr "Speel de muziek af op de achtergrond"
 
 msgid "Hide sub-menu"
 msgstr "Verberg het submenu"
@@ -4580,7 +4574,7 @@ msgid "If set to 'yes' the same commands will be sent to the TV for deep standby
 msgstr "Indien geactiveerd, dan zal een identiek signaal verstuurd worden by 'deep stand-by' als bij 'gewoon stand-by'."
 
 msgid "If set to 'yes', allows you to use timeshift with alternative audio plugins."
-msgstr ""
+msgstr "Indien geactiveerd, dan kun je timeshift gebruiken met alternatieve audioplug-ins."
 
 msgid "If the box is supposed to enter deep standby e.g. monday night at 1 AM, it actually is already tuesday. To enable this anyway, differing next day start time can be specified here."
 msgstr "Hiermee kan de start van een nieuwe dag verschoven worden naar een later tijdstip. Hiermee kan een periode na mindernacht nog gezien worden als de avond van de vorige dag."
@@ -4710,7 +4704,7 @@ msgid "Indonesian"
 msgstr "Indonesisch"
 
 msgid "Info"
-msgstr "Informatie"
+msgstr "Info"
 
 msgid "Info bar"
 msgstr "Informatiebalk"
@@ -4754,9 +4748,8 @@ msgstr "Formatteren"
 msgid "Initialize"
 msgstr "Initialiseer"
 
-#, fuzzy
 msgid "Initialize Multiboot"
-msgstr "Formatteren"
+msgstr "Activeer Multiboot"
 
 msgid "Initializing storage device..."
 msgstr "Opslagapparaat initialiseren"
@@ -4803,7 +4796,6 @@ msgstr "Installeert"
 msgid "Installing software..."
 msgstr "De software wordt geïnstalleerd..."
 
-#, fuzzy
 msgid "Instant record"
 msgstr "Directe opname"
 
@@ -4949,7 +4941,7 @@ msgid "Kernel version: "
 msgstr "Kernel versie: "
 
 msgid "Kexec MultiBoot Initialisation - will reboot after 10 seconds."
-msgstr ""
+msgstr "Kexec MultiBoot Initialisatie - herstart na 10 seconden."
 
 msgid ""
 "Kexec MultiBoot Initialisation in progress!\n"
@@ -4957,9 +4949,13 @@ msgid ""
 "Will reboot after restoring any eMMC slots.\n"
 "This can take from 1 -> 5 minutes per slot."
 msgstr ""
+"Kexec MultiBoot Initialisatie is bezig!\n"
+"\n"
+"Zal opnieuw opstarten na het restoren van eMMC-slots.\n"
+"Dit kan 1 -> 5 minuten per slot duren."
 
 msgid "Kexec MultiBoot Manager"
-msgstr ""
+msgstr "Kexec Multiboot Manager"
 
 msgid "Key Events"
 msgstr "Toetsaanslagen"
@@ -5143,7 +5139,7 @@ msgid "Load length of movies in movie list"
 msgstr "Toon lengte van opnames in opnamemenu"
 
 msgid "Load playlist"
-msgstr "Afspeellijst laden"
+msgstr "Laad de afspeellijst"
 
 msgid "Load unlinked userbouquets"
 msgstr "Niet gekoppelde gebruikersboeketten laden"
@@ -5753,9 +5749,8 @@ msgstr "Geen beschrijving beschikbaar."
 msgid "No displayable files on this medium found!"
 msgstr "Geen weer te geven bestanden op dit medium gevonden!"
 
-#, fuzzy
 msgid "No epg.dat file found on the fallback receiver"
-msgstr "Er is geen epg.dat bestand op de server gevonden"
+msgstr "Geen epg.dat bestand op de FallBack-server gevonden"
 
 msgid "No event info found, recording indefinitely."
 msgstr "Geen EPG gegevens gevonden. Opname voor onbepaalde tijd."
@@ -5867,7 +5862,7 @@ msgid "No, never"
 msgstr "Nee, nooit"
 
 msgid "No, only download"
-msgstr ""
+msgstr "Nee, enkel downloaden"
 
 msgid "None"
 msgstr "Geen"
@@ -5907,7 +5902,7 @@ msgid "Not associated"
 msgstr "Geen verband"
 
 msgid "Not defined"
-msgstr "Niet vestgelegd"
+msgstr "Niet vastgelegd"
 
 #, python-format
 msgid "Not enough disk space. Please free up some disk space and try again. (%(req)d MB required, %(avail)d MB available)"
@@ -6049,9 +6044,8 @@ msgstr "Kleur van de LED in deep stand-by mode"
 msgid "Operating LED status in standby mode"
 msgstr "Kleur van de LED in stand-by"
 
-#, fuzzy
 msgid "Operating LED status while running"
-msgstr "Kleur van de LED tijdens bedrijf"
+msgstr "LED status indien de box aan is"
 
 msgid "Opkg"
 msgstr "Opkg"
@@ -6062,12 +6056,11 @@ msgstr "Opties m.b.t. déactiveren timer"
 msgid "Orbital position"
 msgstr "Orbit positie"
 
-#, fuzzy
 msgid "Order by modes"
-msgstr "Terug op datum"
+msgstr "Sorteer door modus"
 
 msgid "Order by slots"
-msgstr ""
+msgstr "Indelen per slot"
 
 msgid "Ordinary"
 msgstr "Gewone"
@@ -6081,9 +6074,8 @@ msgstr "Origineel geluid"
 msgid "Other"
 msgstr "Anders"
 
-#, fuzzy
 msgid "Other Images"
-msgstr "Verwijderen de image"
+msgstr "Andere image"
 
 msgid "Other Subtitles & lang"
 msgstr "Andere Ondertitels & lang"
@@ -6189,11 +6181,10 @@ msgid "Parental control setup"
 msgstr "Kinderslotinstellingen"
 
 msgid "Partial"
-msgstr ""
+msgstr "Deels"
 
-#, fuzzy
 msgid "Partial EPG"
-msgstr "Multi EPG"
+msgstr "Gedeeltelijke EPG"
 
 msgid "Passthrough"
 msgstr "Passthrough"
@@ -6718,6 +6709,11 @@ msgid ""
 "unless you have eMMC slots to restore.\n"
 "Restoring eMMC slots can take from 1 -> 5 minutes per slot."
 msgstr ""
+"Druk op de groene toets om MultiBoot in te schakelen!\n"
+"\n"
+"Reboot zal binnen 10 seconden starten,\n"
+"tenzij je eMMC-slots hebt om te restoren.\n"
+"Het restoren van eMMC-slots kan 1 -> 5 minuten per slot duren."
 
 msgid "Press INFO on your remote control for additional information."
 msgstr "Druk INFO op uw afstandsbediening voor meer informatie."
@@ -6786,7 +6782,7 @@ msgid "Press or select button and then press 'OK' for attach next function or ed
 msgstr "Selecteer een toets met 'Ok' om nog een functie te koppelen of een eerdere aan te passen."
 
 msgid "Press yellow button to set CEC address again"
-msgstr "Druk de gele toets om het HDMI-CED adres in te stellen"
+msgstr "Druk de gele toets om het HDMI-CEC adres in te stellen"
 
 msgid "Press yellow to set this interface as default interface."
 msgstr "Druk op geel om deze interface als standaard in te stellen."
@@ -6948,6 +6944,8 @@ msgid ""
 "Really permanently delete MultiBoot files?\n"
 "%s"
 msgstr ""
+"Wilt u de Multiboot bestanden permanent verwijderen?\n"
+"%s"
 
 msgid "Really reboot now?"
 msgstr "Nu herstarten?"
@@ -7003,6 +7001,8 @@ msgid ""
 "Recording IPTV with ServiceApp player enabled, timer ended!\n"
 "Please recheck it!"
 msgstr ""
+"IPTV opname met ServiceApp speler geactiveerd, timer afgelopen!\n"
+"Controleer dit opnieuw!"
 
 msgid "Recording Setup"
 msgstr "Instellingen t.b.v. de opnames"
@@ -7013,9 +7013,8 @@ msgstr "Opnemen bezig"
 msgid "Recording paths"
 msgstr "Opnamelocaties"
 
-#, fuzzy
 msgid "Recording time has been set."
-msgstr "De slaaptimer is uitgeschakeld."
+msgstr "De lengte van de opname is ingesteld."
 
 msgid "Recording type"
 msgstr "Opnamesoort"
@@ -7071,9 +7070,8 @@ msgstr "Herlaad"
 msgid "Reload blacklists"
 msgstr "Herlaadt blacklist"
 
-#, fuzzy
 msgid "Reload services/bouquets list"
-msgstr "Deze zender toevoegen aan een bouquet"
+msgstr "Herlaad de zender/bouquetlijst"
 
 msgid "Reloading bouquets and services..."
 msgstr "Bouquetten en zenders opnieuw inladen"
@@ -7132,9 +7130,8 @@ msgstr "Map verwijderen"
 msgid "Remove entry"
 msgstr "Verwijder het huidige item"
 
-#, fuzzy
 msgid "Remove forever"
-msgstr "Verwijder het huidige item"
+msgstr "Verwijder permanent"
 
 msgid "Remove from parental protection"
 msgstr "Verwijder kinderslot"
@@ -7774,9 +7771,8 @@ msgstr "Toon de actie t.b.v. timer '%s'."
 msgid "Select all"
 msgstr "Markeer alles"
 
-#, fuzzy
 msgid "Select an image brand"
-msgstr "Kies de image"
+msgstr "Kies de maker van de image"
 
 msgid "Select audio track"
 msgstr "Kies audiospoor"
@@ -8534,7 +8530,7 @@ msgid "Signal OK, proceeding"
 msgstr "Signaal ok, doorgaan"
 
 msgid "Signal finder"
-msgstr "Signaal zoeker"
+msgstr "Signaalzoeker"
 
 msgid "Signal quality"
 msgstr "Signaalkwaliteit"
@@ -8607,7 +8603,7 @@ msgid "Skip internet connection check (disables automatic package installation)"
 msgstr "Sla deze over. (De automatische installatie van pakketten vervalt)"
 
 msgid "Skip jumping to live TV while timeshifting with plugins"
-msgstr ""
+msgstr "Schakelen naar live tv overslaan tijdens het timeshiften met plug-ins"
 
 msgid "Sleep timer"
 msgstr "Sleeptimer"
@@ -8879,9 +8875,8 @@ msgstr "Start een directe opname"
 msgid "Start offline decode"
 msgstr "Start achteraf decoderen"
 
-#, fuzzy
 msgid "Start recording current event"
-msgstr "Stand-by na de huidige actie"
+msgstr "Start een opname van het huidige programma"
 
 msgid "Start recording?"
 msgstr "Start opname?"
@@ -8905,7 +8900,7 @@ msgid "Start timeshift"
 msgstr "Start de timeshift"
 
 msgid "Start with list screen"
-msgstr "Start met een zichtbare lijst"
+msgstr "Start in lijstmode"
 
 msgid "Starting on"
 msgstr "Start op"
@@ -9019,7 +9014,7 @@ msgid "Stopped"
 msgstr "Gestopt"
 
 msgid "Storage device not available or not initialized."
-msgstr ""
+msgstr "De opslag is niet beschikbaar of niet geïnitialiseerd."
 
 msgid "Store at index"
 msgstr "Opslaan op index"
@@ -9172,7 +9167,6 @@ msgstr "Schakel het display in tijdens stand-by"
 msgid "Switch on the display during Suspend Mode"
 msgstr "Schakel het display in tijdens de deep stand-by"
 
-#, fuzzy
 msgid "Switch on the display during operation"
 msgstr "Schakel het display in tijdens normaal bedrijf"
 
@@ -9201,7 +9195,7 @@ msgid "Switch to next sub service"
 msgstr "Ga naar het volgende subkanaal"
 
 msgid "Switch to playlist"
-msgstr "Ga naar afspeellijst"
+msgstr "Ga naar de afspeellijst"
 
 msgid "Switch to previous bouquet"
 msgstr "Schakel naar het vorige bouquet"
@@ -9261,7 +9255,7 @@ msgstr "Tekst"
 msgid "TRANSLATOR_INFO"
 msgstr ""
 "Deze Nederlandse vertaling wordt u aangeboden door het OpenPLi team.\n"
-"De laatste aanpassing in deze vertaling is gedaan op 12 April 2022.\n"
+"De laatste aanpassingen in deze vertaling zijn gedaan op 6 Oktober 2023.\n"
 "Voor aanvullingen of opmerkingen stuurt u een mail naar translators@openpli.org."
 
 msgid "TS file is too large for ISO9660 level 1!"
@@ -9412,7 +9406,7 @@ msgstr ""
 "Installeer deze aub."
 
 msgid "The number of steps to change the volume on the device the keys are forwarded to."
-msgstr ""
+msgstr "Het aantal stappen waarmee het volume wijzigt op het apparaat waarnaar de toetsen worden doorgestuurd."
 
 msgid ""
 "The overscan wizard has been completed.\n"
@@ -9467,7 +9461,7 @@ msgid "The saved PIN was cleared."
 msgstr "De opgeslagen PIN is verwijderd."
 
 msgid "The services/bouquets list is reloaded!"
-msgstr ""
+msgstr "De zenderlijst / boeketten zijn herladen!"
 
 msgid "The sleep timer has been activated."
 msgstr "De slaaptimer is geactiveerd."
@@ -9807,7 +9801,7 @@ msgid "Time scale"
 msgstr "Tijdschaal"
 
 msgid "Time synchronization method"
-msgstr "Tijd synchronisatie"
+msgstr "Tijdsynchronisatie methode"
 
 msgid "Time zone"
 msgstr "Tijdzone"
@@ -10137,7 +10131,7 @@ msgid "Unable to backup settings as the AutoBackup plugin is missing, do you wan
 msgstr "Onmogelijk om de instellingen te backuppen a.g.v. het ontbreken van de AutoBackup plugin. Wilt u doorgaan?"
 
 msgid "Unable to complete - Kexec Multiboot files missing!"
-msgstr ""
+msgstr "Kan niet worden voltooid - Kexec Multiboot-bestanden ontbreken!"
 
 msgid "Unable to create the required directories on the media (e.g. USB stick or Harddisk) - Please verify media and try again!"
 msgstr "Niet mogelijk om de benodigde map(pen) op het medium (b.v. USB stick of harde schijf) aan te maken. Controleer het medium en probeer het nogmaals."
@@ -10166,9 +10160,8 @@ msgstr "Herstel de de-installatie"
 msgid "Unencrypted"
 msgstr "Ongecodeerd"
 
-#, fuzzy
 msgid "Unexpected error while retrieving fallback tuner's timer information"
-msgstr "Onverwachte fout tijdens het ophalen van de timerinformatie van de Fallback tuner"
+msgstr "Onverwachte fout bij het ophalen van de timer-informatie vanaf de FallBack-tuner"
 
 msgid "UnhandledKey"
 msgstr "Ongeldige toets"
@@ -10577,7 +10570,7 @@ msgid "View, install and remove available or installed packages."
 msgstr "Bekijk, installeer en verwijder beschikbare of geïnstalleerde pakketten."
 
 msgid "Virgin Islands (British)"
-msgstr "Virgin eilanden (Engels)"
+msgstr "Maagdeneilanden (Engels)"
 
 msgid "Virgin Islands (U.S.)"
 msgstr "Virgin eilanden"
@@ -10604,7 +10597,7 @@ msgid "Volume down"
 msgstr "Volume -"
 
 msgid "Volume keys on the receiver remote will control the TV volume."
-msgstr "Indien geactiveerd, dan wordt het volume van de TV door de AB van de ontvanger bediend."
+msgstr "Indien geactiveerd, dan wordt het volume van de TV door de afstandsbediening van de ontvanger bepaald."
 
 msgid "Volume up"
 msgstr "Volume +"
@@ -11708,6 +11701,9 @@ msgstr "verlaat het netwerkadapter instellingenmenu"
 msgid "experimental film/video"
 msgstr "Experimentele films/Video"
 
+msgid "extra high"
+msgstr "extra hoog"
+
 msgid "extra wide"
 msgstr "Extra breed"
 
@@ -11791,6 +11787,9 @@ msgstr "hoogte"
 
 msgid "help..."
 msgstr "Help..."
+
+msgid "high"
+msgstr "hoog"
 
 msgid "horizontal"
 msgstr "horizontaal"
@@ -12318,7 +12317,7 @@ msgstr "top"
 
 #, python-format
 msgid "total conflict (%d)"
-msgstr ""
+msgstr "totaal conflict (%d)"
 
 msgid "tourism/travel"
 msgstr "Toerisme/Reizen"

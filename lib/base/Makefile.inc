@@ -16,8 +16,10 @@ base_libenigma_base_a_SOURCES = \
 	base/freesatv2.cpp \
 	base/huffman.cpp \
 	base/init.cpp \
+	base/internetcheck.cpp \
 	base/ioprio.cpp \
 	base/message.cpp \
+	base/modelinformation.cpp \
 	base/nconfig.cpp \
 	base/rawfile.cpp \
 	base/smartptr.cpp \
@@ -50,8 +52,10 @@ baseinclude_HEADERS = \
 	base/itssource.h \
 	base/init.h \
 	base/init_num.h \
+	base/internetcheck.h \
 	base/ioprio.h \
 	base/message.h \
+	base/modelinformation.h \
 	base/nconfig.h \
 	base/object.h \
 	base/rawfile.h \

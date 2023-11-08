@@ -13,7 +13,6 @@ from Components.Console import Console
 from Components.SystemInfo import BoxInfo, SystemInfo
 from Tools.Directories import SCOPE_KEYMAPS, SCOPE_SKIN, fileReadLine, fileWriteLine, fileReadLines, fileReadXML, resolveFilename, pathExists
 
-from six import ensure_str
 MODULE_NAME = __name__.split(".")[-1]
 
 REMOTE_MODEL = 0
@@ -37,7 +36,7 @@ class InputDevices:
 				self.fd = osopen("/dev/input/%s" % device, O_RDWR | O_NONBLOCK)
 				self.name = ioctl(self.fd, self.EVIOCGNAME(256), _buffer)
 				self.name = self.name[:self.name.find(b"\0")]
-				self.name = ensure_str(self.name)
+				self.name = str(self.name)
 				if str(self.name).find("Keyboard") != -1:
 					self.name = 'keyboard'
 				osclose(self.fd)
@@ -160,7 +159,7 @@ class Keyboard:
 				keyboardMapFile = None
 				keyboardMapName = None
 				for line in lines:
-					key, val = [x.strip() for x in line.split("=", 1)]
+					key, val = (x.strip() for x in line.split("=", 1))
 					if key == "kmap":
 						keyboardMapFile = val
 					elif key == "name":
@@ -191,7 +190,7 @@ class Keyboard:
 
 	def getDefaultKeyboardMap(self):
 		# This is a code proposal to make the default keymap respond
-		# to the currently defined locale.  OpenATV initialises the
+		# to the currently defined locale.  OpenPLI initialises the
 		# keymap based on hardware manufacturer.  Making the
 		# selection based on language locale makes more sense.  There
 		# are other code changes coming that will allow this to happen.

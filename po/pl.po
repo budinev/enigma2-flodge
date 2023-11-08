@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2023-04-08 10:03+0200\n"
 "Last-Translator: rafix44 <rafix44@o2.pl>\n"
 "Language-Team: \n"
@@ -1492,6 +1492,10 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr "Ustawienia modułu dostępu CI"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "Opóźnienie DVB CI"
+
 msgid "CI assignment"
 msgstr "Zadania CI"
 
@@ -2295,11 +2299,11 @@ msgstr "Połącz"
 msgid "Connect to a wireless network"
 msgstr "Połącz z siecią bezprzewodową"
 
-msgid "Connected"
-msgstr "Połączony"
-
 msgid "Connected satellites"
 msgstr "Podłączone satelity"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "Podłączony do"
@@ -3061,7 +3065,7 @@ msgstr[2] "Gotowe - zainstalowano, zaktualizowano lub usunięto %d pakietów (%s
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11507,6 +11511,10 @@ msgstr "Zamknij menu konfiguracji adaptera sieciowego"
 msgid "experimental film/video"
 msgstr "Film eksperymentalny"
 
+#, fuzzy
+msgid "extra high"
+msgstr "Bardzo szeroka"
+
 msgid "extra wide"
 msgstr "Bardzo szeroka"
 
@@ -11590,6 +11598,9 @@ msgstr "Wysokość"
 
 msgid "help..."
 msgstr "Pomoc..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "Pozioma (H)"

@@ -1,27 +1,47 @@
 # -*- coding: utf-8 -*-
 from Components.config import config, ConfigSlider, ConfigSelection, ConfigYesNo, ConfigEnableDisable, ConfigOnOff, ConfigSubsection, ConfigBoolean, ConfigSelectionNumber, ConfigNothing, NoSave
-from enigma import eAVSwitch, eDVBVolumecontrol, getDesktop
+from enigma import eAVControl, eDVBVolumecontrol, getDesktop
 from Components.SystemInfo import SystemInfo
+from Tools.Directories import fileWriteLine
 from Tools.HardwareInfo import HardwareInfo
 from os.path import isfile
 import os
 
 model = HardwareInfo().get_device_model()
 
+MODULE_NAME = __name__.split(".")[-1]
+
 
 class AVSwitch:
-	def setInput(self, input):
-		INPUT = {"ENCODER": 0, "SCART": 1, "AUX": 2}
-		eAVSwitch.getInstance().setInput(INPUT[input])
-
-	def setColorFormat(self, value):
-		eAVSwitch.getInstance().setColorFormat(value)
+	def setAspect(self, configElement):
+		eAVControl.getInstance().setAspect(configElement.value, 1)
 
 	def setAspectRatio(self, value):
-		eAVSwitch.getInstance().setAspectRatio(value)
+		if value < 100:
+			eAVControl.getInstance().setAspectRatio(value)
+		else:  # Aspect Switcher
+			value -= 100
+			offset = config.av.aspectswitch.offsets[str(value)].value
+			newheight = 576 - offset
+			newtop = offset // 2
+			if value:
+				newwidth = 720
+			else:
+				newtop = 0
+				newwidth = 0
+				newheight = 0
+
+			eAVControl.getInstance().setAspectRatio(2)  # 16:9
+			eAVControl.getInstance().setVideoSize(newtop, 0, newwidth, newheight)
+
+	def setColorFormat(self, value):
+		eAVControl.getInstance().setColorFormat(value)
+
+	def setInput(self, input):
+		eAVControl.getInstance().setInput(input, 1)
 
 	def setSystem(self, value):
-		eAVSwitch.getInstance().setVideomode(value)
+		eAVControl.getInstance().setVideoMode(model)
 
 	def getOutputAspect(self):
 		valstr = config.av.aspectratio.value
@@ -74,7 +94,10 @@ class AVSwitch:
 			value = 2 # auto(4:3_off)
 		else:
 			value = 1 # auto
-		eAVSwitch.getInstance().setWSS(value)
+		eAVControl.getInstance().setWSS(value)
+
+
+iAVSwitch = AVSwitch()
 
 
 def InitAVSwitch():
@@ -158,8 +181,6 @@ def InitAVSwitch():
 	config.av.generalPCMdelay = ConfigSelectionNumber(-1000, 1000, 5, default=0)
 	config.av.vcrswitch = ConfigEnableDisable(default=False)
 
-	iAVSwitch = AVSwitch()
-
 	def setColorFormat(configElement):
 		map = {"cvbs": 0, "rgb": 1, "svideo": 2, "yuv": 3}
 		iAVSwitch.setColorFormat(map[configElement.value])
@@ -176,15 +197,13 @@ def InitAVSwitch():
 		iAVSwitch.setAspectWSS()
 
 	# this will call the "setup-val" initial
-	config.av.colorformat.addNotifier(setColorFormat)
 	config.av.aspectratio.addNotifier(setAspectRatio)
 	config.av.tvsystem.addNotifier(setSystem)
 	config.av.wss.addNotifier(setWSS)
 
-	iAVSwitch.setInput("ENCODER") # init on startup
-	detected = eAVSwitch.getInstance().haveScartSwitch()
+	iAVSwitch.setInput("encoder") # init on startup
 
-	SystemInfo["ScartSwitch"] = eAVSwitch.getInstance().haveScartSwitch()
+	SystemInfo["ScartSwitch"] = eAVControl.getInstance().hasScartSwitch()
 
 	if SystemInfo["CanDownmixAC3"]:
 		choices = [
@@ -387,18 +406,26 @@ def InitAVSwitch():
 		config.av.allow_10bit.addNotifier(setDisable10Bit)
 
 	if SystemInfo["HDMIAudioSource"]:
-		config.av.hdmi_audio_source = ConfigSelection(default="pcm", choices={
-			"pcm": _("PCM"),
-			"spdif": _("SPDIF")
-		})
+		if SystemInfo["AmlogicFamily"]:
+			choices = [
+				("0", _("PCM")),
+				("1", _("SPDIF")),
+				("2", _("Bluetooth"))
+			]
+			default = "0"
+		else:
+			choices = [
+				(pChoice("pcm")),
+				(pChoice("spdif"))
+			]
+			default = "pcm"
 
 		def setAudioSource(configElement):
-			try:
-				with open("/proc/stb/hdmi/audio_source", "w") as hdmi_audio_source:
-					hdmi_audio_source.write(configElement.value)
-					hdmi_audio_source.close()
-			except (IOError, OSError):
-				print("[AVSwitch] Write to /proc/stb/hdmi/audio_source failed!")
+			if SystemInfo["AmlogicFamily"]:
+				fileWriteLine("/sys/devices/virtual/amhdmitx/amhdmitx0/audio_source", configElement.value, source=MODULE_NAME)
+			else:
+				fileWriteLine("/proc/stb/hdmi/audio_source", configElement.value, source=MODULE_NAME)
+		config.av.hdmi_audio_source = ConfigSelection(choices=choices, default=default)
 		config.av.hdmi_audio_source.addNotifier(setAudioSource)
 	else:
 		config.av.hdmi_audio_source = ConfigNothing()

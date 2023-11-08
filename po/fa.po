@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2018-02-14 16:51+0330\n"
 "Last-Translator: Persian Prince <persianprince@pe4k.com>\n"
 "Language-Team: Persian Professionals <persianpros@yahoo.com>\n"
@@ -1496,6 +1496,9 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr ""
 
+msgid "CI Boot Delay"
+msgstr ""
+
 #
 msgid "CI assignment"
 msgstr "CI وظیفه"
@@ -2307,11 +2310,10 @@ msgstr "وصل کردن"
 msgid "Connect to a wireless network"
 msgstr "وصل شدن به شبکه بدون سیم"
 
-#, fuzzy
-msgid "Connected"
-msgstr "وصل کردن"
-
 msgid "Connected satellites"
+msgstr ""
+
+msgid "Connected through another tuner"
 msgstr ""
 
 msgid "Connected to"
@@ -3101,7 +3103,7 @@ msgstr[0] "انجام شد ، تعداد %d بسته با %d خطا نصب ، ب
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11655,6 +11657,9 @@ msgstr ""
 msgid "experimental film/video"
 msgstr ""
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -11739,6 +11744,9 @@ msgid "height"
 msgstr ""
 
 msgid "help..."
+msgstr ""
+
+msgid "high"
 msgstr ""
 
 msgid "horizontal"

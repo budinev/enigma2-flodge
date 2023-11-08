@@ -32,7 +32,8 @@ class MovieListData:
 
 class StubInfo:
 	def getName(self, serviceref):
-		return os.path.split(serviceref.getPath())[1]
+		path = serviceref.getPath().encode(errors="replace").decode('utf8')
+		return os.path.split(path)[1]
 
 	def getLength(self, serviceref):
 		return -1
@@ -656,7 +657,7 @@ class MovieList(GUIComponent):
 				# enigma wants an extra '/' appended
 				if not parent.endswith('/'):
 					parent += '/'
-				ref = eServiceReference("2:0:1:0:0:0:0:0:0:0:" + parent)
+				ref = eServiceReference("2:0:1:0:0:0:0:0:0:0:" + parent.replace(':', '%3a'))
 				ref.flags = eServiceReference.flagDirectory
 				self.list.append((ref, None, 0, -1))
 				numberOfDirs += 1

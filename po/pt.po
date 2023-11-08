@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2014-12-15 19:38-0000\n"
 "Last-Translator: Phenom <phenomxy@gmail.com>\n"
 "Language-Team: Muaitai <muaitai@gmail.com>\n"
@@ -1676,6 +1676,9 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr ""
 
+msgid "CI Boot Delay"
+msgstr ""
+
 #
 msgid "CI assignment"
 msgstr "Escolha de CI"
@@ -2581,13 +2584,11 @@ msgstr "Ligar"
 msgid "Connect to a wireless network"
 msgstr "Ligar a uma rede sem fios"
 
-#
-#, fuzzy
-msgid "Connected"
-msgstr "conectado"
-
 msgid "Connected satellites"
 msgstr "Satélites conectados"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 #
 msgid "Connected to"
@@ -3491,7 +3492,7 @@ msgstr[1] "Concluído - Instalados, actualizados, ou removidos %d pacotes com %d
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -13294,6 +13295,9 @@ msgstr "sair do menu de configuração do adaptador de rede"
 msgid "experimental film/video"
 msgstr "filme/vídeo experimental"
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -13394,6 +13398,9 @@ msgstr "altura"
 #
 msgid "help..."
 msgstr "ajuda..."
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

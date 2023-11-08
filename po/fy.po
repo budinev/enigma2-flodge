@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2008-12-29 16:22+0100\n"
 "Last-Translator: gerrit <gerrit@nedlinux.nl>\n"
 "Language-Team: gerrit <fy@li.org>\n"
@@ -1664,6 +1664,9 @@ msgstr ""
 msgid "CI (Common Interface) Setup"
 msgstr ""
 
+msgid "CI Boot Delay"
+msgstr ""
+
 #
 msgid "CI assignment"
 msgstr ""
@@ -2551,12 +2554,10 @@ msgstr ""
 msgid "Connect to a wireless network"
 msgstr "Sykje Triitloaze netwerken"
 
-#
-#, fuzzy
-msgid "Connected"
-msgstr "oanslúten"
-
 msgid "Connected satellites"
+msgstr ""
+
+msgid "Connected through another tuner"
 msgstr ""
 
 #
@@ -3456,7 +3457,7 @@ msgstr[1] "Dien - %d paket(ten) ynstalllearre of bywurke"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -13112,6 +13113,9 @@ msgstr "netwurkadapter ynstellingen menu ferlitte"
 msgid "experimental film/video"
 msgstr ""
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -13212,6 +13216,9 @@ msgstr ""
 #
 msgid "help..."
 msgstr "help..."
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

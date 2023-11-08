@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-02-19 14:49+0100\n"
 "Last-Translator: \n"
 "Language-Team: Muzoss-VELEBRDO\n"
@@ -1468,6 +1468,10 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "Поставки за CI (Заеднички интерфејс)"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "Одложување на DVB CI"
+
 msgid "CI assignment"
 msgstr "Назначување на CI"
 
@@ -2267,11 +2271,11 @@ msgstr "Поврзете се"
 msgid "Connect to a wireless network"
 msgstr "Поврзете се на безжична мрежа"
 
-msgid "Connected"
-msgstr "Поврзано"
-
 msgid "Connected satellites"
 msgstr "Поврзани сателити"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "Поврзан со"
@@ -3032,7 +3036,7 @@ msgstr[1] "Gotovo - Instaliran, ažuriran ili отстранет %d paket (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11420,6 +11424,10 @@ msgstr "излезете од менито за поставување мреж�
 msgid "experimental film/video"
 msgstr "експериментален филм / видео"
 
+#, fuzzy
+msgid "extra high"
+msgstr "екстра широк"
+
 msgid "extra wide"
 msgstr "екстра широк"
 
@@ -11504,6 +11512,9 @@ msgstr "висина"
 
 msgid "help..."
 msgstr "помош..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "хоризонтално"

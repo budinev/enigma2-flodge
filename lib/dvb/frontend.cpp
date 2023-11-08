@@ -1,5 +1,5 @@
 #include <linux/dvb/version.h>
-
+#include <linux/version.h>
 #include <lib/dvb/dvb.h>
 #include <lib/dvb/frontendparms.h>
 #include <lib/base/cfile.h>
@@ -1346,7 +1346,7 @@ void eDVBFrontend::calculateSignalQuality(int snr, int &signalquality, int &sign
 	}
 	else if (!strcmp(m_description, "M1502A(external)")) // DVB-S2X Dual 4K
 	{
-		ret = (int)(snr / 23.2);
+		ret = (int)(snr / 41.4);
 	}
 	else if (!strcmp(m_description, "AVL6762 (external)")) // DVB-C/T2 Dual 4K
 	{
@@ -3315,6 +3315,9 @@ std::string eDVBFrontend::getCapabilities()
 		case SYS_DVBC_ANNEX_C:	ss << " DVBC_ANNEX_C"; break;
 		case SYS_TURBO:		ss << " TURBO"; break;
 		case SYS_DTMB:		ss << " DTMB"; break;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+		case SYS_DVBC2:		ss << " DVBC2"; break;
+#endif
 #endif
 		case SYS_DVBT2:		ss << " DVBT2"; break;
 		}

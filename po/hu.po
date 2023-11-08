@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-11-03 15:10+0100\n"
 "Last-Translator: mcfly82\n"
 "Language-Team: mcfly82 & wysless\n"
@@ -1464,6 +1464,10 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI (Common Interface) beállítása"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "DVB CI késleltetés"
+
 msgid "CI assignment"
 msgstr "CI hozzárendelés"
 
@@ -2263,11 +2267,11 @@ msgstr "Csatlakozás"
 msgid "Connect to a wireless network"
 msgstr "Csatlakozás vezeték nélküli hálózathoz"
 
-msgid "Connected"
-msgstr "Csatlakozva"
-
 msgid "Connected satellites"
 msgstr "Csatlakoztatott műholdak"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "Csatlakoztatva ehhez"
@@ -3026,7 +3030,7 @@ msgstr[1] "%d szoftvercsomag telepítése, frissítése vagy eltávolítása elk
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11428,6 +11432,10 @@ msgstr "kliépés a hálózati adapter beállításaiból"
 msgid "experimental film/video"
 msgstr "kísérleti filmezés"
 
+#, fuzzy
+msgid "extra high"
+msgstr "extra széles"
+
 msgid "extra wide"
 msgstr "extra széles"
 
@@ -11512,6 +11520,9 @@ msgstr "magasság"
 
 msgid "help..."
 msgstr "súgó..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "horizontális"

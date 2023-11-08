@@ -2,6 +2,7 @@
 import skin
 
 from enigma import ePoint, eSize
+from Components.config import config
 
 
 class GUIComponent:
@@ -35,10 +36,19 @@ class GUIComponent:
 		if not self.visible:
 			self.instance.hide()
 
-		if self.skinAttributes:
-			skin.applyAllAttributes(self.instance, desktop, self.skinAttributes, parent.scale)
-			return True
-		return False
+		if self.skinAttributes is None:
+			return False
+
+		#//workaround for values from attributes the not be set
+		#
+		#The order of some attributes is crucial if they are applied. Also, an attribute may be responsible that another does not take effect and occurs at different skins.
+		#It was noticed at 'scrollbarSliderBorderWidth' and 'scrollbarSliderForegroundColor'.
+		#
+		if config.skin.primary_skin.value.split('/')[0] not in ('DMConcinnity-HD'):
+			self.skinAttributes.sort()
+		#//
+		skin.applyAllAttributes(self.instance, desktop, self.skinAttributes, parent.scale)
+		return True
 
 	def move(self, x, y=None):
 		# we assume, that x is already an ePoint

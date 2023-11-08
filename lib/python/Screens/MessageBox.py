@@ -18,8 +18,9 @@ class MessageBox(Screen):
 	def __init__(self, session, text, type=TYPE_YESNO, timeout=-1, close_on_any_key=False, default=True, enable_input=True, msgBoxID=None, picon=None, simple=False, list=[], timeout_default=None, title=None, showYESNO=False):
 		self.type = type
 		Screen.__init__(self, session)
+		self.skinName = ["MessageBox"]
 		if simple:
-			self.skinName = "MessageBoxSimple"
+			self.skinName = ["MessageBoxSimple"] + self.skinName
 
 		self.msgBoxID = msgBoxID
 
@@ -27,6 +28,7 @@ class MessageBox(Screen):
 		self["text"] = Label(text)
 		self["Text"] = StaticText(text)
 		self["selectedChoice"] = StaticText()
+		self["title_sep"] = Label("")
 
 		self.text = text
 		self.close_on_any_key = close_on_any_key

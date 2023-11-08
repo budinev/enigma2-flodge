@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma 2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2021-08-02 09:19+0700\n"
 "Last-Translator: krong\n"
 "Language-Team: none\n"
@@ -1449,6 +1449,10 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "Cài đặt CI (Giao diện chung)"
 
+#, fuzzy
+msgid "CI Boot Delay"
+msgstr "Sự chậm trễ của DVB CI"
+
 msgid "CI assignment"
 msgstr "Phân công CI"
 
@@ -2248,11 +2252,11 @@ msgstr "Kết nối"
 msgid "Connect to a wireless network"
 msgstr "Kết nối với mạng không dây"
 
-msgid "Connected"
-msgstr "Đã kết nối"
-
 msgid "Connected satellites"
 msgstr "Các vệ tinh được kết nối"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 msgid "Connected to"
 msgstr "Kết nối với"
@@ -3012,7 +3016,7 @@ msgstr[0] "Xong - Đã cài đặt, nâng cấp hoặc gỡ bỏ gói%d (%s)"
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -11405,6 +11409,10 @@ msgstr "thoát khỏi menu cài đặt bộ điều hợp mạng"
 msgid "experimental film/video"
 msgstr "phim / video thử nghiệm"
 
+#, fuzzy
+msgid "extra high"
+msgstr "rộng thêm"
+
 msgid "extra wide"
 msgstr "rộng thêm"
 
@@ -11489,6 +11497,9 @@ msgstr "chiều cao"
 
 msgid "help..."
 msgstr "cứu giúp..."
+
+msgid "high"
+msgstr ""
 
 msgid "horizontal"
 msgstr "ngang"

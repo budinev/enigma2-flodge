@@ -7,8 +7,8 @@
 # because the log unit looks enough like a file!
 
 import sys
-from io import StringIO
 import threading
+from io import StringIO
 
 logfile = None
 # Need to make our operations thread-safe.

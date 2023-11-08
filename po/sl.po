@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Project Slovenia\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2020-05-16 18:48+0200\n"
 "Last-Translator: Taykun345 <support@satnigmo.com>\n"
 "Language-Team: Satnigmo <support@satnigmo.com>\n"
@@ -1718,6 +1718,9 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI vmesnik"
 
+msgid "CI Boot Delay"
+msgstr ""
+
 #
 msgid "CI assignment"
 msgstr "CI dodelitev"
@@ -2599,13 +2602,11 @@ msgid "Connect to a wireless network"
 msgstr "Povezava z brezžičnim omrežjem"
 
 #
-#, fuzzy
-msgid "Connected"
-msgstr "povezano"
-
-#
 msgid "Connected satellites"
 msgstr "Priključeni sateliti"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 #
 msgid "Connected to"
@@ -3513,7 +3514,7 @@ msgstr[3] "Končano - nameščenih, nadgrajenih ali izbrisanih je bilo %d paketo
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -13260,6 +13261,9 @@ msgstr "izhod iz nastavitvenega menija omrežnega vmesnika"
 msgid "experimental film/video"
 msgstr ""
 
+msgid "extra high"
+msgstr ""
+
 msgid "extra wide"
 msgstr ""
 
@@ -13357,6 +13361,9 @@ msgstr "višina"
 #
 msgid "help..."
 msgstr "Pomoč"
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

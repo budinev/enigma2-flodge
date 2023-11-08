@@ -32,7 +32,7 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 				if line.startswith("#") or line.strip() == "":
 					continue
 				if "=" in line:
-					item, value = [x.strip() for x in line.split("=", 1)]
+					item, value = (x.strip() for x in line.split("=", 1))
 					if item:
 						self.immutableList.append(item)
 						self.enigmaInfoList.append(item)
@@ -50,7 +50,7 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 				if line.startswith("#") or line.strip() == "":
 					continue
 				if "=" in line:
-					item, value = [x.strip() for x in line.split("=", 1)]
+					item, value = (x.strip() for x in line.split("=", 1))
 					if item:
 						self.enigmaConfList.append(item)
 						if item in self.boxInfo:
@@ -65,7 +65,7 @@ class BoxInformation:  # To maintain data integrity class variables should not b
 		data = []
 		for line in lines:
 			if line.startswith("checksum"):
-				item, value = [x.strip() for x in line.split("=", 1)]
+				item, value = (x.strip() for x in line.split("=", 1))
 			else:
 				data.append(line)
 		data.append("")
@@ -160,7 +160,7 @@ BoxInfo = BoxInformation()
 ARCHITECTURE = BoxInfo.getItem("architecture")
 BRAND = BoxInfo.getItem("brand")
 MODEL = BoxInfo.getItem("model")
-SOC_FAMILY = BoxInfo.getItem("socfamily")
+SOCFAMILY = BoxInfo.getItem("socfamily")
 DISPLAYTYPE = BoxInfo.getItem("displaytype")
 MTDROOTFS = BoxInfo.getItem("mtdrootfs")
 DISPLAYMODEL = BoxInfo.getItem("displaymodel")
@@ -254,6 +254,7 @@ SystemInfo["WakeOnLAN"] = not model.startswith("et8000") and fileCheck("/proc/st
 SystemInfo["HasExternalPIP"] = not (model.startswith("et9") or model in ("e4hd",)) and fileCheck("/proc/stb/vmpeg/1/external")
 SystemInfo["VideoDestinationConfigurable"] = fileExists("/proc/stb/vmpeg/0/dst_left")
 SystemInfo["hasPIPVisibleProc"] = fileCheck("/proc/stb/vmpeg/1/visible")
+SystemInfo["HasGPT"] = model in ("dreamone", "dreamtwo") and pathExists("/dev/mmcblk0p7")
 SystemInfo["MaxPIPSize"] = model in ("hd51", "h7", "vs1500", "e4hd") and (360, 288) or (540, 432)
 SystemInfo["VFD_scroll_repeats"] = not model.startswith("et8500") and fileCheck("/proc/stb/lcd/scroll_repeats")
 SystemInfo["VFD_scroll_delay"] = not model.startswith("et8500") and fileCheck("/proc/stb/lcd/scroll_delay")
@@ -291,14 +292,17 @@ SystemInfo["HasHdrType"] = fileCheck("/proc/stb/video/hdmi_hdrtype")
 SystemInfo["HasScaler_sharpness"] = pathExists("/proc/stb/vmpeg/0/pep_scaler_sharpness")
 SystemInfo["VFDSymbol"] = getHaveVFDSymbol() == "True"
 SystemInfo["DreamBoxAudio"] = model in ("dm7080", "dm800", "dm900", "dm920", "one", "two")
+SystemInfo["DreamBoxDVI"] = model in ("dm8000", "dm800")
 SystemInfo["HasHDMIin"] = model in ("dm7080", "dm820")
 SystemInfo["HasHDMIinFHD"] = model in ("dm900", "dm920", "one", "two")
 SystemInfo["HDMIin"] = SystemInfo["HasHDMIin"] or SystemInfo["HasHDMIinFHD"]
+SystemInfo["HasHDMIinPiP"] = SystemInfo["HasHDMIin"] and BRAND != "dreambox"
 SystemInfo["HasHDMI-CEC"] = HardwareInfo().has_hdmi() and fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/HdmiCEC/plugin.pyc")) and (fileExists("/dev/cec0") or fileExists("/dev/hdmi_cec") or fileExists("/dev/misc/hdmi_cec0"))
 SystemInfo["HasYPbPr"] = model in ("dm8000", "et5000", "et6000", "et6500", "et9000", "et9200", "et9500", "et10000", "formuler1", "mbtwinplus", "spycat", "vusolo", "vuduo", "vuduo2", "vuultimo")
 SystemInfo["HasScart"] = model in ("dm8000", "et4000", "et6500", "et8000", "et9000", "et9200", "et9500", "et10000", "formuler1", "hd1100", "hd1200", "hd1265", "hd2400", "vusolo", "vusolo2", "vuduo", "vuduo2", "vuultimo", "vuuno", "xp1000")
 SystemInfo["HasSVideo"] = model in ("dm8000")
 SystemInfo["RecoveryMode"] = fileCheck("/proc/stb/fp/boot_mode") or model in ("one", "two")
+SystemInfo["AmlogicFamily"] = SOCFAMILY.startswith(("aml", "meson")) or fileCheck("/proc/device-tree/amlogic-dt-id") or isfile("/usr/bin/amlhalt") or fileAccess("/sys/module/amports")
 SystemInfo["HasComposite"] = model not in ("i55", "gbquad4k", "gbue4k", "hd1500", "osnino", "osninoplus", "purehd", "purehdse", "revo4k", "vusolo4k", "vuzero4k", "vuduo4k", "vuduo4kse", "vuuno4k", "vuuno4kse", "vuultimo4k")
 SystemInfo["hasXcoreVFD"] = model in ("osmega", "spycat4k", "spycat4kmini", "spycat4kcombo") and fileCheck("/sys/module/brcmstb_%s/parameters/pt6302_cgram" % model)
 SystemInfo["HasOfflineDecoding"] = model not in ("osmini", "osminiplus", "et7000mini", "et11000", "mbmicro", "mbtwinplus", "mbmicrov2", "et7000", "et8500")
@@ -321,7 +325,7 @@ SystemInfo["CanDownmixAC3"] = fileHas("/proc/stb/audio/ac3_choices", "downmix")
 SystemInfo["CanDownmixDTS"] = fileHas("/proc/stb/audio/dts_choices", "downmix")
 SystemInfo["CanDownmixAAC"] = fileHas("/proc/stb/audio/aac_choices", "downmix")
 SystemInfo["CanDownmixAACPlus"] = fileHas("/proc/stb/audio/aacplus_choices", "downmix")
-SystemInfo["HDMIAudioSource"] = fileCheck("/proc/stb/hdmi/audio_source")
+SystemInfo["HDMIAudioSource"] = fileCheck("/proc/stb/hdmi/audio_source") or fileCheck("/sys/devices/virtual/amhdmitx/amhdmitx0/audio_source")
 SystemInfo["CanAC3Transcode"] = fileHas("/proc/stb/audio/ac3plus_choices", "force_ac3")
 SystemInfo["CanDTSHD"] = fileHas("/proc/stb/audio/dtshd_choices", "downmix")
 SystemInfo["CanAACTranscode"] = fileHas("/proc/stb/audio/aac_transcode_choices", "off")

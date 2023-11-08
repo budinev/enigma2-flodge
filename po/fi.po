@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-24 16:50+0200\n"
+"POT-Creation-Date: 2023-10-02 14:05+0100\n"
 "PO-Revision-Date: 2020-05-16 18:41+0200\n"
 "Last-Translator: jamu\n"
 "Language-Team: BoxFreak/jamu\n"
@@ -1630,6 +1630,9 @@ msgstr "CH%s"
 msgid "CI (Common Interface) Setup"
 msgstr "CI-liitäntä/CAM"
 
+msgid "CI Boot Delay"
+msgstr ""
+
 #
 msgid "CI assignment"
 msgstr "CI-määritys"
@@ -2481,11 +2484,11 @@ msgstr "Yhdistä"
 msgid "Connect to a wireless network"
 msgstr "Yhdistä WLAN-verkkoon"
 
-msgid "Connected"
-msgstr "Yhdistetty"
-
 msgid "Connected satellites"
 msgstr "Valitut satelliitit"
+
+msgid "Connected through another tuner"
+msgstr ""
 
 #
 msgid "Connected to"
@@ -3365,7 +3368,7 @@ msgstr[1] "Valmis - asennettu, päivitetty tai poistettu %d ohjelmapakettia (%s)
 
 #, python-format
 msgid ""
-"Download Successsful\n"
+"Download Successful\n"
 "%s"
 msgstr ""
 
@@ -12822,6 +12825,10 @@ msgstr "poistu verkkosovittimen asetusvalikosta"
 msgid "experimental film/video"
 msgstr "kokeellinen elokuva/video"
 
+#, fuzzy
+msgid "extra high"
+msgstr "Erikoisleveä"
+
 msgid "extra wide"
 msgstr "Erikoisleveä"
 
@@ -12915,6 +12922,9 @@ msgstr "Korkeus"
 #
 msgid "help..."
 msgstr "apua..."
+
+msgid "high"
+msgstr ""
 
 #
 msgid "horizontal"

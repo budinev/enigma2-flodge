@@ -6,6 +6,7 @@ from Components.ConfigList import ConfigListScreen
 from Components.config import config, ConfigBoolean, ConfigNothing
 from Components.Label import Label
 from Components.Sources.StaticText import StaticText
+from Tools.Directories import isPluginInstalled
 
 from Plugins.SystemPlugins.Videomode.VideoHardware import video_hw
 
@@ -86,7 +87,7 @@ class VideoSetup(ConfigListScreen, Screen):
 		elif config.av.aspect.value == "4_3":
 			self.list.append((_("Display 16:9 content as"), config.av.policy_169, _("When the content has an aspect ratio of 16:9, choose whether to scale/stretch the picture.")))
 
-		if config.av.videoport.value == "DVI":
+		if config.av.videoport.value == "HDMI":
 			if level >= 1:
 				self.list.append((_("Allow unsupported modes"), config.av.edid_override, _("When selected this allows video modes to be selected even if they are not reported as supported.")))
 				if SystemInfo["HasBypassEdidChecking"]:
@@ -136,7 +137,7 @@ class VideoSetup(ConfigListScreen, Screen):
 			if SystemInfo["CanDownmixAACPlus"]:
 				self.list.append((_("AAC plus downmix"), config.av.downmix_aacplus, _("Configure whether multi channel sound tracks should be downmixed to stereo.")))
 			if SystemInfo["HDMIAudioSource"]:
-				self.list.append((_("Audio Source"), config.av.hdmi_audio_source, _("Choose whether multi channel sound tracks should be convert to PCM or SPDIF.")))
+				self.list.append((_("Audio Source"), config.av.hdmi_audio_source, _("Choose whether multi channel sound tracks should be convert to PCM, SPDIF or Bluetooth.")))
 			if SystemInfo["CanAACTranscode"]:
 				self.list.append((_("AAC transcoding"), config.av.transcodeaac, _("Choose whether AAC sound tracks should be transcoded.")))
 			self.list.extend((
@@ -158,8 +159,8 @@ class VideoSetup(ConfigListScreen, Screen):
 
 			if SystemInfo["CanBTAudio"]:
 				self.list.append((_("Enable BT audio"), config.av.btaudio, _("This option allows you to switch audio to BT speakers.")))
-			if SystemInfo["CanBTAudioDelay"]:
-				self.list.append((_("General BT audio delay"), config.av.btaudiodelay, _("This option configures the general audio delay for BT speakers.")))
+				if SystemInfo["CanBTAudioDelay"] and config.av.btaudio.value != "off":
+					self.list.append((_("General BT audio delay"), config.av.btaudiodelay, _("This option configures the general audio delay for BT speakers.")))
 
 		if SystemInfo["CanChangeOsdAlpha"]:
 			self.list.append((_("OSD transparency"), config.av.osd_alpha, _("Configure the transparency of the OSD.")))
@@ -167,7 +168,7 @@ class VideoSetup(ConfigListScreen, Screen):
 		if SystemInfo["CanChangeOsdPlaneAlpha"]:
 			self.list.append((_("OSD plane transparency"), config.av.osd_planealpha, _("Configure the transparency of the OSD.")))
 
-		if not isinstance(config.av.scaler_sharpness, ConfigNothing):
+		if not isinstance(config.av.scaler_sharpness, ConfigNothing) and not isPluginInstalled("VideoEnhancement"):
 			self.list.append((_("Scaler sharpness"), config.av.scaler_sharpness, _("Configure the sharpness of the video scaling.")))
 
 		self["config"].list = self.list

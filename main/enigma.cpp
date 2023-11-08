@@ -87,7 +87,6 @@ void keyEvent(const eRCKey &key)
 }
 
 /************************************************/
-#include <unistd.h>
 #include <lib/components/scan.h>
 #include <lib/dvb/idvb.h>
 #include <lib/dvb/dvb.h>
@@ -99,7 +98,7 @@ void keyEvent(const eRCKey &key)
 /* Defined in eerror.cpp */
 void setDebugTime(bool enable);
 
-class eMain: public eApplication, public sigc::trackable
+class eMain : public eApplication, public sigc::trackable
 {
 	eInit init;
 	ePythonConfigQuery config;
@@ -200,16 +199,17 @@ int main(int argc, char **argv)
 
 	// set pythonpath if unset
 	setenv("PYTHONPATH", eEnv::resolve("${libdir}/enigma2/python").c_str(), 0);
-	printf("PYTHONPATH: %s\n", getenv("PYTHONPATH"));
-	printf("DVB_API_VERSION %d DVB_API_VERSION_MINOR %d\n", DVB_API_VERSION, DVB_API_VERSION_MINOR);
 
 	// get enigma2 debug level settings
 	debugLvl = getenv("ENIGMA_DEBUG_LVL") ? atoi(getenv("ENIGMA_DEBUG_LVL")) : 4;
 	if (debugLvl < 0)
 		debugLvl = 0;
-	printf("ENIGMA_DEBUG_LVL=%d\n", debugLvl);
 	if (getenv("ENIGMA_DEBUG_TIME"))
 		setDebugTime(atoi(getenv("ENIGMA_DEBUG_TIME")) != 0);
+
+	eLog(0, "[Enigma] Python path is '%s'.", getenv("PYTHONPATH"));
+	eLog(0, "[Enigma] DVB API version %d, DVB API version minor %d.", DVB_API_VERSION, DVB_API_VERSION_MINOR);
+	eLog(0, "[Enigma] Enigma debug level %d.", debugLvl);
 
 	ePython python;
 	eMain main;
@@ -217,11 +217,10 @@ int main(int argc, char **argv)
 	ePtr<gMainDC> my_dc;
 	gMainDC::getInstance(my_dc);
 
-	//int double_buffer = my_dc->haveDoubleBuffering();
+	// int double_buffer = my_dc->haveDoubleBuffering();
 
 	ePtr<gLCDDC> my_lcd_dc;
 	gLCDDC::getInstance(my_lcd_dc);
-
 
 		/* ok, this is currently hardcoded for arabic. */
 			/* some characters are wrong in the regular font, force them to use the replacement font */
@@ -237,11 +236,13 @@ int main(int argc, char **argv)
 	dsk.setStyleID(0);
 	dsk_lcd.setStyleID(1);
 
-/*	if (double_buffer)
+	/*
+	if (double_buffer)
 	{
 		eDebug("[MAIN] - double buffering found, enable buffered graphics mode.");
 		dsk.setCompositionMode(eWidgetDesktop::cmBuffered);
-	} */
+	}
+	*/
 
 	wdsk = &dsk;
 	lcddsk = &dsk_lcd;
@@ -249,9 +250,9 @@ int main(int argc, char **argv)
 	dsk.setDC(my_dc);
 	dsk_lcd.setDC(my_lcd_dc);
 
-	dsk.setBackgroundColor(gRGB(0,0,0,0xFF));
+	dsk.setBackgroundColor(gRGB(0, 0, 0, 0xFF));
 
-		/* redrawing is done in an idle-timer, so we have to set the context */
+	/* redrawing is done in an idle-timer, so we have to set the context */
 	dsk.setRedrawTask(main);
 	dsk_lcd.setRedrawTask(main);
 
