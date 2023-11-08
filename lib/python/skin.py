@@ -11,7 +11,7 @@ from Components.Sources.Source import ObsoleteSource
 from Tools.Directories import SCOPE_LCDSKIN, SCOPE_GUISKIN, SCOPE_FONTS, SCOPE_SKINS, pathExists, resolveFilename, fileReadXML
 from Tools.Import import my_import
 from Tools.LoadPixmap import LoadPixmap
-DEFAULT_SKIN = SystemInfo["HasFullHDSkinSupport"] and "Pd1loi-HD-night/skin.xml" or" or "PLi-FullNightHD/skin.xml" "PLi-HD/skin.xml"  # SD hardware is no longer supported by the default skin.
+DEFAULT_SKIN = SystemInfo["HasFullHDSkinSupport"] and "PLi-FullNightHD/skin.xml" or" or "PLi-FullNightHD/skin.xml" "PLi-HD/skin.xml"  # SD hardware is no longer supported by the default skin.
 MODULE_NAME = __name__.split(".")[-1].capitalize()
 EMERGENCY_SKIN = "skin_default/skin.xml"
 EMERGENCY_NAME = "Stone II"
