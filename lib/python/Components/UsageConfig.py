@@ -35,6 +35,7 @@ def InitUsageConfig():
 		("dhcp-router", _("DHCP Router")),
 		("staticip", _("Static IP Router")),
 		("google", _("Google DNS")),
+		("NordVPN", _("NordVPN")),
 		("quad9security", _("Quad9 Security")),
 		("quad9nosecurity", _("Quad9 No Security")),
 		("cloudflare", _("Cloudflare")),
@@ -182,6 +183,7 @@ def InitUsageConfig():
 	config.usage.volume_instead_of_channelselection = ConfigYesNo(default=False)
 	config.usage.channelselection_preview = ConfigYesNo(default=False)
 	config.usage.show_spinner = ConfigYesNo(default=True)
+	config.usage.enable_blinking = ConfigYesNo(default=False)
 	config.usage.menu_sort_weight = ConfigDictionarySet(default={"mainmenu": {"submenu": {}}})
 	config.usage.menu_sort_mode = ConfigSelection(default="default", choices=[("a_z", _("alphabetical")), ("default", _("Default")), ("user", _("user defined")), ("user_hidden", _("user defined hidden"))])
 	config.usage.menu_show_numbers = ConfigSelection(default="no", choices=[("no", _("no")), ("menu&plugins", _("in menu and plugins")), ("menu", _("in menu only")), ("plugins", _("in plugins only"))])
@@ -827,6 +829,8 @@ def InitUsageConfig():
 		config.usage.time.display.value = config.usage.time.display.default
 
 	config.usage.boolean_graphic = ConfigYesNo(default=False)
+	config.usage.show_slider_value = ConfigYesNo(default=True)
+	config.usage.cursorscroll = ConfigSelectionNumber(min=0, max=50, stepwidth=5, default=0, wraparound=True)
 
 	if SystemInfo["Fan"]:
 		choicelist = [('off', _("Off")), ('on', _("On")), ('auto', _("Auto"))]
@@ -1533,6 +1537,7 @@ def InitUsageConfig():
 	config.misc.softcam_setup.extension_menu = ConfigYesNo(default=True)
 	config.misc.softcam_streamrelay_url = ConfigIP(default=[127, 0, 0, 1], auto_jump=True)
 	config.misc.softcam_streamrelay_port = ConfigInteger(default=17999, limits=(0, 65535))
+	config.misc.softcam_streamrelay_delay = ConfigSelectionNumber(min=0, max=2000, stepwidth=50, default=0, wraparound=True)
 
 	config.logmanager = ConfigSubsection()
 	config.logmanager.showinextensions = ConfigYesNo(default=False)

@@ -50,13 +50,15 @@ class TimerEditList(Screen):
 			self["key_green"] = StaticText(_("Add"))
 			self["key_yellow"] = StaticText("")
 			self["key_blue"] = StaticText("")
-			self["key_info"] = StaticText("")
+			self["key_menu"] = StaticText(_("MENU"))
+			self["key_info"] = StaticText(_("INFO"))
 		else:
 			self["key_red"] = Button("")
 			self["key_green"] = Button(_("Add"))
 			self["key_yellow"] = Button("")
 			self["key_blue"] = Button("")
-			self["key_info"] = Button("")
+			self["key_menu"] = Button(_("MENU"))
+			self["key_info"] = Button(_("INFO"))
 
 		self["description"] = Label("")
 
@@ -147,6 +149,7 @@ class TimerEditList(Screen):
 						t.disable()
 				if timer_changed:
 					self.session.nav.RecordTimer.timeChanged(t)
+					self.session.nav.RecordTimer.saveTimer()
 			self.refill()
 
 	def runningEventCallback(self, t, result):
@@ -161,6 +164,7 @@ class TimerEditList(Screen):
 				findNextRunningEvent = True
 				t.disable()
 			self.session.nav.RecordTimer.timeChanged(t)
+			self.session.nav.RecordTimer.saveTimer()
 			t.findRunningEvent = findNextRunningEvent
 			self.refill()
 
@@ -268,7 +272,7 @@ class TimerEditList(Screen):
 			self.list.sort(key=functools.cmp_to_key(eol_compare))
 		else:
 			self.list.sort(key=lambda x: x[0].begin)
-		self["timerlist"].l.setList(self.list)
+		self["timerlist"].setList(self.list)
 		self.updateState()
 
 	def showLog(self):

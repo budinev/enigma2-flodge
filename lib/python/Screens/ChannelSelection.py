@@ -27,6 +27,7 @@ from Components.Input import Input
 profile("ChannelSelection.py 3")
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent
 from Components.SystemInfo import SystemInfo
+from Components.Sources.StaticText import StaticText
 from Screens.InputBox import PinInput
 from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Screens.MessageBox import MessageBox
@@ -35,7 +36,7 @@ from Screens.Hotkey import InfoBarHotkey, hotkeyActionMap, hotkey
 profile("ChannelSelection.py 4")
 from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
-from ServiceReference import ServiceReference, hdmiInServiceRef
+from ServiceReference import ServiceReference, getStreamRelayRef, hdmiInServiceRef
 from Tools.BoundFunction import boundFunction
 from Tools.Notifications import RemovePopup
 from Tools.Alternatives import GetWithAlternative, CompareWithAlternatives
@@ -1389,6 +1390,9 @@ class ChannelSelectionBase(Screen):
 		self["key_yellow"] = Button(_("Provider"))
 		self["key_blue"] = Button(_("Favourites"))
 
+		self["key_menu"] = StaticText(_("MENU"))
+		self["key_info"] = StaticText(_("INFO"))
+
 		self["list"] = ServiceList(self)
 		self.servicelist = self["list"]
 
@@ -2035,7 +2039,12 @@ class ChannelSelection(ChannelSelectionBase, ChannelSelectionEdit, ChannelSelect
 				info = service.info()
 				if info:
 					refstr = info.getInfoString(iServiceInformation.sServiceref)
-					self.servicelist.setPlayableIgnoreService(eServiceReference(refstr))
+					refstr, isStreamRelay = getStreamRelayRef(refstr)
+					ref = eServiceReference(refstr)
+					if isStreamRelay:
+						if not [timer for timer in self.session.nav.RecordTimer.timer_list if timer.state == 2 and refstr == timer.service_ref]:
+							ref.setAlternativeUrl(refstr)
+					self.servicelist.setPlayableIgnoreService(ref)
 
 	def __evServiceEnd(self):
 		self.servicelist.setPlayableIgnoreService(eServiceReference())
@@ -2768,17 +2777,15 @@ class HistoryZapSelector(Screen, HelpableScreen):
 		self["key_green"] = StaticText(_("Select"))
 		self["actions"] = HelpableActionMap(self, ["SelectCancelActions", "InfobarCueSheetActions"], {
 			"cancel": (self.keyCancel, _("Cancel the service zap")),
-			"select": (self.keySelect, _("Select the currently highlighted service")),
-			"jumpPreviousMark": (self.keyTop, _("Move to the first line / screen")),
-			"jumpNextMark": (self.keyBottom, _("Move to the last line / screen"))
+			"select": (self.keySelect, _("Select the currently highlighted service"))
 		}, prio=0, description=_("History Zap Actions"))
 		self["navigationActions"] = HelpableActionMap(self, ["NavigationActions"], {
-			"top": (self.keyTop, _("Move to the first line / screen")),
+			"right": (self.keyTop, _("Move to the first line / screen")),
 			"pageUp": (self.keyPageUp, _("Move up a screen")),
 			"up": (self.keyUp, _("Move up a line")),
 			"down": (self.keyDown, _("Move down a line")),
 			"pageDown": (self.keyPageDown, _("Move down a screen")),
-			"bottom": (self.keyBottom, _("Move to the last line / screen"))
+			"left": (self.keyBottom, _("Move to the last line / screen"))
 		}, prio=0, description=_("History Zap Navigation Actions"))
 		serviceHandler = eServiceCenter.getInstance()
 		historyList = []

@@ -34,7 +34,7 @@ from Screens.SubtitleDisplay import SubtitleDisplay
 from Screens.RdsDisplay import RdsInfoDisplay, RassInteractive
 from Screens.TimeDateInput import TimeDateInput
 from Screens.UnhandledKey import UnhandledKey
-from ServiceReference import ServiceReference, isPlayableForCur
+from ServiceReference import ServiceReference, getStreamRelayRef, isPlayableForCur
 
 from Tools.ASCIItranslit import legacyEncode
 from Tools.Directories import fileExists, fileReadLines, fileWriteLines, fileReadLinesISO, getRecordingFilename, moveFiles
@@ -53,6 +53,7 @@ from bisect import insort
 from sys import maxsize
 import itertools
 import datetime
+from re import match
 
 from RecordTimer import RecordTimerEntry, RecordTimer, findSafeRecordPath
 
@@ -215,51 +216,65 @@ class InfoBarStreamRelay:
 
 	FILENAME = "/etc/enigma2/whitelist_streamrelay"
 
-	def __init__(self) -> None:
-		self.streamRelay = fileReadLines(self.FILENAME, default=[], source=self.__class__.__name__)
+	def __init__(self):
+		self.reload()
+
+	def reload(self):
+		data = fileReadLines(self.FILENAME, default=[], source=self.__class__.__name__)
+		self.__services = self.__sanitizeData(data)
+
+	def __sanitizeData(self, data: list):
+		return list(set([match(r"([0-9A-F]+:){10}", line.strip()).group(0) for line in data if line and match(r"^(?:[0-9A-F]+:){10}", line.strip())]))
 
 	def check(self, nav, service):
-		return (service or nav.getCurrentlyPlayingServiceReference()) and service.toString() in self.streamRelay
+		return (service or nav.getCurrentlyPlayingServiceReference()) and service.toCompareString() in self.__services
 
 	def write(self):
-		fileWriteLines(self.FILENAME, self.streamRelay, source=self.__class__.__name__)
+		fileWriteLines(self.FILENAME, self.__services, source=self.__class__.__name__)
 
 	def toggle(self, nav, service):
 		if isinstance(service, list):
 			serviceList = service
-			for service in serviceList:
-				servicestring = service.toString()
-				if servicestring in self.streamRelay:
-					self.streamRelay.remove(servicestring)
-				else:
-					self.streamRelay.append(servicestring)
+			serviceList = [service.toCompareString() for service in serviceList]
+			self.__services = list(set(serviceList + self.__services))
 			self.write()
 		else:
 			service = service or nav.getCurrentlyPlayingServiceReference()
 			if service:
-				servicestring = service.toString()
-				if servicestring in self.streamRelay:
-					self.streamRelay.remove(servicestring)
+				servicestring = service.toCompareString()
+				if servicestring in self.__services:
+					self.__services.remove(servicestring)
 				else:
-					self.streamRelay.append(servicestring)
+					self.__services.append(servicestring)
 					if nav.getCurrentlyPlayingServiceReference() == service:
 						nav.restartService()
 				self.write()
 
+	def __getData(self):
+		return self.__services
+
+	def __setData(self, value):
+		self.__services = value
+		self.write()
+
+	data = property(__getData, __setData)
+
 	def streamrelayChecker(self, playref):
-		playrefstring = playref.toString()
-		if "%3a//" not in playrefstring and playrefstring in self.streamRelay:
+		playrefstring = playref.toCompareString()
+		if "%3a//" not in playrefstring and playrefstring in self.__services:
 			url = f'http://{".".join("%d" % d for d in config.misc.softcam_streamrelay_url.value)}:{config.misc.softcam_streamrelay_port.value}/'
 			if "127.0.0.1" in url:
 				playrefmod = ":".join([("%x" % (int(x[1], 16) + 1)).upper() if x[0] == 6 else x[1] for x in enumerate(playrefstring.split(':'))])
 			else:
 				playrefmod = playrefstring
 			playref = eServiceReference("%s%s%s:%s" % (playrefmod, url.replace(":", "%3a"), playrefstring.replace(":", "%3a"), ServiceReference(playref).getServiceName()))
-			print(f"[{self.__class__.__name__} Play service {playref.toString()} via streamrelay")
-		return playref
+			print(f"[{self.__class__.__name__}] Play service {playref.toCompareString()} via streamrelay")
+			playref.setAlternativeUrl(playrefstring)
+			return playref, True
+		return playref, False
 
 	def checkService(self, service):
-		return service and service.toString() in self.streamRelay
+		return service and service.toCompareString() in self.__services
 
 
 streamrelay = InfoBarStreamRelay()
@@ -1580,7 +1595,7 @@ class InfoBarSeek:
 		return (0, -n, 0, "<< %dx" % n)
 
 	def makeStateSlowMotion(self, n):
-		return (0, 0, n, "/%d" % n)
+		return (0, 0, n, "/ %d" % n)
 
 	def isStateForward(self, state):
 		return state[1] > 1
@@ -1922,7 +1937,7 @@ class InfoBarPVRState:
 		self.force_show = force_show
 
 	def _mayShow(self):
-		if self.shown and self.seekstate != self.SEEK_STATE_PLAY:
+		if self.shown:
 			self.pvrStateDialog.show()
 		if config.usage.show_infobar_do_dimming.value is True:
 			if self.shown and self.seekstate != self.SEEK_STATE_EOF:
@@ -1933,7 +1948,15 @@ class InfoBarPVRState:
 
 	def __playStateChanged(self, state):
 		playstateString = state[3]
+		playstate = playstateString.split()
+		pixmapnum = [">", '||', 'END', '>>', '<<', '/'].index(playstate[0])
 		self.pvrStateDialog["state"].setText(playstateString)
+		self.pvrStateDialog["statusicon"].setPixmapNum(pixmapnum)
+		self.pvrStateDialog["speed"].setText(playstate[1] if len(playstate) > 1 else "")
+		if "state" in self:
+			self["state"].setText(playstateString)
+			self["statusicon"].setPixmapNum(pixmapnum)
+			self["speed"].setText(playstate[1] if len(playstate) > 1 else "")
 
 		# if we return into "PLAY" state, ensure that the dialog gets hidden if there will be no infobar displayed
 		if not config.usage.show_infobar_on_skip.value and self.seekstate == self.SEEK_STATE_PLAY and not self.force_show:
@@ -3290,7 +3313,7 @@ class InfoBarAspectSelection:
 			if aspectList[item][1] == aspect:
 				selection = item
 				break
-		self.session.openWithCallback(self.aspectSelected, ChoiceBox, text=_("Please select an aspect ratio..."), list=tlist, selection=selection, keys=keys)
+		self.session.openWithCallback(self.aspectSelected, ChoiceBox, title=_("Please select an aspect ratio..."), list=aspectList, selection=selection, keys=keys)
 
 	def aspectSelected(self, aspect):
 		if not aspect is None:
