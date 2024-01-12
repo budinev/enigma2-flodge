@@ -26,7 +26,7 @@ profile("ChannelSelection.py 2.3")
 from Components.Input import Input
 profile("ChannelSelection.py 3")
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 from Components.Sources.StaticText import StaticText
 from Screens.InputBox import PinInput
 from Screens.VirtualKeyBoard import VirtualKeyBoard
@@ -36,7 +36,7 @@ from Screens.Hotkey import InfoBarHotkey, hotkeyActionMap, hotkey
 profile("ChannelSelection.py 4")
 from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
-from ServiceReference import ServiceReference, getStreamRelayRef, hdmiInServiceRef
+from ServiceReference import ServiceReference, getStreamRelayRef
 from Tools.BoundFunction import boundFunction
 from Tools.Notifications import RemovePopup
 from Tools.Alternatives import GetWithAlternative, CompareWithAlternatives
@@ -189,7 +189,7 @@ class ChannelContextMenu(Screen):
 								append_when_current_valid(current, menu, (_("Remove from parental protection"), boundFunction(self.removeParentalProtection, current)), level=0)
 						if self.parentalControl.blacklist and config.ParentalControl.hideBlacklist.value and not self.parentalControl.sessionPinCached and config.ParentalControl.storeservicepin.value != "never":
 							append_when_current_valid(current, menu, (_("Unhide parental control services"), self.unhideParentalServices), level=0, key="1")
-					if SystemInfo["3DMode"] and fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/OSD3DSetup/plugin.pyc")):
+					if BoxInfo.getItem("3DMode") and fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/OSD3DSetup/plugin.pyc")):
 						if eDVBDB.getInstance().getFlag(eServiceReference(current.toString())) & FLAG_IS_DEDICATED_3D:
 							append_when_current_valid(current, menu, (_("Unmark service as dedicated 3D service"), self.removeDedicated3DFlag), level=2)
 						else:
@@ -226,7 +226,7 @@ class ChannelContextMenu(Screen):
 						if not self.inBouquet:
 							append_when_current_valid(current, menu, (_("Add service to favourites"), self.addServiceToBouquetSelected), level=0, key="5")
 							self.addFunction = self.addServiceToBouquetSelected
-					if SystemInfo["PIPAvailable"]:
+					if BoxInfo.getItem("PIPAvailable"):
 						self.PiPAvailable = True
 						if self.csel.dopipzap:
 							append_when_current_valid(current, menu, (_("Play in main window"), self.playMain), level=0, key="red")
@@ -283,7 +283,7 @@ class ChannelContextMenu(Screen):
 				if not csel.entry_marked and not inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
 					if current.type != -1:
 						menu.append(ChoiceEntryComponent("dummy", (_("Add marker"), self.showMarkerInputBox)))
-					if SystemInfo["HasHDMIin"]:
+					if BoxInfo.getItem("HasHDMIin"):
 						append_when_current_valid(current, menu, (_("Add HDMI IN to bouquet"), self.showHDMIInInputBox))
 					if not csel.movemode:
 						if haveBouquets:
@@ -455,7 +455,7 @@ class ChannelContextMenu(Screen):
 
 	def openSetup(self):
 		from Screens.Setup import Setup
-		self.session.openWithCallback(self.cancelClick, Setup, "userinterface")
+		self.session.openWithCallback(self.cancelClick, Setup, "channelselection")
 
 	def cancelClick(self, dummy=False):
 		self.close(False)
@@ -994,7 +994,7 @@ class ChannelSelectionEdit:
 	def addHDMIIn(self, name):
 		current = self.servicelist.getCurrent()
 		mutableList = self.getMutableList()
-		ref = hdmiInServiceRef()
+		ref = eServiceReference(str)
 		ref.setName(name)
 		if mutableList and current and current.valid():
 			if not mutableList.addService(ref, current):
@@ -1813,6 +1813,10 @@ class ChannelSelectionBase(Screen):
 					if currentRoot is None or currentRoot != self.bouquet_root:
 						self.clearPath()
 						self.enterPath(self.bouquet_root)
+						if not config.usage.multibouquet.value:
+							playingref = self.session.nav.getCurrentlyPlayingServiceOrGroup()
+							if playingref:
+								self.setCurrentSelectionAlternative(playingref)
 
 	def keyNumber0(self, number):
 		if len(self.servicePath) > 1 and not self.selectionNumber:
@@ -1945,7 +1949,7 @@ class ChannelSelectionBase(Screen):
 					op = int(playingref.toString().split(':')[6][:-4] or "0", 16)
 					refstr = '1:7:0:0:0:0:0:0:0:0:(provider == \"%s\") && (satellitePosition == %s) && %s ORDER BY name:%s' % (provider, op, self.service_types[self.service_types.rfind(':') + 1:], provider)
 					self.setCurrentSelection(eServiceReference(refstr))
-		elif not self.isBasePathEqual(self.bouquet_root) or self.bouquet_mark_edit == EDIT_ALTERNATIVES:
+		elif not self.isBasePathEqual(self.bouquet_root) or self.bouquet_mark_edit == EDIT_ALTERNATIVES or (self.startRoot and self.startRoot != ref):
 			if playingref:
 				self.setCurrentSelectionAlternative(playingref)
 
@@ -2321,20 +2325,11 @@ class ChannelSelection(ChannelSelectionBase, ChannelSelectionEdit, ChannelSelect
 	def historyZap(self, direction):
 		count = len(self.history)
 		if count > 0:
-			# markedItem = self.history_pos
 			selectedItem = self.history_pos + direction
 			if selectedItem < 0:
 				selectedItem = 0
 			elif selectedItem > count - 1:
 				selectedItem = count - 1
-			# serviceHandler = eServiceCenter.getInstance()
-			# historyInfoList = []
-			# for item in self.history:
-			# 	# info = serviceHandler.info(item[-1])
-			# 	# if info:
-			# 	# 	historyInfoList.append((info.getName(item[-1]), item[-1]))
-			# 	historyList.append(item[-1])
-			# self.session.openWithCallback(self.historyMenuClosed, HistoryZapSelector, historyList, selectedItem, mark, invert_items=True, redirect_buttons=True, wrap_around=True)
 			self.session.openWithCallback(self.historyMenuClosed, HistoryZapSelector, [x[-1] for x in self.history], markedItem=self.history_pos, selectedItem=selectedItem)
 
 	def historyMenuClosed(self, retval):
@@ -2779,9 +2774,11 @@ class HistoryZapSelector(Screen, HelpableScreen):
 			"cancel": (self.keyCancel, _("Cancel the service zap")),
 			"select": (self.keySelect, _("Select the currently highlighted service"))
 		}, prio=0, description=_("History Zap Actions"))
-		self["navigationActions"] = HelpableActionMap(self, ["NavigationActions"], {
+		self["navigationActions"] = HelpableActionMap(self, ["NavigationActions", "PreviousNextActions"], {
 			"right": (self.keyTop, _("Move to the first line / screen")),
 			"pageUp": (self.keyPageUp, _("Move up a screen")),
+			"previous": (self.keyUp, _("Move up a line")),
+			"next": (self.keyDown, _("Move down a line")),
 			"up": (self.keyUp, _("Move up a line")),
 			"down": (self.keyDown, _("Move down a line")),
 			"pageDown": (self.keyPageDown, _("Move down a screen")),
@@ -2811,15 +2808,12 @@ class HistoryZapSelector(Screen, HelpableScreen):
 						localBegin = localtime(begin)
 						localEnd = localtime(end)
 						eventDuration = _("%s  -  %s    (%s%d Min)") % (strftime(config.usage.time.short.value, localBegin), strftime(config.usage.time.short.value, localEnd), prefix, remaining)
-			servicePicon = getPiconName(str(ServiceReference(historyItem)))
-			servicePicon = loadPNG(servicePicon) if servicePicon else ""
-			# List entries: ("", ServiceMarked, ServiceName, EventName, EventDescription, EventDuration, ServicePicon, ServiceReference)
-			historyList.append(("", index == markedItem and "\u00BB" or "", serviceName, eventName, eventDescription, eventDuration, servicePicon, historyItem))
-		if True:  # Newest first.
-			historyList.reverse()
-			self.selectedItem = len(historyList) - selectedItem - 1
-		else:
-			self.selectedItem = selectedItem
+				servicePicon = getPiconName(str(ServiceReference(historyItem)))
+				servicePicon = loadPNG(servicePicon) if servicePicon else ""
+				# List entries: ("", ServiceMarked, ServiceName, EventName, EventDescription, EventDuration, ServicePicon, ServiceReference)
+				historyList.append(("", index == markedItem and "\u00BB" or "", serviceName, eventName, eventDescription, eventDuration, servicePicon, historyItem))
+		historyList.reverse()
+		self.selectedItem = len(historyList) - selectedItem - 1
 		self["menu"] = List(historyList)
 		self.onLayoutFinish.append(self.layoutFinished)
 

@@ -3,12 +3,15 @@ import os
 import time
 import re
 from Tools.HardwareInfo import HardwareInfo
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 from sys import maxsize, modules, version_info
 from Tools.Directories import fileReadLine
 from subprocess import PIPE, Popen
 
 MODULE_NAME = __name__.split(".")[-1]
+
+socfamily = BoxInfo.getItem("socfamily")
+MODEL = BoxInfo.getItem("model", default="unknown")
 
 
 def getVersionString():
@@ -33,14 +36,13 @@ def getFlashDateString():
 	return _("unknown")
 
 
+def returndate(date):
+	date = str(date)
+	return "%s-%s-%s" % (date[:4], date[4:6], date[6:8])
+
+
 def getBuildDateString():
-	try:
-		if os.path.isfile('/etc/version'):
-			version = open("/etc/version", "r").read()
-			return "%s-%s-%s" % (version[:4], version[4:6], version[6:8])
-	except:
-		pass
-	return _("unknown")
+	return returndate(BoxInfo.getItem("compiledate"))
 
 
 def getUpdateDateString():
@@ -48,7 +50,7 @@ def getUpdateDateString():
 		from glob import glob
 		driver = [x.split("-")[-2] for x in open(glob("/var/lib/opkg/info/*-dvb-modules-*.control")[0], "r") if x.startswith("Version:")][0]
 		if build.isdigit():
-			return "%s-%s-%s" % (build[:4], build[4:6], build[6:])
+			return returndate(build)
 	except:
 		pass
 	return _("unknown")
@@ -56,9 +58,14 @@ def getUpdateDateString():
 
 def getEnigmaVersionString():
 	import enigma
-	enigma_version = enigma.getEnigmaVersionString()
+	enigma_version = enigma.getEnigmaVersionString().title()
 	if '-(no branch)' in enigma_version:
 		enigma_version = enigma_version[:-12]
+	enigma_version = enigma_version.rsplit("-", enigma_version.count("-") - 2)
+	if len(enigma_version) == 3:
+		enigma_version = enigma_version[0] + " (" + enigma_version[2] + "-" + enigma_version[1] + ")"
+	else:
+		enigma_version = enigma_version[0] + " (" + enigma_version[1] + ")"
 	return enigma_version
 
 
@@ -81,10 +88,7 @@ def getffmpegVersionString():
 
 
 def getKernelVersionString():
-	try:
-		return open("/proc/version", "r").read().split(' ', 4)[2].split('-', 2)[0]
-	except:
-		return _("unknown")
+	return BoxInfo.getItem("kernel")
 
 
 def getHardwareTypeString():
@@ -92,11 +96,11 @@ def getHardwareTypeString():
 
 
 def getImageTypeString():
-	try:
-		image_type = open("/etc/issue").readlines()[-2].strip()[:-6]
-		return image_type.capitalize().replace("develop", "Nightly Build")
-	except:
-		return _("undefined")
+	return "%s %s" % (BoxInfo.getItem("displaydistro"), BoxInfo.getItem("imageversion").title())
+
+
+def getOEVersionString():
+	return BoxInfo.getItem("oe").title()
 
 
 def getCPUInfoString():
@@ -152,15 +156,15 @@ def getCPUInfoString():
 
 
 def getChipSetString():
-	if HardwareInfo().get_device_name() in ('dm7080', 'dm820'):
+	if MODEL in ('dm7080', 'dm820'):
 		return "7435"
-	elif HardwareInfo().get_device_name() in ('dm520', 'dm525'):
+	elif MODEL in ('dm520', 'dm525'):
 		return "73625"
-	elif HardwareInfo().get_device_name() in ('dm900', 'dm920', 'et13000', 'sf5008'):
+	elif MODEL in ('dm900', 'dm920', 'et13000', 'sf5008'):
 		return "7252S"
-	elif HardwareInfo().get_device_name() in ('hd51', 'vs1500', 'h7'):
+	elif MODEL in ('hd51', 'vs1500', 'h7'):
 		return "7251S"
-	elif HardwareInfo().get_device_name() in ('alien5',):
+	elif MODEL in ('alien5',):
 		return "S905D"
 	else:
 		chipset = fileReadLine("/proc/stb/info/chipset", source=MODULE_NAME)
@@ -168,8 +172,30 @@ def getChipSetString():
 			return _("Undefined")
 		return str(chipset.lower().replace('\n', '').replace('bcm', '').replace('brcm', '').replace('sti', ''))
 
+
+def getCPUBrand():
+	if BoxInfo.getItem("AmlogicFamily"):
+		return _("Amlogic")
+	elif BoxInfo.getItem("HiSilicon"):
+		return _("HiSilicon")
+	elif socfamily.startswith("smp"):
+		return _("Sigma Designs")
+	elif socfamily.startswith("bcm") or BoxInfo.getItem("brand") == "rpi":
+		return _("Broadcom")
+	print("[About] No CPU brand?")
+	return _("Undefined")
+
+
+def getCPUArch():
+	if BoxInfo.getItem("ArchIsARM64"):
+		return _("ARM64")
+	elif BoxInfo.getItem("ArchIsARM"):
+		return _("ARM")
+	return _("Mipsel")
+
+
 def getDVBAPI():
-	if SystemInfo["OLDE2API"]:
+	if BoxInfo.getItem("OLDE2API"):
 		return _("Old") 
 	else:
 		return _("New")

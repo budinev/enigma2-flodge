@@ -15,7 +15,7 @@ enigma.eTimer = eBaseImpl.eTimer
 enigma.eSocketNotifier = eBaseImpl.eSocketNotifier
 enigma.eConsoleAppContainer = eConsoleImpl.eConsoleAppContainer
 from Components.config import config, configfile, ConfigText, ConfigYesNo, ConfigInteger, ConfigSelection, ConfigSubsection, NoSave
-from Components.SystemInfo import SystemInfo
+from Components.SystemInfo import BoxInfo
 
 from traceback import print_exc
 
@@ -23,6 +23,7 @@ from traceback import print_exc
 #
 config.crash = ConfigSubsection()
 config.crash.debugScreens = ConfigYesNo(default=False)
+config.crash.debugMultiBoot = ConfigYesNo(default=False)
 config.crash.debugKeyboards = ConfigYesNo(default=False)
 config.crash.debugRemoteControls = ConfigYesNo(default=False)
 config.crash.debugDVBScan = ConfigYesNo(default=False)
@@ -451,7 +452,7 @@ from Screens.Scart import Scart
 
 class AutoScartControl:
 	def __init__(self, session):
-		self.hasScart = SystemInfo["HasScart"]
+		self.hasScart = BoxInfo.getItem("HasScart")
 		if self.hasScart:
 			self.force = False
 			self.current_vcr_sb = enigma.eAVControl.getInstance().getVCRSlowBlanking()
