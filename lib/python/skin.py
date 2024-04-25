@@ -1,6 +1,7 @@
 from glob import glob
 from os.path import dirname, isfile, join as pathjoin, splitext
 from os import listdir, unlink
+from traceback import print_exc
 from xml.etree.ElementTree import Element, ElementTree, fromstring
 
 from enigma import BT_ALPHABLEND, BT_ALPHATEST, BT_HALIGN_CENTER, BT_HALIGN_LEFT, BT_HALIGN_RIGHT, BT_KEEP_ASPECT_RATIO, BT_SCALE, BT_VALIGN_BOTTOM, BT_VALIGN_CENTER, BT_VALIGN_TOP, addFont, eLabel, eListbox, ePixmap, ePoint, eRect, eRectangle, eSize, eSlider, eSubtitleWidget, eWidget, eWindow, eWindowStyleManager, eWindowStyleSkinned, getDesktop, gFont, getFontFaces, gMainDC, gRGB
@@ -44,6 +45,7 @@ switchPixmap = {}  # Dictionary of switch images.
 windowStyles = {}  # Dictionary of window styles for each screen ID.
 resolutions = {}  # Dictionary of screen resolutions for each screen ID.
 scrollLabelStyle = {}  # Dictionary of scrollLabel widget defaults.
+componentTemplates = {}  # Dictionary of template data for each component.
 constantWidgets = {}
 layouts = {}
 variables = {}
@@ -147,6 +149,10 @@ def InitSkins():
 		gMainDC.getInstance().setResolution(resolution[0], resolution[1])
 		getDesktop(GUI_SKIN_ID).resize(eSize(resolution[0], resolution[1]))
 	runCallbacks = True
+	# Load all XML template styles.
+	styleFileName = resolveFilename(SCOPE_SKINS, pathjoin(dirname(currentPrimarySkin), "styles.xml"))
+	if isfile(styleFileName):
+		loadStyles(styleFileName)
 
 
 # Method to load a skin XML file into the skin data structures.
@@ -156,7 +162,7 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 	filename = resolveFilename(scope, filename)
 	print(f"[Skin] Loading skin file '{filename}'.")
 	domSkin = fileReadXML(filename, source=MODULE_NAME)
-	if domSkin:
+	if domSkin is not None:
 		# For loadSingleSkinData colors, bordersets etc. are applied one after
 		# the other in order of ascending priority.
 		loadSingleSkinData(desktop, screenID, domSkin, filename, scope=scope)
@@ -175,6 +181,7 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 							res = [parseInteger(x.strip()) for x in res.split(",")]
 							msg = f", resolution {res[0]}x{res[1]}," if len(res) == 2 and res[0] and res[1] else ""
 							print(f"[Skin] Loading screen '{name}'{msg} from '{filename}'.  (scope={scope})")
+							# print(f"[Skin] Loading screen '{name}'{f", resolution {res[0]}x{res[1]}," if len(res) == 2 and res[0] and res[1] else ""} from '{filename}'.  (scope={scope})")
 						domScreens[name] = (element, f"{dirname(filename)}/")
 			elif element.tag == "windowstyle":  # Process the windowstyle element.
 				scrnID = element.attrib.get("id")
@@ -193,6 +200,24 @@ def loadSkin(filename, scope=SCOPE_SKINS, desktop=getDesktop(GUI_SKIN_ID), scree
 					method()
 		return True
 	return False
+
+
+# Method to load a styles.xml if exists.
+#
+def loadStyles(styleFileName):
+	print(f"[Skin] Loading XML templates from '{styleFileName}'.")
+	domStyles = fileReadXML(styleFileName, source=MODULE_NAME)
+	if domStyles is not None:
+		for template in domStyles.findall("template"):
+			component = template.get("component")
+			name = template.get("name")
+			if component and name:
+				if component in componentTemplates:
+					componentTemplates[component][name] = template
+				else:
+					componentTemplates[component] = {name: template}
+		if config.crash.debugScreens.value:
+			print(f"[Skin] DEBUG componentTemplates '{componentTemplates}'.")
 
 
 def reloadSkins():
@@ -266,9 +291,10 @@ def parseOptions(options, attribute, value, default):
 		else:
 			optionList = "', '".join(options.keys())
 			skinError(f"The '{attribute}' value '{value}' is invalid, acceptable options are '{optionList}'")
+			# skinError(f"The '{attribute}' value '{value}' is invalid, acceptable options are '{"', '".join(options.keys())}'")
 			value = default
 	else:
-		skinError("The '%s' parser is not correctly initialized")
+		skinError(f"The '{attribute}' parser is not correctly initialized")
 		value = default
 	return value
 
@@ -400,8 +426,8 @@ def parseFont(value, scale=((1, 1), (1, 1))):
 		try:
 			size = int(size)
 		except ValueError:
+			val = size.replace("f", f"{getSkinFactor()}")
 			try:
-				val = size.replace("f", f"{getSkinFactor()}")
 				size = int(eval(val))
 			except Exception as err:
 				print(f"[Skin] Error ({type(err).__name__} - {err}): Font size in '{value}', evaluated to '{val}', can't be processed!")
@@ -425,7 +451,7 @@ def parseFont(value, scale=((1, 1), (1, 1))):
 
 def parseGradient(value):
 	def validColor(value):
-		if value[0] == "#" and 7 < len(value) < 10:
+		if value[0] == "#" and len(value) in (9, 7):
 			isColor = True
 		elif value in colors:
 			isColor = True
@@ -604,6 +630,15 @@ def parseSize(value, scale, object=None, desktop=None):
 	return eSize(*parseValuePair(value, scale, object, desktop))
 
 
+def parseTabWidth(value, default):
+	if value and value.isdigit():
+		return int(value)
+	options = {
+		"auto": -1
+	}
+	return options.get(value, default)
+
+
 def parseValuePair(value, scale, object=None, desktop=None, size=None):
 	if value in variables:
 		value = variables[value]
@@ -773,6 +808,8 @@ def collectAttributes(skinAttributes, node, context, skinPath=None, ignore=(), f
 	size = None
 	pos = None
 	font = None
+	selectionZoom = None
+	selectionZoomSize = None
 	for attrib, value in node.items():  # Walk all attributes.
 		if attrib not in ignore:
 			newValue = value
@@ -789,19 +826,29 @@ def collectAttributes(skinAttributes, node, context, skinPath=None, ignore=(), f
 			# fail to clear the title area.  Similar situation for a scrollbar in a
 			# listbox; when the scrollbar setting is applied after the size, a scrollbar
 			# will not be shown until the selection moves for the first time.
-			if attrib == "size":
-				size = newValue
-			elif attrib == "position":
-				pos = newValue
-			elif attrib == "font":
-				font = newValue
-				skinAttributes.append((attrib, newValue))
-			else:
-				skinAttributes.append((attrib, newValue))
-	if pos is not None:
+			match attrib:
+				case "size":
+					size = newValue
+				case "position":
+					pos = newValue
+				case "font":
+					font = newValue
+					skinAttributes.append((attrib, newValue))
+				case "selectionZoom":
+					selectionZoom = newValue
+				case "selectionZoomSize":
+					selectionZoomSize = newValue
+				case _:
+					skinAttributes.append((attrib, newValue))
+
+	if selectionZoom is not None:  # The "selectionZoom" attribute must be after the item size attributes.
+		skinAttributes.append(("selectionZoom", selectionZoom))
+	if selectionZoomSize is not None:  # The "selectionZoomSize" attribute must be after the item size attributes.
+		skinAttributes.append(("selectionZoomSize", selectionZoomSize))
+	if pos is not None:  # The "position" attribute must be after the all other attributes.
 		pos, size = context.parse(pos, size, font)
 		skinAttributes.append(("position", pos))
-	if size is not None:
+	if size is not None:  # The "size" attribute must be after the "position" attribute.
 		skinAttributes.append(("size", size))
 
 
@@ -843,6 +890,15 @@ class AttributeParser:
 
 	def backgroundColor(self, value):
 		self.guiObject.setBackgroundColor(parseColor(value, 0x00000000))
+
+	def backgroundColorEven(self, value):
+		self.guiObject.setBackgroundColorRows(parseColor(value, 0x00000000))
+
+	def backgroundColorOdd(self, value):
+		self.guiObject.setBackgroundColor(parseColor(value, 0x00000000))
+
+	def backgroundColorRows(self, value):
+		self.guiObject.setBackgroundColorRows(parseColor(value, 0x00000000))
 
 	def backgroundColorSelected(self, value):
 		self.guiObject.setBackgroundColorSelected(parseColor(value, 0x00000000))
@@ -899,7 +955,8 @@ class AttributeParser:
 				errors.append(flag)
 		if errors:
 			errorList = "', '".join(errors)
-			print(f"[Skin] Error: Attribute 'flags' with value '%s' has invalid element(s) '{errorList}'!")
+			print(f"[Skin] Error: Attribute 'flags' with value '{value}' has invalid element(s) '{errorList}'!")
+			# print(f"[Skin] Error: Attribute 'flags' with value '{value}' has invalid element(s) '{"', '".join(errors)}'!")
 
 	def font(self, value):
 		self.guiObject.setFont(parseFont(value, self.scaleTuple))
@@ -1157,6 +1214,9 @@ class AttributeParser:
 	def spacingColor(self, value):
 		self.guiObject.setSpacingColor(parseColor(value, 0x00000000))
 
+	def tabWidth(self, value):
+		self.guiObject.setTabWidth(parseTabWidth(value, -1))
+
 	def text(self, value):
 		if value:
 			value = _(value)
@@ -1170,11 +1230,11 @@ class AttributeParser:
 
 	def textOffset(self, value):
 		self.textPadding(value)
-		attribDeprecationWarning("textOffset", "textPadding")
+		attribDeprecationWarning("textOffset", "padding")
 
 	def textPadding(self, value):
-		leftPadding, topPadding, rightPadding, bottomPadding = parsePadding("textPadding", value)
-		self.guiObject.setTextPadding(eRect(self.applyHorizontalScale(leftPadding), self.applyVerticalScale(topPadding), self.applyHorizontalScale(rightPadding), self.applyVerticalScale(bottomPadding)))
+		self.padding(value)
+		attribDeprecationWarning("textPadding", "padding")
 
 	def title(self, value):
 		if value:
@@ -1604,7 +1664,7 @@ class SkinContextVertical(SkinContext):
 			left = self.x
 			p = pos.split(",")
 			if len(p) == 2 and p[1] in ("top", "bottom") and p[0].isdigit():
-				left = int(int(p[0]) * self.scale[0][0] / self.scale[0][1])
+				left += int(int(p[0]) * self.scale[0][0] / self.scale[0][1])
 				pos = p[1]
 			if pos == "bottom":
 				pos = (left, self.y + self.h - height)
@@ -1628,6 +1688,11 @@ class SkinContextVertical(SkinContext):
 
 
 class SkinContextHorizontal(SkinContext):
+	def __init__(self, parent=None, pos=None, size=None, font=None):
+		super().__init__(parent, pos, size, font)
+		self.rx = self.w
+		self.rw = self.w
+
 	def parse(self, pos, size, font):
 		if size in variables:
 			size = variables[size]
@@ -1643,7 +1708,7 @@ class SkinContextHorizontal(SkinContext):
 			top = self.y
 			p = pos.split(",")
 			if len(p) == 2 and p[0] in ("left", "right") and p[1].isdigit():
-				top = int(int(p[1]) * self.scale[0][0] / self.scale[0][1])
+				top += int(int(p[1]) * self.scale[0][0] / self.scale[0][1])
 				pos = p[0]
 			if pos == "left":
 				pos = (self.x, top)
@@ -1651,7 +1716,10 @@ class SkinContextHorizontal(SkinContext):
 				self.x += (width + self.spacing)
 				self.w -= (width + self.spacing)
 			elif pos == "right":
-				pos = (self.x + self.w - width, top)
+				if self.rw != self.rx:
+					self.rx -= self.spacing
+				self.rx = self.rx - width
+				pos = (self.rx, top)
 				size = (width, height)
 				self.w -= (width + self.spacing)
 			else:
@@ -1690,6 +1758,7 @@ def readSkin(screen, skin, names, desktop):
 			else:
 				widgetList = ", ".join(screen.mandatoryWidgets)
 				print(f"[Skin] Warning: Skin screen '{name}' rejected as it does not offer all the mandatory widgets '{widgetList}'!")
+				# print(f"[Skin] Warning: Skin screen '{name}' rejected as it does not offer all the mandatory widgets '{"', '".join(screen.mandatoryWidgets)}'!")
 				myScreen = None
 	else:
 		myName = f"<embedded-in-{screen.__class__.__name__}>"
@@ -1714,7 +1783,7 @@ def readSkin(screen, skin, names, desktop):
 				print("[Skin] No suitable screen found!")
 		else:
 			myScreen = fromstring(skin)
-		if myScreen:
+		if myScreen is not None:
 			screen.parsedSkin = myScreen
 	if myScreen is None:
 		print("[Skin] No skin to read or screen to display.")
@@ -1788,6 +1857,14 @@ def readSkin(screen, skin, names, desktop):
 				raise SkinError(f"Component with name '{widgetName}' was not found in skin of screen '{myName}'")
 			# assert screen[widgetName] is not Source
 			collectAttributes(attributes, widget, context, skinPath, ignore=("name",))
+			for widgetTemplate in widget.findall("template"):
+				widgetTemplateComponent = widgetTemplate.get("component")
+				widgetTemplateName = widgetTemplate.get("name")
+				if widgetTemplateComponent and widgetTemplateName:
+					if widgetTemplateComponent in componentTemplates:
+						componentTemplates[widgetTemplateComponent][widgetTemplateName] = widgetTemplateComponent
+					else:
+						componentTemplates[widgetTemplateComponent] = {widgetTemplateName: widgetTemplateComponent}
 		elif widgetSource:
 			# print(f"[Skin] DEBUG: Widget source='{widgetSource}'.")
 			while True:  # Get corresponding source until we found a non-obsolete source.
@@ -1820,10 +1897,11 @@ def readSkin(screen, skin, names, desktop):
 					raise SkinError(f"For connection '%s' a renderer must be defined with a 'render=' attribute" % wconnection)
 			for converter in widget.findall("convert"):
 				converterType = converter.get("type")
+				nostrip = converter.get("nostrip") and converter.get("nostrip").lower() in ("1", "enabled", "nostrip", "on", "true", "yes")
 				assert converterType, "[Skin] The 'convert' tag needs a 'type' attribute!"
 				# print(f"[Skin] DEBUG: Converter='{converterType}'.")
 				try:
-					parms = converter.text.strip()
+					parms = converter.text if nostrip else converter.text.strip()
 				except Exception:
 					parms = ""
 				# print(f"[Skin] DEBUG: Params='{parms}'.")
@@ -1880,6 +1958,8 @@ def readSkin(screen, skin, names, desktop):
 			raise SkinError(f"Applet failed to compile: '{str(err)}'")
 		if widgetType == "onLayoutFinish":
 			screen.onLayoutFinish.append(code)
+		elif widgetType == "onContentChanged":
+			screen.onContentChanged.append(code)
 		else:
 			raise SkinError(f"Applet type '{widgetType}' is unknown")
 
@@ -1927,7 +2007,8 @@ def readSkin(screen, skin, names, desktop):
 			try:
 				processor(widget, context)
 			except SkinError as err:
-				print(f"[Skin] Error in screen '{myName}' widget '{widget.tag}' {str(err)}!")
+				print(f"[Skin] Error: Screen '{myName}' widget '{widget.tag}' {str(err)}!")
+				print_exc()
 
 	def processPanel(widget, context):
 		name = widget.attrib.get("name")
@@ -1973,11 +2054,13 @@ def readSkin(screen, skin, names, desktop):
 		sizeW = "?" if context.w is None else str(context.w)
 		sizeH = "?" if context.h is None else str(context.h)
 		print(f"[Skin] Processing screen '{myName}'{msg}, position=({posX}, {posY}), size=({sizeW}x{sizeH}) for module '{screen.__class__.__name__}'.")
+		# print(f"[Skin] Processing screen '{myName}'{f", from list '{", ".join(names)}'," if len(names) > 1 else ""} position=({posX},{posY}), size=({sizeW},{sizeH}) for module '{screen.__class__.__name__}'.")
 		context.x = 0  # Reset offsets, all components are relative to screen coordinates.
 		context.y = 0
 		processScreen(myScreen, context)
 	except Exception as err:
-		print(f"[Skin] Error in screen '{myName}' {str(err)}!")
+		print(f"[Skin] Error: Screen '{myName}' {str(err)}!")
+		print_exc()
 
 	from Components.GUIComponent import GUIComponent
 	unusedComponents = [x for x in set(screen.keys()) - usedComponents if isinstance(x, GUIComponent)]
@@ -2017,6 +2100,23 @@ def findWidgets(name):
 				if name:
 					widgetSet.update(findWidgets(name))
 	return widgetSet
+
+
+# Return the XML formatting and style template for a multi content listbox.
+#
+def getcomponentTemplate(component, name):
+	if component in componentTemplates and componentTemplates[component][name]:
+		return componentTemplates[component][name]
+	return None
+
+
+# Return a list of all styles defined within an XML formatting and style
+# template as used in a multi content listbox.
+#
+def getcomponentTemplateNames(component):
+	if component in componentTemplates:
+		return list(componentTemplates[component].keys())
+	return None
 
 
 # This method emulates the C++ methods available to get Scrollbar style elements.

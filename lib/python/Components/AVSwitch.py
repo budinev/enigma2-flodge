@@ -7,6 +7,8 @@ from Tools.AVHelper import pChoice, readChoices
 from os.path import isfile
 import os
 
+iAVSwitch = None # will be initialized later, allows to import name 'iAVSwitch' from 'Components.AVSwitch'
+
 MODULE_NAME = __name__.split(".")[-1]
 
 model = BoxInfo.getItem("model")
@@ -856,7 +858,7 @@ def InitAVSwitch():
 				open("/proc/stb/video/alpha", "w").write(str(config.value))
 			except:
 				print("[AVSwitch] Write to /proc/stb/video/alpha failed!")
-		config.av.osd_alpha = ConfigSlider(default=255, limits=(0, 255))
+		config.av.osd_alpha = ConfigSlider(default=255, increment=5, limits=(20, 255)) # Make Openpli compatible with some plugins who still use config.av.osd_alpha.
 		config.av.osd_alpha.addNotifier(setOSDAlpha)
 
 	if BoxInfo.getItem("CanChangeOsdPlaneAlpha"):

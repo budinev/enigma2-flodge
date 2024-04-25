@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-17 11:25+0100\n"
+"POT-Creation-Date: 2024-03-10 21:56+0100\n"
 "PO-Revision-Date: 2021-07-31 17:00+0800\n"
 "Last-Translator: 孤独之剑 <haotzyy1970@yahoo.com>\n"
 "Language-Team: 孤独之剑 <haotzyy1970@yahoo.com>\n"
@@ -370,7 +370,7 @@ msgid "(activated +%d min)"
 msgstr "(激活 +%d 分钟)"
 
 #, fuzzy
-msgid "(current)"
+msgid "(current image)"
 msgstr "当前"
 
 msgid "(empty)"
@@ -1654,6 +1654,10 @@ msgstr "频道"
 
 msgid "Channel Info"
 msgstr "频道信息"
+
+#, fuzzy
+msgid "Channel Selection"
+msgstr "频道选择"
 
 msgid "Channel context menu"
 msgstr "频道上下文菜单"
@@ -3235,13 +3239,6 @@ msgstr "启用自动快速扫描"
 msgid "Enable auto fastscan for %s"
 msgstr "为 %s 启用自动快速扫描"
 
-msgid "Enable blink functionality for some areas like record icon."
-msgstr ""
-
-#, fuzzy
-msgid "Enable blinking"
-msgstr "启用原始EPG"
-
 #, fuzzy
 msgid "Enable bluetooth audio"
 msgstr "允许编辑自定义组"
@@ -4213,6 +4210,9 @@ msgstr "IP地址"
 msgid "HDMI-CEC setup"
 msgstr "HDMI-CEC设置"
 
+msgid "HDMI-In"
+msgstr ""
+
 msgid "HDR10 support"
 msgstr "HDR10支持"
 
@@ -4616,6 +4616,14 @@ msgstr "输入设备"
 
 msgid "Input devices"
 msgstr "输入设备"
+
+#, fuzzy
+msgid "Insert Service"
+msgstr "频道"
+
+#, fuzzy
+msgid "Insert entry"
+msgstr "定时器项目"
 
 msgid "Install"
 msgstr "安装"
@@ -5797,6 +5805,10 @@ msgstr "重复显示文字的数量."
 msgid "Number or SMS style data entry"
 msgstr "数字或SMS样式的数据输入"
 
+#, fuzzy
+msgid "OE Version: "
+msgstr "系统版本: "
+
 msgid "OK"
 msgstr "确定"
 
@@ -6106,6 +6118,10 @@ msgstr "原始大小"
 
 msgid "Pilot"
 msgstr "向导"
+
+#, fuzzy
+msgid "Pin Userbouquet"
+msgstr "自定义组"
 
 msgid "Pitcairn"
 msgstr "皮特凯恩群岛"
@@ -7576,6 +7592,10 @@ msgstr "如果您的天线系统支持此功能,请选择快速DiSEqC.如果你�
 msgid "Select HDD"
 msgstr "选择硬盘"
 
+#, fuzzy
+msgid "Select Service"
+msgstr "选择电影"
+
 msgid "Select Softcam"
 msgstr "选择Softcam插件"
 
@@ -7693,7 +7713,15 @@ msgstr "选择刷新率"
 msgid "Select satellites"
 msgstr "选择卫星"
 
+#, fuzzy
+msgid "Select service name"
+msgstr "频道名称"
+
 msgid "Select service to add..."
+msgstr "选择要添加的频道..."
+
+#, fuzzy
+msgid "Select service type"
 msgstr "选择要添加的频道..."
 
 msgid "Select slot"
@@ -7701,6 +7729,14 @@ msgstr "选择插槽"
 
 msgid "Select sort method:"
 msgstr "排序方式:"
+
+#, fuzzy
+msgid "Select stream URL"
+msgstr "选择Softcam插件"
+
+#, fuzzy
+msgid "Select stream type"
+msgstr "选择调谐器"
 
 msgid "Select target folder"
 msgstr "选择目标文件夹"
@@ -7875,6 +7911,14 @@ msgstr "频道PIDs"
 
 msgid "Service ID"
 msgstr "频道ID"
+
+#, fuzzy
+msgid "Service Name"
+msgstr "频道名称"
+
+#, fuzzy
+msgid "Service Type"
+msgstr "频道名称"
 
 msgid "Service belongs to a parental protected bouquet"
 msgstr "频道属于受父母保护的自定义组"
@@ -8869,6 +8913,14 @@ msgstr "流媒体"
 msgid "Stream Relay delay"
 msgstr "滚动延迟"
 
+#, fuzzy
+msgid "Stream Type"
+msgstr "流媒体"
+
+#, fuzzy
+msgid "Stream URL"
+msgstr "流媒体"
+
 msgid "Stream request"
 msgstr "流请求"
 
@@ -9227,6 +9279,11 @@ msgid ""
 msgstr ""
 "目录%s不可写.\n"
 "请确保您选择了一个可写目录."
+
+msgid ""
+"The enigma.info file for the boxinformation is not available or the content is invalid.\n"
+"Press any key to continue?"
+msgstr ""
 
 msgid "The following files were found..."
 msgstr "下列文件已找到..."
@@ -10043,6 +10100,10 @@ msgstr "取消作为专用3D频道的频道标识"
 
 msgid "Unmount"
 msgstr "卸载"
+
+#, fuzzy
+msgid "Unpin Userbouquet"
+msgstr "自定义组"
 
 msgid "Unsupported"
 msgstr "不支持"
@@ -11579,6 +11640,9 @@ msgstr "抓取当前帧为bmp图片"
 
 msgid "green"
 msgstr "绿色"
+
+msgid "half an hour"
+msgstr ""
 
 msgid "handicraft"
 msgstr "工艺"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tuxbox-enigma 0.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-17 11:25+0100\n"
+"POT-Creation-Date: 2024-03-10 21:56+0100\n"
 "PO-Revision-Date: 2010-03-09 21:03+0100\n"
 "Last-Translator: \n"
 "Language-Team: HDTV ROMANIA(superonic,costel_mbc,neutrin,otheitis,cipy_1982,neutrin,runcanion)\n"
@@ -362,7 +362,7 @@ msgstr ""
 msgid "(activated +%d min)"
 msgstr ""
 
-msgid "(current)"
+msgid "(current image)"
 msgstr ""
 
 msgid "(empty)"
@@ -1669,6 +1669,10 @@ msgstr "Canal"
 
 msgid "Channel Info"
 msgstr ""
+
+#, fuzzy
+msgid "Channel Selection"
+msgstr "Selectie canal"
 
 #, fuzzy
 msgid "Channel context menu"
@@ -3311,12 +3315,6 @@ msgstr ""
 msgid "Enable auto fastscan for %s"
 msgstr ""
 
-msgid "Enable blink functionality for some areas like record icon."
-msgstr ""
-
-msgid "Enable blinking"
-msgstr ""
-
 #, fuzzy
 msgid "Enable bluetooth audio"
 msgstr "Activeaza editare bouquet"
@@ -4296,6 +4294,9 @@ msgstr "IP Address"
 msgid "HDMI-CEC setup"
 msgstr ""
 
+msgid "HDMI-In"
+msgstr ""
+
 msgid "HDR10 support"
 msgstr ""
 
@@ -4712,6 +4713,14 @@ msgstr ""
 
 msgid "Input devices"
 msgstr ""
+
+#, fuzzy
+msgid "Insert Service"
+msgstr "Serviciu"
+
+#, fuzzy
+msgid "Insert entry"
+msgstr "Intrare timer"
 
 msgid "Install"
 msgstr "Instalare"
@@ -5961,6 +5970,10 @@ msgstr ""
 msgid "Number or SMS style data entry"
 msgstr ""
 
+#, fuzzy
+msgid "OE Version: "
+msgstr "Versiune noua:"
+
 msgid "OK"
 msgstr "OK"
 
@@ -6282,6 +6295,10 @@ msgstr "Pillarbox"
 
 msgid "Pilot"
 msgstr "Pilot"
+
+#, fuzzy
+msgid "Pin Userbouquet"
+msgstr "Adauga bouquet"
 
 msgid "Pitcairn"
 msgstr ""
@@ -7802,6 +7819,10 @@ msgid "Select HDD"
 msgstr "Selectare HDD"
 
 #, fuzzy
+msgid "Select Service"
+msgstr "Alegeti un film"
+
+#, fuzzy
 msgid "Select Softcam"
 msgstr "Alegeti un film"
 
@@ -7930,7 +7951,15 @@ msgstr "Selectati rata de reimprospatare"
 msgid "Select satellites"
 msgstr ""
 
+#, fuzzy
+msgid "Select service name"
+msgstr "Scanare Serviciu"
+
 msgid "Select service to add..."
+msgstr "Selectati serviciul care sa fie adaugat..."
+
+#, fuzzy
+msgid "Select service type"
 msgstr "Selectati serviciul care sa fie adaugat..."
 
 msgid "Select slot"
@@ -7938,6 +7967,14 @@ msgstr ""
 
 msgid "Select sort method:"
 msgstr ""
+
+#, fuzzy
+msgid "Select stream URL"
+msgstr "Alegeti un film"
+
+#, fuzzy
+msgid "Select stream type"
+msgstr "Alegeti un film"
 
 #, fuzzy
 msgid "Select target folder"
@@ -8118,6 +8155,14 @@ msgstr ""
 
 msgid "Service ID"
 msgstr ""
+
+#, fuzzy
+msgid "Service Name"
+msgstr "Scanare Serviciu"
+
+#, fuzzy
+msgid "Service Type"
+msgstr "Scanare Serviciu"
 
 msgid "Service belongs to a parental protected bouquet"
 msgstr ""
@@ -9165,6 +9210,13 @@ msgstr ""
 msgid "Stream Relay delay"
 msgstr ""
 
+#, fuzzy
+msgid "Stream Type"
+msgstr "Tip transponder"
+
+msgid "Stream URL"
+msgstr ""
+
 msgid "Stream request"
 msgstr ""
 
@@ -9536,6 +9588,11 @@ msgstr ""
 msgid ""
 "The directory %s is not writable.\n"
 "Make sure you select a writable directory instead."
+msgstr ""
+
+msgid ""
+"The enigma.info file for the boxinformation is not available or the content is invalid.\n"
+"Press any key to continue?"
 msgstr ""
 
 msgid "The following files were found..."
@@ -10352,6 +10409,9 @@ msgid "Unmark service as dedicated 3D service"
 msgstr ""
 
 msgid "Unmount"
+msgstr ""
+
+msgid "Unpin Userbouquet"
 msgstr ""
 
 msgid "Unsupported"
@@ -11874,6 +11934,9 @@ msgstr "capteaza imaginea ca bitmap"
 
 msgid "green"
 msgstr "verde"
+
+msgid "half an hour"
+msgstr ""
 
 msgid "handicraft"
 msgstr ""

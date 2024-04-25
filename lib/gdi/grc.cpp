@@ -399,7 +399,7 @@ void gPainter::setFont(gFont *font)
 	m_rc->submit(o);
 }
 
-void gPainter::renderText(const eRect &pos, const std::string &string, int flags, gRGB bordercolor, int border, int markedpos, int *offset)
+void gPainter::renderText(const eRect &pos, const std::string &string, int flags, gRGB bordercolor, int border, int markedpos, int *offset, int tabwidth)
 {
 	if (string.empty())
 		return;
@@ -416,6 +416,7 @@ void gPainter::renderText(const eRect &pos, const std::string &string, int flags
 	o.parm.renderText->bordercolor = bordercolor;
 	o.parm.renderText->markedpos = markedpos;
 	o.parm.renderText->offset = offset;
+	o.parm.renderText->tabwidth = tabwidth;
 	if (markedpos >= 0)
 		o.parm.renderText->scrollpos = eConfigManager::getConfigIntValue("config.usage.cursorscroll");
 	m_rc->submit(o);
@@ -796,6 +797,7 @@ void gDC::exec(const gOpcode *o)
 		break;
 	case gOpcode::renderText:
 	{
+		const char *ellipsis = reinterpret_cast<const char *>(u8"…");
 		ePtr<eTextPara> para = new eTextPara(o->parm.renderText->area);
 		int flags = o->parm.renderText->flags;
 		int border = o->parm.renderText->border;
@@ -804,14 +806,14 @@ void gDC::exec(const gOpcode *o)
 		if (markedpos != -1)
 			border = 0;
 		ASSERT(m_current_font);
-		para->setFont(m_current_font);
+		para->setFont(m_current_font, o->parm.renderText->tabwidth);
 
 		if (flags & gPainter::RT_ELLIPSIS)
 		{
 			if (flags & gPainter::RT_WRAP) // Remove wrap
 				flags -= gPainter::RT_WRAP;
 			std::string text = o->parm.renderText->text;
-			text += u8"…";
+			text += ellipsis;
 
 			eTextPara testpara(o->parm.renderText->area);
 			testpara.setFont(m_current_font);
@@ -826,7 +828,7 @@ void gDC::exec(const gOpcode *o)
 				if ((int)text.size() > ns)
 				{
 					text.resize(ns);
-					text += u8"…";
+					text += ellipsis;
 				}
 				if (o->parm.renderText->text)
 					free(o->parm.renderText->text);

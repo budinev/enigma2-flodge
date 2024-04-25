@@ -24,7 +24,7 @@ from Screens.MessageBox import MessageBox
 from Screens.ChoiceBox import ChoiceBox
 from Screens.Console import Console
 from Plugins.Plugin import PluginDescriptor
-from Tools.Directories import fileExists, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN
+from Tools.Directories import fileExists, fileReadLines, fileWriteLines, resolveFilename, SCOPE_PLUGINS, SCOPE_CURRENT_SKIN
 from Tools.LoadPixmap import LoadPixmap
 
 from skin import parseColor
@@ -51,7 +51,10 @@ config.pluginfilter.softcams = ConfigYesNo(default=True)
 config.pluginfilter.systemplugins = ConfigYesNo(default=True)
 config.pluginfilter.vix = ConfigYesNo(default=False)
 config.pluginfilter.weblinks = ConfigYesNo(default=True)
+config.pluginfilter.alternateGitHubDNS = ConfigYesNo(default=False)
 config.pluginfilter.userfeed = ConfigText(default="http://", fixed_size=False)
+
+MODULE_NAME = __name__.split(".")[-1]
 
 def CreateFeedConfig():
 	fileconf = "/etc/opkg/user-feed.conf"
@@ -277,9 +280,14 @@ class PluginBrowser(Screen, ProtectedScreen):
 		self.session.openWithCallback(self.PluginDownloadBrowserClosed, PluginDownloadBrowser, PluginDownloadBrowser.DOWNLOAD, self.firsttime)
 		self.firsttime = False
 
-	def PluginDownloadBrowserClosed(self):
-		self.updateList()
-		self.checkWarnings()
+	def PluginDownloadBrowserClosed(self, returnValue):
+		if returnValue == None:
+			self.updateList()
+			self.checkWarnings()
+		elif returnValue == 0:
+			self.download()
+		else:
+			self.delete()
 
 	def openExtensionmanager(self):
 		if fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/SoftwareManager/plugin.py")):
@@ -327,10 +335,8 @@ class PluginDownloadBrowser(Screen):
 		self.onChangedEntry = []
 		self["list"].onSelectionChanged.append(self.selectionChanged)
 
-		if self.type in (self.DOWNLOAD, self.MANAGE):
-			self["text"] = Label(_("Downloading plugin information. Please wait..."))
-		elif self.type == self.REMOVE:
-			self["text"] = Label(_("Getting plugin information. Please wait..."))
+		self["text"] = Label(_("Downloading plugin information. Please wait...") if self.type == self.DOWNLOAD else _("Getting plugin information. Please wait..."))
+		self["key_red" if self.type == self.DOWNLOAD else "key_green"] = Label(_("Remove plugins") if self.type == self.DOWNLOAD else _("Download plugins"))
 
 		self["key_red"] = StaticText(_("Close"))
 		self["key_green"] = StaticText("")
@@ -345,10 +351,11 @@ class PluginDownloadBrowser(Screen):
 			"cancel": (self.requestClose, _("Cancel / Close the screen")),
 			"ok": (self.go, _("Perform install/remove of the selected item"))
 		}, prio=0, description=_("Plugin Manager Actions"))
-
-		self.opkg = "/usr/bin/opkg"
-		self.opkg_install = self.opkg + " install --force-overwrite"
-		self.opkg_remove = self.opkg + " remove --autoremove --force-depends"
+		self["PluginDownloadActions"] = ActionMap(["ColorActions"],	{"red": self.delete} if self.type == self.DOWNLOAD else {"green": self.download})
+		if os.path.isfile('/usr/bin/opkg'):
+			self.opkg = "/usr/bin/opkg"
+			self.opkg_install = self.opkg + " install --force-overwrite"
+			self.opkg_remove = self.opkg + " remove --autoremove --force-depends"
 
 		self.opkgObj = OpkgComponent()
 		self.opkgObj.addCallback(self.opkgCallback)
@@ -451,7 +458,13 @@ class PluginDownloadBrowser(Screen):
 				mbox = self.session.openWithCallback(self.runInstall, MessageBox, _("Do you really want to remove the plugin \"%s\"?") % plugin.name, default=False)
 				mbox.setTitle(_("Remove Plugins"))
 
-	def requestClose(self):
+	def delete(self):
+		self.requestClose(1)
+
+	def download(self):
+		self.requestClose(0)
+
+	def requestClose(self, returnValue=None):
 		if self.plugins_changed:
 			plugins.readPluginList(resolveFilename(SCOPE_PLUGINS))
 		if self.reload_settings:
@@ -461,7 +474,7 @@ class PluginDownloadBrowser(Screen):
 		plugins.readPluginList(resolveFilename(SCOPE_PLUGINS))
 		self.container.appClosed.remove(self.runFinished)
 		self.container.dataAvail.remove(self.dataAvail)
-		self.close()
+		self.close(returnValue)
 
 	def resetPostInstall(self):
 		try:
@@ -737,7 +750,7 @@ class PluginBrowserNew(Screen):
 		self.plugins = []
 		self.current = 0
 		self.current_page = 0
-		if config.misc.plugin_style.value == "newstyle1":
+		if config.misc.plugin_style.value == "grid1":
 			self.backgroundPixmap = ""
 			self.backgroundColor = "#44000000"
 			self.foregroundColor = "#000080ff"
@@ -745,7 +758,7 @@ class PluginBrowserNew(Screen):
 			self.primaryColorLabel = "#DCE1E3"
 			self.secondaryColor = "#4e4e4e"
 			self.secondaryColorLabel = "#00000000"
-		elif config.misc.plugin_style.value == "newstyle2":
+		elif config.misc.plugin_style.value == "grid2":
 			self.backgroundPixmap = ""
 			self.backgroundColor = "#21292A"
 			self.foregroundColor = "#000080ff"
@@ -753,7 +766,7 @@ class PluginBrowserNew(Screen):
 			self.primaryColorLabel = "#DCE1E3"
 			self.secondaryColor = "#39474F"
 			self.secondaryColorLabel = "#00000000"
-		elif config.misc.plugin_style.value == "newstyle3":
+		elif config.misc.plugin_style.value == "grid3":
 			self.backgroundPixmap = ""
 			self.backgroundColor = "#44000000"
 			self.foregroundColor = "#000080ff"
@@ -761,7 +774,7 @@ class PluginBrowserNew(Screen):
 			self.primaryColorLabel = "#00ffffff"
 			self.secondaryColor = "#696969"
 			self.secondaryColorLabel = "#00000000"
-		elif config.misc.plugin_style.value == "newstyle4":
+		elif config.misc.plugin_style.value == "grid4":
 			if isFullHD():
 				self.backgroundPixmap = '<ePixmap position="0,0" size="1920,1080" pixmap="skin_default/style4.jpg" transparent="1" zPosition="-1" />'
 			else:
@@ -772,7 +785,7 @@ class PluginBrowserNew(Screen):
 			self.primaryColorLabel = "#00ffffff"
 			self.secondaryColor = "#1b3c85"
 			self.secondaryColorLabel = "#00ffc000"
-		elif config.misc.plugin_style.value == "newstyle5":
+		elif config.misc.plugin_style.value == "grid5":
 			if isFullHD():
 				self.backgroundPixmap = '<ePixmap position="0,0" size="1920,1080" pixmap="skin_default/style5.jpg" transparent="1" zPosition="-1" />'
 			else:
@@ -783,7 +796,7 @@ class PluginBrowserNew(Screen):
 			self.primaryColorLabel = "#00ffffff"
 			self.secondaryColor = "#1b3c85"
 			self.secondaryColorLabel = "#00ffc000"
-		elif config.misc.plugin_style.value == "newstyle6":
+		elif config.misc.plugin_style.value == "grid6":
 			if isFullHD():
 				self.backgroundPixmap = '<ePixmap position="0,0" size="1920,1080" pixmap="skin_default/style6.jpg" transparent="1" zPosition="-1" />'
 			else:
@@ -1185,9 +1198,14 @@ class PluginBrowserNew(Screen):
 		self.session.openWithCallback(self.PluginDownloadBrowserClosed, PluginDownloadBrowser, PluginDownloadBrowser.DOWNLOAD, self.firsttime)
 		self.firsttime = False
 
-	def PluginDownloadBrowserClosed(self):
-		self.updateList()
-		self.checkWarnings()
+	def PluginDownloadBrowserClosed(self, returnValue):
+		if returnValue == None:
+			self.updateList()
+			self.checkWarnings()
+		elif returnValue == 0:
+			self.download()
+		else:
+			self.delete()
 
 	def openExtensionmanager(self):
 		if fileExists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/SoftwareManager/plugin.py")):
@@ -1204,6 +1222,7 @@ class PluginFilter(ConfigListScreen, Screen):
 		self.session = session
 		self.skinName = "Setup"
 		Screen.setTitle(self, _("Plugin Filter..."))
+		self["description"] = Label("")
 		self["HelpWindow"] = Pixmap()
 		self["HelpWindow"].hide()
 		self["status"] = StaticText()
@@ -1246,6 +1265,7 @@ class PluginFilter(ConfigListScreen, Screen):
 		self.list.append((_("security"), config.pluginfilter.security, _("This allows you to show security modules in downloads")))
 		self.list.append((_("kernel modules"), config.pluginfilter.kernel, _("This allows you to show kernel modules in downloads")))
 		self.list.append((_("userfeed"), config.pluginfilter.userfeed, _("This allows you to show userfeed modules in downloads")))
+		self.list.append((_("Use alternate GitHub DNS"), config.pluginfilter.alternateGitHubDNS, _("Select 'Yes' to use alternate GitHub feed IP addresses. This can be helpful if you use a VPN and the normal feeds can't be accessed via the published DNS names")))
 
 		self["config"].list = self.list
 		self["config"].setList(self.list)
@@ -1254,6 +1274,7 @@ class PluginFilter(ConfigListScreen, Screen):
 
 	def selectionChanged(self):
 		self["status"].setText(self["config"].getCurrent()[2])
+		self["description"].text = self.getCurrentDescription()
 
 	def changedEntry(self):
 		for x in self.onChangedEntry:
@@ -1272,6 +1293,7 @@ class PluginFilter(ConfigListScreen, Screen):
 		configfile.save()
 
 	def keySave(self):
+		self.swapGitHubDNS()
 		self.saveAll()
 		self.close()
 
@@ -1288,10 +1310,20 @@ class PluginFilter(ConfigListScreen, Screen):
 		else:
 			self.close()
 
+	def swapGitHubDNS(self):
+		if config.pluginfilter.alternateGitHubDNS.isChanged():
+			lines = fileReadLines("/etc/hosts", source=MODULE_NAME)
+			lines = [line for line in lines if "raw.githubusercontent.com" not in line]
+			if config.pluginfilter.alternateGitHubDNS.value:
+				lines += ["%s raw.githubusercontent.com" % ip for ip in ("185.199.108.133", "185.199.109.133", "185.199.110.133", "185.199.111.133", "2606:50c0:8000::154", "2606:50c0:8001::154", "2606:50c0:8002::154", "2606:50c0:8003::154")]
+			fileWriteLines("/etc/hosts", lines, source=MODULE_NAME)
+
+
 class PluginDownloadManager(PluginDownloadBrowser):
 	def __init__(self, session):
 		PluginDownloadBrowser.__init__(self, session=session, type=self.MANAGE)
 		self.skinName = ["PluginDownloadBrowser"]
 
-if config.misc.plugin_style.value == "newstyle1" or config.misc.plugin_style.value == "newstyle2" or config.misc.plugin_style.value == "newstyle3" or config.misc.plugin_style.value == "newstyle4" or config.misc.plugin_style.value == "newstyle5" or config.misc.plugin_style.value == "newstyle6":
+
+if config.misc.plugin_style.value == "grid1" or config.misc.plugin_style.value == "grid2" or config.misc.plugin_style.value == "grid3" or config.misc.plugin_style.value == "grid4" or config.misc.plugin_style.value == "grid5" or config.misc.plugin_style.value == "grid6":
 	PluginBrowser = PluginBrowserNew

@@ -23,7 +23,11 @@ to generate HTML."""
 		self.listData = list or []
 		self.listStyle = "default"  # Style might be an optional string which can be used to define different visualizations in the skin.
 		self.onSelectionChanged = []
+		self.onListUpdated = []
 		self.disableCallbacks = False
+		self.__current = None
+		self.__index = None
+		self.connectedGuiElement = None
 
 	def enableAutoNavigation(self, enabled):
 		try:
@@ -38,6 +42,7 @@ to generate HTML."""
 	def setList(self, listData):
 		self.listData = listData
 		self.changed((self.CHANGED_ALL,))
+		self.listUpdated()
 
 	list = property(getList, setList)
 
@@ -52,6 +57,13 @@ to generate HTML."""
 
 	def count(self):
 		return len(self.listData)
+
+	def setConnectedGuiElement(self, guiElement):
+		self.connectedGuiElement = guiElement
+		index = guiElement.instance.getCurrentIndex()
+		self.__current = self.list[index]
+		self.__index = index
+		self.changed((self.CHANGED_ALL,))
 
 	def selectionChanged(self, index):
 		if self.disableCallbacks:
@@ -79,7 +91,10 @@ to generate HTML."""
 
 	@cached
 	def getCurrent(self):
-		return self.master is not None and self.master.current
+		if self.master:
+			if hasattr(self.master, "current"):
+				return self.master.current
+		return self.__current
 
 	current = property(getCurrent)
 
@@ -89,8 +104,14 @@ to generate HTML."""
 
 	def setCurrentIndex(self, index):
 		if self.master is not None:
-			self.master.index = index
+			if hasattr(self.master, "index"):
+				self.master.index = index
+			else:
+				self.__index = index
 			self.selectionChanged(index)
+		if self.connectedGuiElement is not None:
+			self.connectedGuiElement.moveSelection(index)
+
 
 	def setIndex(self, index):  # This method should be found and removed from all code.
 		return self.setCurrentIndex(index)
@@ -121,6 +142,10 @@ to generate HTML."""
 			self.changed((self.CHANGED_SPECIFIC, "style"))
 
 	style = property(getStyle, setStyle)
+
+	def listUpdated(self):
+		for x in self.onListUpdated:
+			x()
 
 	def show(self):
 		try:

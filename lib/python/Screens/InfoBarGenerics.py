@@ -2,7 +2,7 @@
 from Screens.ChannelSelection import ChannelSelection, BouquetSelector, SilentBouquetSelector
 
 from Components.ActionMap import ActionMap, HelpableActionMap, NumberActionMap
-from Components.Harddisk import harddiskmanager
+from Components.Harddisk import harddiskmanager, findMountPoint
 from Components.Input import Input
 from Components.Label import Label
 from Components.MovieList import AUDIO_EXTENSIONS, MOVIE_EXTENSIONS, DVD_EXTENSIONS
@@ -44,7 +44,7 @@ from Tools.Notifications import AddPopup, AddNotificationWithCallback, current_n
 from keyids import KEYFLAGS, KEYIDS, KEYIDNAMES
 
 from enigma import eAVControl, eTimer, eServiceCenter, eDVBServicePMTHandler, iServiceInformation, iPlayableService, eServiceReference, eEPGCache, eActionMap, getDesktop, eDVBDB
-
+from skin import findSkinScreen
 from time import time, localtime, strftime
 import os
 from os.path import isfile
@@ -62,7 +62,7 @@ iAVSwitch = AVSwitch()
 # hack alert!
 from Screens.Menu import MainMenu, mdom
 
-MODEL = BoxInfo.getItem("model", default="unknown")
+MODEL = BoxInfo.getItem("model")
 
 MODULE_NAME = __name__.split(".")[-1]
 
@@ -83,18 +83,19 @@ def setResumePoint(session):
 			if not pos[0]:
 				key = ref.toString()
 				lru = int(time())
-				l = seek.getLength()
-				if l:
-					l = l[1]
+				sl = seek.getLength()
+				if sl:
+					sl = sl[1]
 				else:
-					l = None
-				resumePointCache[key] = [lru, pos[1], l]
-				if len(resumePointCache) > 50:
-					candidate = key
-					for k, v in resumePointCache.items():
-						if v[0] < lru:
-							candidate = k
-					del resumePointCache[candidate]
+					sl = None
+				resumePointCache[key] = [lru, pos[1], sl]
+				for k, v in list(resumePointCache.items()):
+					if v[0] < lru:
+						candidate = k
+						filepath = os.path.realpath(candidate.split(':')[-1])
+						mountpoint = findMountPoint(filepath)
+						if os.path.ismount(mountpoint) and not os.path.exists(filepath):
+							del resumePointCache[candidate]
 				if lru - resumePointCacheLast > 3600:
 					saveResumePoints()
 
@@ -127,18 +128,27 @@ def saveResumePoints():
 	try:
 		f = open('/etc/enigma2/resumepoints.pkl', 'wb')
 		pickle.dump(resumePointCache, f, pickle.HIGHEST_PROTOCOL)
+		f.close()
 	except Exception as ex:
-		print("[InfoBar] Failed to write resumepoints:", ex)
+		print("[saveResumePoints] Failed to write resumepoints:", ex)
 	resumePointCacheLast = int(time())
 
 
 def loadResumePoints():
 	import pickle
 	try:
-		return pickle.load(open('/etc/enigma2/resumepoints.pkl', 'rb'))
+		f = open('/etc/enigma2/resumepoints.pkl', 'rb')
+		pickleFile = pickle.load(f)
+		f.close()
+		return pickleFile
 	except Exception as ex:
-		print("[InfoBar] Failed to load resumepoints:", ex)
+		print("[loadResumePoints] Failed to load resumepoints:", ex)
 		return {}
+
+
+def updateResumePointCache():
+	global resumePointCache
+	resumePointCache = loadResumePoints()
 
 
 resumePointCache = loadResumePoints()
@@ -146,14 +156,22 @@ resumePointCacheLast = int(time())
 
 
 class whitelist:
+	FILENAME_VBI = "/etc/enigma2/whitelist_vbi"
 	vbi = []
+	FILENAME_BOUQUETS = "/etc/enigma2/whitelist_bouquets"
+	bouquets = []
 
 
 def reload_whitelist_vbi():
-	whitelist.vbi = [line.strip() for line in open('/etc/enigma2/whitelist_vbi', 'r').readlines()] if isfile('/etc/enigma2/whitelist_vbi') else []
+	whitelist.vbi = [line.strip() for line in open(whitelist.FILENAME_VBI, 'r').readlines()] if os.path.isfile(whitelist.FILENAME_VBI) else []
+
+
+def reload_whitelist_bouquets():
+	whitelist.bouquets = [line.strip() for line in open(whitelist.FILENAME_BOUQUETS, 'r').readlines()] if os.path.isfile(whitelist.FILENAME_BOUQUETS) else []
 
 
 reload_whitelist_vbi()
+reload_whitelist_bouquets()
 
 
 class subservice:
@@ -183,21 +201,27 @@ def getPossibleSubservicesForCurrentChannel(current_service):
 
 
 def getActiveSubservicesForCurrentChannel(service):
-	info = service and service.info()
-	current_service = info and ':'.join(info.getInfoString(iServiceInformation.sServiceref).split(':')[:11])
 	activeSubservices = []
-	if current_service:
-		possibleSubservices = getPossibleSubservicesForCurrentChannel(current_service)
-		for subservice in possibleSubservices:
-			events = eEPGCache.getInstance().lookupEvent(['BDTS', (subservice, 0, -1)])
-			if events and len(events) == 1:
-				event = events[0]
-				title = event[2]
-				if title and "Sendepause" not in title:
-					starttime = datetime.datetime.fromtimestamp(event[0]).strftime('%H:%M')
-					endtime = datetime.datetime.fromtimestamp(event[0] + event[1]).strftime('%H:%M')
-					schedule = str(starttime) + "-" + str(endtime)
-					activeSubservices.append(("%s [%s] %s" % (ServiceReference(subservice).getServiceName(), schedule, title), subservice))
+	if info := service and service.info():
+		sRef = info.getInfoString(iServiceInformation.sServiceref)
+		url = "http://%s:%s/" % (config.misc.softcam_streamrelay_url.getHTML(), config.misc.softcam_streamrelay_port.value)
+		splittedRef = sRef.split(url.replace(":", "%3a"))
+		if len(splittedRef) > 1:
+			sRef = splittedRef[1].split(":")[0].replace("%3a", ":")
+		current_service = ':'.join(sRef.split(':')[:11])
+		if current_service:
+			possibleSubservices = getPossibleSubservicesForCurrentChannel(current_service)
+			epgCache = eEPGCache.getInstance()
+			for subservice in possibleSubservices:
+				events = epgCache.lookupEvent(['BDTS', (subservice, 0, -1)])
+				if events and len(events) == 1:
+					event = events[0]
+					title = event[2]
+					if title and "Sendepause" not in title:
+						starttime = datetime.datetime.fromtimestamp(event[0]).strftime('%H:%M')
+						endtime = datetime.datetime.fromtimestamp(event[0] + event[1]).strftime('%H:%M')
+						current_show_name = "%s [%s-%s]" % (title, str(starttime), str(endtime))
+						activeSubservices.append((current_show_name, subservice))
 	if not activeSubservices:
 		subservices = service and service.subServices()
 		if subservices:
@@ -208,7 +232,8 @@ def getActiveSubservicesForCurrentChannel(service):
 
 
 def hasActiveSubservicesForCurrentChannel(service):
-	return bool(getActiveSubservicesForCurrentChannel(service))
+	activeSubservices = getActiveSubservicesForCurrentChannel(service)
+	return bool(activeSubservices and len(activeSubservices))
 
 
 class InfoBarStreamRelay:
@@ -387,13 +412,23 @@ class InfoBarShowHide(InfoBarScreenSaver):
 
 		self.onShowHideNotifiers = []
 
-		self.actualSecondInfoBarScreen = None
+		self.actualSecondInfoBarScreen = self.InfoBarAdds = None
 		if isStandardInfoBar(self):
 			self.secondInfoBarScreen = self.session.instantiateDialog(SecondInfoBar, "SecondInfoBar")
 			self.secondInfoBarScreen.show()
+			self.secondInfoBarScreen.onShow.append(self.__SecondInfobarOnShow)
+			self.secondInfoBarScreen.onHide.append(self.__SecondInfobarOnHide)
 			self.secondInfoBarScreenSimple = self.session.instantiateDialog(SecondInfoBar, "SecondInfoBarSimple")
 			self.secondInfoBarScreenSimple.show()
+			self.secondInfoBarScreenSimple.onShow.append(self.__SecondInfobarOnShow)
+			self.secondInfoBarScreenSimple.onHide.append(self.__SecondInfobarOnHide)
 			self.actualSecondInfoBarScreen = config.usage.show_simple_second_infobar.value and self.secondInfoBarScreenSimple.skinAttributes and self.secondInfoBarScreenSimple or self.secondInfoBarScreen
+			if findSkinScreen("InfoBarAdds"):
+				self.InfoBarAdds = self.session.instantiateDialog(SecondInfoBar, "InfoBarAdds")
+				self.InfoBarAdds.show()
+
+		self.InfobarPluginScreens = [self.session.instantiateDialog(plugin) for plugin in plugins.getPlugins(where=PluginDescriptor.WHERE_INFOBAR_SCREEN)]
+		self.SecondInfobarPluginScreens = [self.session.instantiateDialog(plugin) for plugin in plugins.getPlugins(where=PluginDescriptor.WHERE_SECONDINFOBAR_SCREEN)]
 
 		from Screens.InfoBar import InfoBar
 		InfoBarInstance = InfoBar.instance
@@ -415,13 +450,19 @@ class InfoBarShowHide(InfoBarScreenSaver):
 		if self.actualSecondInfoBarScreen:
 			self.secondInfoBarScreen.hide()
 			self.secondInfoBarScreenSimple.hide()
+		if self.InfoBarAdds:
+			self.InfoBarAdds.hide()
 		self.hideVBILineScreen.hide()
 
 	def __onShow(self):
 		self.__state = self.STATE_SHOWN
 		for x in self.onShowHideNotifiers:
 			x(True)
+		for PluginScreen in self.InfobarPluginScreens:
+			PluginScreen.show()
 		self.startHideTimer()
+		if self.InfoBarAdds and config.usage.show_infobar_adds.value:
+			self.InfoBarAdds.show()
 
 	def __onHide(self):
 		self.__state = self.STATE_HIDDEN
@@ -431,6 +472,20 @@ class InfoBarShowHide(InfoBarScreenSaver):
 			self.actualSecondInfoBarScreen.hide()
 		for x in self.onShowHideNotifiers:
 			x(False)
+		for PluginScreen in self.InfobarPluginScreens:
+			PluginScreen.hide()
+		if self.InfoBarAdds:
+			self.InfoBarAdds.hide()
+
+	def __SecondInfobarOnShow(self):
+		for PluginScreen in self.InfobarPluginScreens:
+			PluginScreen.hide()
+		for PluginScreen in self.SecondInfobarPluginScreens:
+			PluginScreen.show()
+
+	def __SecondInfobarOnHide(self):
+		for PluginScreen in self.SecondInfobarPluginScreens:
+			PluginScreen.hide()
 
 	def resetAlpha(self):
 		if config.usage.show_infobar_do_dimming.value and self.lastResetAlpha is False:
@@ -459,19 +514,33 @@ class InfoBarShowHide(InfoBarScreenSaver):
 
 	def toggleShowLong(self):
 		if not config.usage.ok_is_channelselection.value:
-			self.toggleSecondInfoBar()
+			self.toggleViews()
 
 	def hideLong(self):
 		if config.usage.ok_is_channelselection.value:
+			self.toggleViews()
+
+	def toggleViews(self):
+		if self.shown:
+			self.toggleInfoBarAddon()
+		else:
 			self.toggleSecondInfoBar()
 
 	def toggleSecondInfoBar(self):
-		if self.actualSecondInfoBarScreen and not self.shown and not self.actualSecondInfoBarScreen.shown and self.secondInfoBarScreenSimple.skinAttributes and self.secondInfoBarScreen.skinAttributes:
+		if self.actualSecondInfoBarScreen and not self.actualSecondInfoBarScreen.shown and self.secondInfoBarScreenSimple.skinAttributes and self.secondInfoBarScreen.skinAttributes:
 			self.actualSecondInfoBarScreen.hide()
 			config.usage.show_simple_second_infobar.value = not config.usage.show_simple_second_infobar.value
 			config.usage.show_simple_second_infobar.save()
 			self.actualSecondInfoBarScreen = config.usage.show_simple_second_infobar.value and self.secondInfoBarScreenSimple or self.secondInfoBarScreen
 			self.showSecondInfoBar()
+
+	def toggleInfoBarAddon(self):
+		if self.InfoBarAdds and (self.actualSecondInfoBarScreen and not self.actualSecondInfoBarScreen.shown or not self.actualSecondInfoBarScreen):
+			config.usage.show_infobar_adds.value = not config.usage.show_infobar_adds.value
+			if config.usage.show_infobar_adds.value:
+				self.InfoBarAdds.show()
+			else:
+				self.InfoBarAdds.hide()
 
 	def keyHide(self):
 		if self.__state == self.STATE_HIDDEN and self.session.pipshown and "popup" in config.usage.pip_hideOnExit.value:
@@ -532,7 +601,7 @@ class InfoBarShowHide(InfoBarScreenSaver):
 	def doHide(self):
 		if self.__state != self.STATE_HIDDEN:
 			if self.dimmed > 0:
-				self.doWriteAlpha(int(int(config.av.osd_alpha.value) * int(self.dimmed) / int(config.usage.show_infobar_dimming_speed.value)))
+				self.doWriteAlpha((config.av.osd_alpha.value * self.dimmed / config.usage.show_infobar_dimming_speed.value))
 				self.DimmingTimer.start(5, True)
 			else:
 				self.DimmingTimer.stop()
@@ -609,6 +678,9 @@ class InfoBarShowHide(InfoBarScreenSaver):
 					return ".hidevbi." in servicepath.lower()
 		return service and service.toString() in whitelist.vbi
 
+	def checkBouquets(self, bouquet):
+		return bouquet in whitelist.bouquets
+
 	def showHideVBI(self):
 		if self.checkHideVBI():
 			self.hideVBILineScreen.show()
@@ -623,8 +695,15 @@ class InfoBarShowHide(InfoBarScreenSaver):
 				whitelist.vbi.remove(service)
 			else:
 				whitelist.vbi.append(service)
-			open('/etc/enigma2/whitelist_vbi', 'w').write('\n'.join(whitelist.vbi))
+			open(whitelist.FILENAME_VBI, 'w').write('\n'.join(whitelist.vbi))
 			self.showHideVBI()
+
+	def ToggleBouquet(self, bouquet):
+		if bouquet in whitelist.bouquets:
+			whitelist.bouquets.remove(bouquet)
+		else:
+			whitelist.bouquets.append(bouquet)
+		open(whitelist.FILENAME_BOUQUETS, 'w').write('\n'.join(whitelist.bouquets))
 
 	def checkStreamrelay(self, service=None):
 		return streamrelay.check(self.session.nav, service)

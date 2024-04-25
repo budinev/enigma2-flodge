@@ -33,13 +33,24 @@ class Pager(GUIAddon):
 	def onContainerShown(self):
 		# disable listboxes default scrollbars
 		if hasattr(self.source, "instance") and hasattr(self.source.instance, "setScrollbarMode"):
-			self.source.instance.setScrollbarMode(2)
+			self.source.instance.setScrollbarMode(eListbox.showNever)
 
-		if self.initPager not in self.source.onSelectionChanged:
-			self.source.onSelectionChanged.append(self.initPager)
+		if self.source and hasattr(self.source, "onVisibilityChange"):
+			self.source.onVisibilityChange.append(self.onSourceVisibleChanged)
+
+		onSelectionChanged = x if (x := getattr(self.source, "onSelectionChanged", None)) is not None else getattr(self.source, "onSelChanged", None)
+
+		if isinstance(onSelectionChanged, list) and self.initPager not in onSelectionChanged:
+			onSelectionChanged.append(self.initPager)
 		self.initPager()
 
 	GUI_WIDGET = eListbox
+
+	def onSourceVisibleChanged(self, visible):
+		if visible:
+			self.show()
+		else:
+			self.hide()
 
 	def buildEntry(self, currentPage, pageCount):
 		width = self.l.getItemSize().width()
@@ -140,7 +151,7 @@ class Pager(GUIAddon):
 
 	def getSourceOrientation(self):
 		if isinstance(self.source, List):  # Components.Sources.List
-			orig_source = self.source.master.master
+			orig_source = self.source.connectedGuiElement or self.source.master.master
 		else:
 			orig_source = self.source
 		if hasattr(orig_source, "instance") and hasattr(orig_source.instance, "getOrientation"):
@@ -154,7 +165,7 @@ class Pager(GUIAddon):
 
 	def getSourceSize(self):
 		if isinstance(self.source, List):  # Components.Sources.List
-			return self.source.master.master.instance.size()
+			return self.source.connectedGuiElement and self.source.connectedGuiElement.instance.size() or self.source.master.master.instance.size()
 		return self.source.instance.size()
 
 	def getListCount(self):
@@ -168,7 +179,7 @@ class Pager(GUIAddon):
 
 	def getListItemSize(self):
 		if isinstance(self.source, List):  # Components.Sources.List
-			orig_source = self.source.master.master
+			orig_source = self.source.connectedGuiElement or self.source.master.master
 		else:
 			orig_source = self.source
 		if hasattr(orig_source, 'content'):

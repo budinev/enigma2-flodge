@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: enigma2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-17 11:25+0100\n"
-"PO-Revision-Date: 2023-12-17 11:26+0100\n"
+"POT-Creation-Date: 2024-03-10 21:56+0100\n"
+"PO-Revision-Date: 2024-03-10 22:03+0100\n"
 "Last-Translator: Pr2\n"
 "Language-Team: french\n"
 "Language: fr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 msgid ""
 "\n"
@@ -368,8 +368,8 @@ msgstr "(ZAP)"
 msgid "(activated +%d min)"
 msgstr "(activé + %d min)"
 
-msgid "(current)"
-msgstr "(actuel)"
+msgid "(current image)"
+msgstr "(image actuelle)"
 
 msgid "(empty)"
 msgstr "(Vide)"
@@ -1644,6 +1644,9 @@ msgstr "Chaîne"
 
 msgid "Channel Info"
 msgstr "Info chaîne"
+
+msgid "Channel Selection"
+msgstr "Sélection des chaînes"
 
 msgid "Channel context menu"
 msgstr "Menu contextuel de la chaîne"
@@ -3212,12 +3215,6 @@ msgstr "Activer le scan rapide automatique"
 msgid "Enable auto fastscan for %s"
 msgstr "Activer le scan rapide automatique pour %s"
 
-msgid "Enable blink functionality for some areas like record icon."
-msgstr "Activer la fonctionnalité de clignotement pour certaines zones comme l'icône d'enregistrement."
-
-msgid "Enable blinking"
-msgstr "Activer le clignotement"
-
 msgid "Enable bluetooth audio"
 msgstr "Activer l'audio bluetooth"
 
@@ -4173,6 +4170,9 @@ msgstr "Adresse HDMI-CEC"
 msgid "HDMI-CEC setup"
 msgstr "Configurer HDMI-CEC"
 
+msgid "HDMI-In"
+msgstr "HDMI-In"
+
 msgid "HDR10 support"
 msgstr "support HDR10"
 
@@ -4574,6 +4574,12 @@ msgstr "Paramètres du périphérique d’entrée"
 
 msgid "Input devices"
 msgstr "Périphériques d’entrée"
+
+msgid "Insert Service"
+msgstr "Insérer un service"
+
+msgid "Insert entry"
+msgstr "Insérer une entrée"
 
 msgid "Install"
 msgstr "Installer"
@@ -5754,6 +5760,9 @@ msgstr "Nombre de texte se répétant sur l'écran."
 msgid "Number or SMS style data entry"
 msgstr "Saisie de données de type numéro ou SMS"
 
+msgid "OE Version: "
+msgstr "Version OE: "
+
 msgid "OK"
 msgstr "OK"
 
@@ -6055,6 +6064,9 @@ msgstr "Bandes noires"
 
 msgid "Pilot"
 msgstr "Pilote"
+
+msgid "Pin Userbouquet"
+msgstr "Épingler le favori"
 
 msgid "Pitcairn"
 msgstr "Pitcairn"
@@ -7529,6 +7541,9 @@ msgstr "Sélectionner Fast DiSEqC si votre système aérien le supporte. Si vous
 msgid "Select HDD"
 msgstr "Sélectionner le disque dur"
 
+msgid "Select Service"
+msgstr "Sélectionner le service"
+
 msgid "Select Softcam"
 msgstr "Sélectionner un Softcam"
 
@@ -7644,14 +7659,26 @@ msgstr "Sélectionner la vitesse rafraîchissement"
 msgid "Select satellites"
 msgstr "Sélectionner les satellites"
 
+msgid "Select service name"
+msgstr "Sélectionner le nom du service"
+
 msgid "Select service to add..."
 msgstr "Sélectionner le service à ajouter..."
+
+msgid "Select service type"
+msgstr "Sélectionner le type de service"
 
 msgid "Select slot"
 msgstr "Sélectionner un slot"
 
 msgid "Select sort method:"
 msgstr "Sélectionner la méthode de tri:"
+
+msgid "Select stream URL"
+msgstr "Sélectionner l'URL du flux"
+
+msgid "Select stream type"
+msgstr "Sélectionner le type de flux"
 
 msgid "Select target folder"
 msgstr "Sélectionner le dossier cible"
@@ -7824,6 +7851,12 @@ msgstr "Services & PIDs"
 
 msgid "Service ID"
 msgstr "ID du service"
+
+msgid "Service Name"
+msgstr "Nom du service"
+
+msgid "Service Type"
+msgstr "Type de service"
 
 msgid "Service belongs to a parental protected bouquet"
 msgstr "Service est dans un bouquet de la protection parentale"
@@ -8807,6 +8840,12 @@ msgstr "Flux"
 msgid "Stream Relay delay"
 msgstr "Délai du Stream Relay"
 
+msgid "Stream Type"
+msgstr "Type du flux"
+
+msgid "Stream URL"
+msgstr "URL du flux"
+
 msgid "Stream request"
 msgstr "Demande de flux"
 
@@ -9037,7 +9076,7 @@ msgstr ""
 "\n"
 "Support: https://www.openpli.org/\n"
 "Traducteur: Pr2\n"
-"Dernière MÀJ: 17-12-2023"
+"Dernière MÀJ: 10-03-2024"
 
 msgid "TS file is too large for ISO9660 level 1!"
 msgstr "Fichier TS trop grand pour le niveau 1 ISO9660!"
@@ -9168,6 +9207,13 @@ msgid ""
 msgstr ""
 "Le répertoire %s n'est pas inscriptible.\n"
 "Vérifier d'avoir choisi un répertoire inscriptible à la place."
+
+msgid ""
+"The enigma.info file for the boxinformation is not available or the content is invalid.\n"
+"Press any key to continue?"
+msgstr ""
+"Le fichier enigma.info pour les informations du récepteur n'est pas disponible ou son contenu n'est pas valide.\n"
+"Appuyez sur une touche pour continuer."
 
 msgid "The following files were found..."
 msgstr "Les fichiers suivant ont été trouvés..."
@@ -9983,6 +10029,9 @@ msgstr "Démarquer le service comme un service dédié à la 3D"
 
 msgid "Unmount"
 msgstr "Démonter"
+
+msgid "Unpin Userbouquet"
+msgstr "Désépingler le favori"
 
 msgid "Unsupported"
 msgstr "Non supporté"
@@ -11506,6 +11555,9 @@ msgstr "Saisir cette frame comme bitmap"
 
 msgid "green"
 msgstr "Vert"
+
+msgid "half an hour"
+msgstr "une demi-heure"
 
 msgid "handicraft"
 msgstr "Artisanat"

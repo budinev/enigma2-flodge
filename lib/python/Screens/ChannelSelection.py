@@ -1,30 +1,32 @@
 # -*- coding: utf-8 -*-
-from Tools.Profile import profile
-
 from Screens.Screen import Screen
 import Screens.InfoBar
 from Screens.ScreenSaver import InfoBarScreenSaver
 import Components.ParentalControl
 from Components.Button import Button
+from Components.ConfigList import ConfigListScreen
+from Components.Label import Label
+from Components.Sources.Boolean import Boolean
+from Components.Pixmap import Pixmap
 from Components.ServiceList import ServiceList, refreshServiceList
 from Components.ActionMap import NumberActionMap, ActionMap, HelpableActionMap
 from Components.MenuList import MenuList
 from Components.ServiceEventTracker import ServiceEventTracker, InfoBarBase
-profile("ChannelSelection.py 1")
+from enigma import eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, loadPNG, eProfileWrite
+eProfileWrite("ChannelSelection.py 1")
 from Screens.EpgSelection import EPGSelection
-from enigma import eServiceReference, eEPGCache, eServiceCenter, eRCInput, eTimer, eDVBDB, iPlayableService, iServiceInformation, getPrevAsciiCode, loadPNG
-from Components.config import config, configfile, ConfigSubsection, ConfigText, ConfigYesNo
+from Components.config import config, configfile, ConfigSubsection, ConfigText, ConfigYesNo, ConfigSelection, ConfigText
 from Tools.NumericalTextInput import NumericalTextInput
-profile("ChannelSelection.py 2")
+eProfileWrite("ChannelSelection.py 2")
 from Components.NimManager import nimmanager
-profile("ChannelSelection.py 2.1")
+eProfileWrite("ChannelSelection.py 2.1")
 from Components.Sources.RdsDecoder import RdsDecoder
-profile("ChannelSelection.py 2.2")
+eProfileWrite("ChannelSelection.py 2.2")
 from Components.Sources.ServiceEvent import ServiceEvent
 from Components.Sources.Event import Event
-profile("ChannelSelection.py 2.3")
+eProfileWrite("ChannelSelection.py 2.3")
 from Components.Input import Input
-profile("ChannelSelection.py 3")
+eProfileWrite("ChannelSelection.py 3")
 from Components.ChoiceList import ChoiceList, ChoiceEntryComponent
 from Components.SystemInfo import BoxInfo
 from Components.Sources.StaticText import StaticText
@@ -33,7 +35,7 @@ from Screens.VirtualKeyBoard import VirtualKeyBoard
 from Screens.MessageBox import MessageBox
 from Screens.ServiceInfo import ServiceInfo
 from Screens.Hotkey import InfoBarHotkey, hotkeyActionMap, hotkey
-profile("ChannelSelection.py 4")
+eProfileWrite("ChannelSelection.py 4")
 from Screens.PictureInPicture import PictureInPicture
 from Screens.RdsDisplay import RassInteractive
 from ServiceReference import ServiceReference, getStreamRelayRef
@@ -51,11 +53,74 @@ from time import time, localtime, strftime
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
 from Components.Renderer.Picon import getPiconName
-profile("ChannelSelection.py after imports")
+eProfileWrite("ChannelSelection.py after imports")
 
 FLAG_SERVICE_NEW_FOUND = 64
 FLAG_IS_DEDICATED_3D = 128
 FLAG_CENTER_DVB_SUBS = 2048 #define in lib/dvb/idvb.h as dxNewFound = 64 and dxIsDedicated3D = 128
+
+
+class InsertService(ConfigListScreen, Screen):
+	def __init__(self, session):
+		Screen.__init__(self, session)
+		self.skinName = ["Setup"]
+		ConfigListScreen.__init__(self, [], session=session, on_change=self.changedEntry)
+
+		self["actions2"] = ActionMap(["SetupActions"],
+		{
+			"ok": self.run,
+			"cancel": boundFunction(self.close, None),
+			"save": self.run,
+		}, -2)
+
+		self["key_red"] = StaticText(_("Exit"))
+		self["key_green"] = StaticText(_("Save"))
+
+		self["description"] = Label("")
+		self["VKeyIcon"] = Boolean(False)
+		self["HelpWindow"] = Pixmap()
+		self["HelpWindow"].hide()
+
+		self.createConfig()
+		self.changedEntry()
+
+	def createConfig(self):
+		choices = [("Select Service", _("Select Service"))]
+		if BoxInfo.getItem("HasHDMIin"):
+			choices = [("HDMI-in", _("HDMI-In"))]
+		choices.append(("IPTV stream", _("Enter URL")))
+		self.servicetype = ConfigSelection(choices=choices)
+		self.streamtype = ConfigSelection(["1", "4097", "5001", "5002"])
+		self.streamurl = ConfigText("http://some_url_to_stream")
+		self.servicename = ConfigText("default_name")
+
+	def createSetup(self):
+		self.list = []
+		self.list.append((_("Service Type"), self.servicetype, _("Select service type")))
+		if self.servicetype.value != "Select Service":
+			if self.servicetype.value != "HDMI-in":
+				self.list.append((_("Stream Type"), self.streamtype, _("Select stream type")))
+				self.list.append((_("Stream URL"), self.streamurl, _("Select stream URL")))
+			self.list.append((_("Service Name"), self.servicename, _("Select service name")))
+		self["config"].list = self.list
+
+	def changedEntry(self):
+		if self.servicetype.value == "HDMI-in":
+			self.servicerefstring = '8192:0:1:0:0:0:0:0:0:0::%s' % self.servicename.value
+		else:
+			self.servicerefstring = '%s:0:1:0:0:0:0:0:0:0:%s:%s' % (self.streamtype.value, self.streamurl.value.replace(':', '%3a'), self.servicename.value)
+		Screen.setTitle(self, '%s [%s]' % (_("Insert Service"), self.servicerefstring))
+		self.createSetup()
+
+	def run(self):
+		if self.servicetype.value == "Select Service":
+			self.session.openWithCallback(self.channelSelectionCallback, SimpleChannelSelection, _("Select channel"))
+		else:
+			self.close(eServiceReference(self.servicerefstring))
+
+	def channelSelectionCallback(self, *args):
+		if len(args):
+			self.close(args[0])
 
 
 class BouquetSelector(Screen):
@@ -147,6 +212,7 @@ class ChannelContextMenu(Screen):
 				"1": self.unhideParentalServices,
 				"2": self.renameEntry,
 				"3": self.findCurrentlyPlayed,
+				"4": self.insertEntry,
 				"5": self.addServiceToBouquetOrAlternative,
 				"6": self.toggleMoveModeSelect,
 				"8": self.removeEntry
@@ -160,7 +226,7 @@ class ChannelContextMenu(Screen):
 		current_root = csel.getRoot()
 		current_sel_path = current.getPath()
 		current_sel_flags = current.flags
-		inBouquetRootList = current_root and 'FROM BOUQUET "bouquets.' in current_root.getPath() #FIXME HACK
+		self.inBouquetRootList = current_root and 'FROM BOUQUET "bouquets.' in current_root.getPath() #FIXME HACK
 		inAlternativeList = current_root and 'FROM BOUQUET "alternatives' in current_root.getPath()
 		self.inBouquet = csel.getMutableList() is not None
 		haveBouquets = config.usage.multibouquet.value
@@ -170,7 +236,7 @@ class ChannelContextMenu(Screen):
 		if not (current_sel_path or current_sel_flags & (eServiceReference.isDirectory | eServiceReference.isMarker)) or current_sel_flags & eServiceReference.isGroup:
 			append_when_current_valid(current, menu, (_("Show transponder info"), self.showServiceInformations), level=2)
 		if csel.bouquet_mark_edit == OFF and not csel.entry_marked:
-			if not inBouquetRootList:
+			if not self.inBouquetRootList:
 				isPlayable = not (current_sel_flags & (eServiceReference.isMarker | eServiceReference.isDirectory))
 				if isPlayable:
 					for p in plugins.getPlugins(PluginDescriptor.WHERE_CHANNEL_CONTEXT_MENU):
@@ -209,7 +275,6 @@ class ChannelContextMenu(Screen):
 								append_when_current_valid(current, menu, (_("Do not center DVB subs on this service"), self.removeCenterDVBSubsFlag), level=2)
 							else:
 								append_when_current_valid(current, menu, (_("Do center DVB subs on this service"), self.addCenterDVBSubsFlag), level=2)
-
 					if haveBouquets:
 						bouquets = self.csel.getBouquetList()
 						if bouquets is None:
@@ -253,6 +318,8 @@ class ChannelContextMenu(Screen):
 					if not inAlternativeList:
 						append_when_current_valid(current, menu, (_("Remove entry"), self.removeEntry), level=0, key="8")
 						self.removeFunction = self.removeCurrentService
+						if config.usage.setup_level.index >= 2:
+							menu.append(ChoiceEntryComponent("4", (_("Insert entry"), self.insertService)))
 				if current_root and ("flags == %d" % (FLAG_SERVICE_NEW_FOUND)) in current_root.getPath():
 					append_when_current_valid(current, menu, (_("Remove new found flag"), self.removeNewFoundFlag), level=0)
 			else:
@@ -263,13 +330,17 @@ class ChannelContextMenu(Screen):
 						append_when_current_valid(current, menu, (_("Add bouquet to parental protection"), boundFunction(self.addParentalProtection, current)), level=0)
 					else:
 						append_when_current_valid(current, menu, (_("Remove bouquet from parental protection"), boundFunction(self.removeParentalProtection, current)), level=0)
-				menu.append(ChoiceEntryComponent("dummy", (_("Add bouquet"), self.showBouquetInputBox)))
+				menu.append(ChoiceEntryComponent("4", (_("Add bouquet"), self.showBouquetInputBox)))
 				append_when_current_valid(current, menu, (_("Rename entry"), self.renameEntry), level=0, key="2")
 				append_when_current_valid(current, menu, (_("Remove entry"), self.removeEntry), level=0, key="8")
 				self.removeFunction = self.removeBouquet
 				if removed_userbouquets_available():
 					append_when_current_valid(current, menu, (_("Purge deleted user bouquets"), self.purgeDeletedBouquets), level=0)
 					append_when_current_valid(current, menu, (_("Restore deleted user bouquets"), self.restoreDeletedBouquets), level=0)
+				if Screens.InfoBar.InfoBar.instance.checkBouquets(current.toString().split('"')[1]):
+					append_when_current_valid(current, menu, (_("Unpin Userbouquet"), self.toggleBouquet), level=2)
+				else:
+					append_when_current_valid(current, menu, (_("Pin Userbouquet"), self.toggleBouquet), level=2)
 				append_when_current_valid(current, menu, (_("Reload services/bouquets list"), self.reloadServicesBouquets), level=2)
 		if self.inBouquet: # current list is editable?
 			if csel.bouquet_mark_edit == OFF:
@@ -280,7 +351,7 @@ class ChannelContextMenu(Screen):
 				if csel.entry_marked and not inAlternativeList:
 					append_when_current_valid(current, menu, (_("Remove entry"), self.removeEntry), level=0, key="8")
 					self.removeFunction = self.removeCurrentService
-				if not csel.entry_marked and not inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
+				if not csel.entry_marked and not self.inBouquetRootList and current_root and not (current_root.flags & eServiceReference.isGroup):
 					if current.type != -1:
 						menu.append(ChoiceEntryComponent("dummy", (_("Add marker"), self.showMarkerInputBox)))
 					if BoxInfo.getItem("HasHDMIin"):
@@ -315,6 +386,12 @@ class ChannelContextMenu(Screen):
 		menu.append(ChoiceEntryComponent("menu", (_("Settings..."), self.openSetup)))
 		self["menu"] = ChoiceList(menu)
 
+	def insertEntry(self):
+		if self.inBouquetRootList:
+			self.showBouquetInputBox()
+		else:
+			self.insertService()
+
 	def set3DMode(self, value):
 		playingref = self.session.nav.getCurrentlyPlayingServiceReference()
 		if config.plugins.OSD3DSetup.mode.value == "auto" and (playingref and playingref == self.csel.getCurrentSelection()):
@@ -336,6 +413,10 @@ class ChannelContextMenu(Screen):
 	def toggleVBI(self):
 		Screens.InfoBar.InfoBar.instance.ToggleHideVBI(self.csel.getCurrentSelection())
 		Screens.InfoBar.InfoBar.instance.showHideVBI()
+		self.close()
+
+	def toggleBouquet(self):
+		Screens.InfoBar.InfoBar.instance.ToggleBouquet(self.csel.getCurrentSelection().toString().split('"')[1])
 		self.close()
 
 	def toggleStreamrelay(self):
@@ -378,6 +459,14 @@ class ChannelContextMenu(Screen):
 			name = name.replace('\xc2\x86', '').replace('\xc2\x87', '')
 			return name
 		return ""
+
+	def insertService(self):
+		self.session.openWithCallback(self.insertServiceCallback, InsertService)
+
+	def insertServiceCallback(self, answer):
+		if answer:
+			self.csel.insertService(answer)
+			self.close()
 
 	def removeEntry(self):
 		if self.removeFunction and self.csel.servicelist.getCurrent() and self.csel.servicelist.getCurrent().valid():
@@ -473,8 +562,7 @@ class ChannelContextMenu(Screen):
 				current = self.session.nav.getCurrentlyPlayingServiceReference()
 			else:
 				current = eServiceReference(GetWithAlternative(current.toString()))
-		self.session.open(ServiceInfo, current)
-		self.close()
+		self.session.openWithCallback(self.close, ServiceInfo, current)
 
 	def setStartupService(self):
 		self.session.openWithCallback(self.setStartupServiceCallback, MessageBox, _("Set startup service"), list=[(_("Only on startup"), "startup"), (_("Also on standby"), "standby")])
@@ -1000,6 +1088,15 @@ class ChannelSelectionEdit:
 			if not mutableList.addService(ref, current):
 				self.servicelist.addService(ref, True)
 				mutableList.flushChanges()
+
+	def insertService(self, serviceref):
+		current = self.servicelist.getCurrent()
+		mutableList = self.getMutableList()
+		if mutableList:
+			if not mutableList.addService(serviceref, current):
+				mutableList.flushChanges()
+				self.servicelist.addService(serviceref, True)
+				self.servicelist.resetRoot()
 
 	def addMarker(self, name):
 		current = self.servicelist.getCurrent()
@@ -1986,6 +2083,7 @@ class ChannelSelection(ChannelSelectionBase, ChannelSelectionEdit, ChannelSelect
 				"ok": self.channelSelected,
 				"keyRadio": self.doRadioButton,
 				"keyTV": self.doTVButton,
+				"toggleTvRadio": self.toggleTVRadio,
 			})
 
 		self.__event_tracker = ServiceEventTracker(screen=self, eventmap={
@@ -2094,6 +2192,12 @@ class ChannelSelection(ChannelSelectionBase, ChannelSelectionEdit, ChannelSelect
 			config.servicelist.lastmode.value = "radio"
 			self.setRadioMode()
 			self.setMode()
+
+	def toggleTVRadio(self):
+		if self.mode == MODE_TV:
+			self.doRadioButton()
+		else:
+			self.doTVButton()
 
 	def __onCreate(self):
 		if config.usage.e1like_radio_mode.value:
@@ -2712,6 +2816,7 @@ class SimpleChannelSelection(ChannelSelectionBase, SelectionEventInfo):
 				"ok": self.channelSelected,
 				"keyRadio": self.setModeRadio,
 				"keyTV": self.setModeTv,
+				"toggleTvRadio": self.toggleTVRadio,
 			})
 		self.bouquet_mark_edit = OFF
 		if isinstance(title, str):
@@ -2758,45 +2863,42 @@ class SimpleChannelSelection(ChannelSelectionBase, SelectionEventInfo):
 		self.setRadioMode()
 		self.showFavourites()
 
+	def toggleTVRadio(self):
+		if self.mode == MODE_TV :
+			self.setModeRadio()
+		else:
+			self.setModeTv()
+
 	def getMutableList(self, root=None):
 		return None
 
 
 class HistoryZapSelector(Screen, HelpableScreen):
-	def __init__(self, session, historyItems, markedItem=0, selectedItem=0):
+	# HISTORY_SPACER = 0
+	# HISTORY_MARKER = 1
+	# HISTORY_SERVICE_NAME = 2
+	# HISTORY_EVENT_NAME = 3
+	# HISTORY_EVENT_DESCRIPTION = 4
+	# HISTORY_EVENT_DURATION = 5
+	# HISTORY_SERVICE_PICON = 6
+	HISTORY_SERVICE_REFERENCE = 7
+
+	def __init__(self, session, serviceReferences, markedItem=0, selectedItem=0):
 		Screen.__init__(self, session)
 		HelpableScreen.__init__(self)
 		self.setTitle(_("History Zap"))
-		print("[ChannelSelection] HistoryZapSelector DEBUG: Setting title='%s'." % self.getTitle())
-		self["key_red"] = StaticText(_("Cancel"))
-		self["key_green"] = StaticText(_("Select"))
-		self["actions"] = HelpableActionMap(self, ["SelectCancelActions", "InfobarCueSheetActions"], {
-			"cancel": (self.keyCancel, _("Cancel the service zap")),
-			"select": (self.keySelect, _("Select the currently highlighted service"))
-		}, prio=0, description=_("History Zap Actions"))
-		self["navigationActions"] = HelpableActionMap(self, ["NavigationActions", "PreviousNextActions"], {
-			"right": (self.keyTop, _("Move to the first line / screen")),
-			"pageUp": (self.keyPageUp, _("Move up a screen")),
-			"previous": (self.keyUp, _("Move up a line")),
-			"next": (self.keyDown, _("Move down a line")),
-			"up": (self.keyUp, _("Move up a line")),
-			"down": (self.keyDown, _("Move down a line")),
-			"pageDown": (self.keyPageDown, _("Move down a screen")),
-			"left": (self.keyBottom, _("Move to the last line / screen"))
-		}, prio=0, description=_("History Zap Navigation Actions"))
 		serviceHandler = eServiceCenter.getInstance()
 		historyList = []
-		for index, historyItem in enumerate(historyItems):
-			info = serviceHandler.info(historyItem)
+		for index, serviceReference in enumerate(serviceReferences):
+			info = serviceHandler.info(serviceReference)
 			if info:
-				serviceName = info.getName(historyItem) or ""
+				serviceName = info.getName(serviceReference) or ""
 				eventName = ""
 				eventDescription = ""
 				eventDuration = ""
-				event = info.getEvent(historyItem)
+				event = info.getEvent(serviceReference)
 				if event:
 					eventName = event.getEventName() or ""
-					# eventName = eventName.replace("(18+)", "").replace("18+", "").replace("(16+)", "").replace("16+", "").replace("(12+)", "").replace("12+", "").replace("(7+)", "").replace("7+", "").replace("(6+)", "").replace("6+", "").replace("(0+)", "").replace("0+", "")  # TODO: What are all these string replacements doing?
 					eventDescription = event.getShortDescription()
 					if not eventDescription:
 						eventDescription = event.getExtendedDescription() or ""
@@ -2807,14 +2909,35 @@ class HistoryZapSelector(Screen, HelpableScreen):
 						prefix = "+" if remaining > 0 else ""
 						localBegin = localtime(begin)
 						localEnd = localtime(end)
-						eventDuration = _("%s  -  %s    (%s%d Min)") % (strftime(config.usage.time.short.value, localBegin), strftime(config.usage.time.short.value, localEnd), prefix, remaining)
-				servicePicon = getPiconName(str(ServiceReference(historyItem)))
+						eventDuration = f"{strftime(config.usage.time.short.value, localBegin)}  -  {strftime(config.usage.time.short.value, localEnd)}    ({prefix}{ngettext('%d Min', '%d Mins', remaining) % remaining})"
+				servicePicon = getPiconName(str(ServiceReference(serviceReference)))
 				servicePicon = loadPNG(servicePicon) if servicePicon else ""
-				# List entries: ("", ServiceMarked, ServiceName, EventName, EventDescription, EventDuration, ServicePicon, ServiceReference)
-				historyList.append(("", index == markedItem and "\u00BB" or "", serviceName, eventName, eventDescription, eventDuration, servicePicon, historyItem))
-		historyList.reverse()
-		self.selectedItem = len(historyList) - selectedItem - 1
+				historyList.append(("", index == markedItem and "\u00BB" or "", serviceName, eventName, eventDescription, eventDuration, servicePicon, serviceReference))
+		if config.usage.zapHistorySort.value == 0:
+			historyList.reverse()
+			self.selectedItem = len(historyList) - selectedItem - 1
+		else:
+			self.selectedItem = selectedItem
 		self["menu"] = List(historyList)
+		self["key_red"] = StaticText(_("Cancel"))
+		self["key_green"] = StaticText(_("Select"))
+		self["actions"] = HelpableActionMap(self, ["SelectCancelActions"], {
+			"select": (self.keySelect, _("Select the currently highlighted service")),
+			"cancel": (self.keyCancel, _("Cancel the service history zap"))
+		}, prio=0, description=_("History Zap Actions"))
+		previousNext = ("previous", "next") if config.usage.zapHistorySort.value else ("next", "previous")
+		self["navigationActions"] = HelpableActionMap(self, ["NavigationActions", "PreviousNextActions"], {
+			"left": (self["menu"].goTop, _("Move to the last line / screen")),
+			"top": (self["menu"].goTop, _("Move to the first line / screen")),
+			"pageUp": (self["menu"].goPageUp, _("Move up a screen")),
+			"up": (self["menu"].goLineUp, _("Move up a line")),
+			previousNext[0]: (self["menu"].goLineUp, _("Move up a line")),
+			previousNext[1]: (self["menu"].goLineDown, _("Move down a line")),
+			"down": (self["menu"].goLineDown, _("Move down a line")),
+			"pageDown": (self["menu"].goPageDown, _("Move down a screen")),
+			"bottom": (self["menu"].goBottom, _("Move to the last line / screen")),
+			"right": (self["menu"].goBottom, _("Move to the first line / screen"))
+		}, prio=0, description=_("History Zap Navigation Actions"))
 		self.onLayoutFinish.append(self.layoutFinished)
 
 	def layoutFinished(self):
@@ -2826,22 +2949,4 @@ class HistoryZapSelector(Screen, HelpableScreen):
 
 	def keySelect(self):
 		current = self["menu"].getCurrent()
-		self.close(current and current[7])  # Send the selected ServiceReference to the calling code.
-
-	def keyTop(self):
-		self["menu"].goTop()
-
-	def keyPageUp(self):
-		self["menu"].goPageUp()
-
-	def keyUp(self):
-		self["menu"].goLineUp()
-
-	def keyDown(self):
-		self["menu"].goLineDown()
-
-	def keyPageDown(self):
-		self["menu"].goPageDown()
-
-	def keyBottom(self):
-		self["menu"].goBottom()
+		self.close(current and current[self.HISTORY_SERVICE_REFERENCE])  # Send the selected ServiceReference to the calling code.

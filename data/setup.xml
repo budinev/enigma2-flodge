@@ -20,6 +20,7 @@
 		<item level="1" text="Zap mode" requires="ZapMode" description="Configure the way in which the receiver changes channels.">config.misc.zapmode</item>
 		<item level="1" text="Zap mode" description="Configure the way in which your device changes channels.">config.misc.zapmodeDM</item>
 		<item level="1" text="History buttons mode" description="Configure the function of the &lt;  &gt; buttons.">config.usage.historymode</item>
+		<item level="1" text="Zap history sequence" description="Select the display sequence of previously visited services." requires="config.usage.historymode">config.usage.zapHistorySort</item>
 		<item level="2" text="Number of digits in channel number" description="This allows you to set the number of digits you can input when selecting channels using number input.">config.usage.maxchannelnumlen</item>
 		<item level="0" text="Input scroll position" description="When the input cursor reaches this point (percentage of the width, from either side) scroll the text to the cursor.">config.usage.cursorscroll</item>
 		<item level="2" text="Enable teletext caching" description="When enabled, teletext pages will be cached, allowing faster access.">config.usage.enable_tt_caching</item>
@@ -110,7 +111,7 @@
 		<item level="0" text="Show transponder remaining/elapsed as" description="This option allows you to choose how to display the remaining/elapsed time for live TV.">config.usage.swap_time_display_on_osd</item>
 		<item level="0" text="Media playback Remaining/Elapsed as" description="This option allows you to choose how to display the remaining/elapsed time for media playback.">config.usage.swap_media_time_display_on_osd</item>
 		<item level="2" text="Hide zap errors" description="When enabled, error messages related to zapping will not be shown.">config.usage.hide_zap_errors</item>
-		<item level="2" text="Show crypto info in infobar" description="When enabled, encryption info will be shown in the infobar (when supported by the skin).">config.usage.show_cryptoinfo</item>
+		<item level="2" text="Show crypto info in infobar" conditional="parameters.get('hasInfobarCryptoInfo', True)" description="When enabled, encryption info will be shown in the infobar (when supported by the skin).">config.usage.show_cryptoinfo</item>
 		<!--item level="2" text="Show picons in display" description="Configure if service picons will be shown in display (when supported by the skin)." requires="HasFrontDisplayPicon">config.usage.show_picon_in_display</item-->
 		<item level="2" text="Infobar frontend data source" description="Configure the source of the frontend data as shown on the infobars. 'Settings' is as stored on the settings. 'Tuner' is as reported by the tuner.">config.usage.infobar_frontend_source</item>
 		<item level="2" text="Show SNR percentage instead of dB value" description="By default, SNR will be shown in dB (when supported by the tuner). This setting forces SNR to be shown as a percentage instead.">config.usage.swap_snr_on_osd</item>
@@ -390,10 +391,15 @@
 		<item level="0" requires="ConfigDisplay" text="Show HDMI-Output Res" description="Show HDMI Output Resulution">config.lcd.showoutputresolution</item>
 	</setup>
 	<setup key="LedDisplay" title="LED Setup">
-		<item level="0" text="LED color during normal operations" description="Configure front LED color during normal operations (this needs an enigma2 restart).">config.usage.frontled_color</item>
-		<item level="0" text="LED color during recording" description="Configure front LED color during recording (this needs an enigma2 restart).">config.usage.frontledrec_color</item>
-		<item level="0" text="LED color during standby" description="Configure front LED color during standby (this needs an enigma2 restart).">config.usage.frontledstdby_color</item>
-		<item level="0" text="LED color during recording in standby" description="Configure front LED color during recording in standby (this needs an enigma2 restart).">config.usage.frontledrecstdby_color</item>
+		<item level="0" requires="LEDControl" text="LED color during normal operations" description="Configure front LED color during normal operations (this needs an enigma2 restart).">config.usage.frontled_color</item>
+		<item level="0" requires="LEDControl" text="LED color during recording" description="Configure front LED color during recording (this needs an enigma2 restart).">config.usage.frontledrec_color</item>
+		<item level="0" requires="LEDControl" text="LED color during standby" description="Configure front LED color during standby (this needs an enigma2 restart).">config.usage.frontledstdby_color</item>
+		<item level="0" requires="LEDControl" text="LED color during recording in standby" description="Configure front LED color during recording in standby (this needs an enigma2 restart).">config.usage.frontledrecstdby_color</item>
+		<item level="1" requires="LEDColorControl" text="LED Color" description="With this option you can switch the LED color or deactivate the LED.">config.fp.led.default_color</item>
+		<item level="1" requires="LEDColorControl" text="LED Brightness" description="LED brightness during normal operations.">config.fp.led.default_brightness</item>
+		<item level="1" requires="LEDColorControl" text="LED Idle Color" description="With this option you can switch the LED color or deactivate the LED.">config.fp.led.standby_color</item>
+		<item level="1" requires="LEDColorControl" text="LED Idle Brightness" description="LED brightness during deep standby.">config.fp.led.standby_brightness</item>
+		<item level="1" requires="LEDColorControl" text="LED Shutdown Color" description="Power LED state during deep-standby.">config.fp.led.shutdown_color</item>
 		<item level="0" text="LED Normal" description="LED brightness during normal operations.">config.lcd.ledbrightness</item>
 		<item level="0" text="LED Standby" description="LED brightness during standby.">config.lcd.ledbrightnessstandby</item>
 		<item level="0" text="LED Deep Standby" description="LED brightness during deep standby.">config.lcd.ledbrightnessdeepstandby</item>
@@ -404,10 +410,6 @@
 		<item level="0" requires="LedPowerColor" text="Operating LED status while running" description="With this option you can switch the LED color or deactivate the LED.">config.lcd.ledpowercolor</item>
 		<item level="0" requires="LedStandbyColor" text="Operating LED status in standby mode" description="With this option you can switch the LED color or deactivate the LED.">config.lcd.ledstandbycolor</item>
 		<item level="0" requires="LedSuspendColor" text="Operating LED status in deep standby mode" description="With this option you can switch the LED color or deactivate the LED.">config.lcd.ledsuspendcolor</item>
-		<item level="0" requires="FrontpanelLEDBlinkControl" text="Operating LED color while blinking." description="With this option you can switch the LED color while blinking.">config.lcd.ledblinkcontrolcolor</item>
-		<item level="0" requires="FrontpanelLEDBrightnessControl" text="Operating LED brightness." description="With this option you can switch the LED brightness.">config.lcd.ledbrightnesscontrol</item>
-		<item level="0" requires="FrontpanelLEDColorControl" text="Operating LED color." description="With this option you can switch the LED color.">config.lcd.ledcolorcontrolcolor</item>
-		<item level="0" requires="FrontpanelLEDFadeControl" text="Operating LED fade." description="With this option you can switch the LED fade.">config.lcd.ledfadecontrolcolor</item>
 		<item level="0" requires="Power4x7On" text="Switch on the display during operation" description="With this option you can switch on the display during operation.">config.lcd.power4x7on</item>
 		<item level="0" requires="Power4x7Standby" text="Switch on the display during Standby Mode" description="With this option you can switch on the display in Standby Mode.">config.lcd.power4x7standby</item>
 		<item level="0" requires="Power4x7Suspend" text="Switch on the display during Suspend Mode" description="With this option you can switch on the display in Deep Standby Mode.">config.lcd.power4x7suspend</item>
